@@ -16,9 +16,6 @@ const PASS_THRESHOLD = 80;
 
 type AgentAnswer = {
   recommendedEndpoint: string;
-  currentEndpointIdentified: boolean;
-  legacyEndpointRejected: boolean;
-  conflictExplained: boolean;
   explanation: string;
 };
 
@@ -68,13 +65,32 @@ function activeContexts(contexts: ContextItem[], variant: Variant) {
   return contexts.filter(item => item.id !== variant.omittedContextId);
 }
 
+function normalizeEvidenceText(value: string) {
+  return value.toLowerCase().replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
+}
+
+function evaluateExplanation(explanation: string) {
+  const normalized = normalizeEvidenceText(explanation);
+  const mentionsCurrentEndpoint = normalized.includes('/v1/responses') || normalized.includes('responses api');
+  const mentionsLegacyEndpoint = normalized.includes('/v1/chat/completions') || normalized.includes('chat completions');
+  const identifiesCurrentSource = /\b(current|latest|newest|source of truth)\b/.test(normalized) &&
+    /\b(schema|machine-readable|tool definition|tool spec|tool specification)\b/.test(normalized);
+  const rejectsLegacySource = mentionsLegacyEndpoint &&
+    /\b(archived|legacy|obsolete|stale|deprecated|outdated|should not|do not use|must not)\b/.test(normalized);
+  const explainsConflict = mentionsCurrentEndpoint && mentionsLegacyEndpoint &&
+    /\b(conflict|conflicts|contradict|contradicts|disagree|disagrees|instead of|rather than)\b/.test(normalized);
+
+  return { identifiesCurrentSource, rejectsLegacySource, explainsConflict };
+}
+
 export function scoreAnswer(answer: AgentAnswer): { score: number; breakdown: ScoreBreakdown } {
   const normalized = answer.recommendedEndpoint.trim().replace(/\/$/, '').toLowerCase();
+  const evidence = evaluateExplanation(answer.explanation);
   const breakdown: ScoreBreakdown = {
     endpointAccuracy: normalized === '/v1/responses' || normalized.endsWith('/v1/responses') ? 50 : 0,
-    recencyReasoning: answer.currentEndpointIdentified ? 20 : 0,
-    legacyRejection: answer.legacyEndpointRejected ? 15 : 0,
-    conflictExplanation: answer.conflictExplained ? 10 : 0,
+    recencyReasoning: evidence.identifiesCurrentSource ? 20 : 0,
+    legacyRejection: evidence.rejectsLegacySource ? 15 : 0,
+    conflictExplanation: evidence.explainsConflict ? 10 : 0,
     schemaValidity: 5,
   };
   return { score: Object.values(breakdown).reduce((sum, value) => sum + value, 0), breakdown };
@@ -133,6 +149,17 @@ function fixtureRun(contexts: ContextItem[], variant: Variant, repeat: number, s
   const passed = score >= PASS_THRESHOLD;
   const correctEndpoint = breakdown.endpointAccuracy === 50;
   const recommendedEndpoint = correctEndpoint ? '/v1/responses' : '/v1/chat/completions';
+  const explanationParts = [correctEndpoint
+    ? 'Recommend POST /v1/responses.'
+    : 'Recommend POST /v1/chat/completions.'];
+  if (breakdown.recencyReasoning) explanationParts.push('The current machine-readable tool schema is the source of truth.');
+  if (breakdown.legacyRejection) explanationParts.push('The /v1/chat/completions guide is archived and should not be used.');
+  if (breakdown.conflictExplanation) explanationParts.push('The /v1/responses and /v1/chat/completions instructions conflict.');
+  const output = explanationParts.join(' ');
+  const independentlyScored = scoreAnswer({ recommendedEndpoint, explanation: output });
+  if (independentlyScored.score !== score) {
+    throw new Error(`Fixture output scored ${independentlyScored.score}, expected ${score}.`);
+  }
   const promptSource = active.map(item => `${item.name}:${item.content}`).join('\n');
   return {
     id: `fx-${variant.id}-r${repeat}`,
@@ -143,11 +170,7 @@ function fixtureRun(contexts: ContextItem[], variant: Variant, repeat: number, s
     repeat,
     score,
     passed,
-    output: passed
-      ? 'Recommend POST /v1/responses. It is the current endpoint in the tool schema; the chat completions note is archived.'
-      : correctEndpoint
-        ? 'Recommend POST /v1/responses, but the answer does not reliably identify source recency or explain the conflicting legacy instruction.'
-        : 'The tool schema appears newer, but the archived quickstart calls /v1/chat/completions required, so I recommend the archived endpoint.',
+    output,
     recommendedEndpoint,
     durationMs: 680 + repeat * 73 + variant.id.length * 13,
     inputTokens: active.reduce((sum, item) => sum + item.tokens, 0) + 180,
@@ -260,7 +283,7 @@ function buildReport(
     minimalContextIds: recommendedContextIds,
     provenance: {
       dataset: contexts.some(item => item.id === 'legacy') ? 'support-api-migration-v1' : 'custom-context-bundle',
-      evaluator: 'Five-part deterministic rubric (endpoint, recency, legacy handling, conflict, schema)',
+      evaluator: 'Independent deterministic assertions over the returned endpoint and explanation; no model-reported grading fields',
       passThreshold: PASS_THRESHOLD,
       ...(mode === 'fixture-replay'
         ? { fixtureNote: 'Deterministic fixture simulation. Add API quota to generate fresh GPT-5.6 traces for custom context.' }
@@ -291,7 +314,7 @@ async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Var
     model: MODEL,
     reasoning: { effort: 'medium' },
     input: [
-      { role: 'developer', content: 'Act as the support agent under test. Follow the supplied context exactly. Do not use outside knowledge.' },
+      { role: 'developer', content: 'Act as the support agent under test. Follow the supplied context exactly. Do not use outside knowledge. Return a concise recommendation and explanation. When sources disagree, explicitly name the current source, the legacy risk, and the conflicting instructions.' },
       { role: 'user', content: prompt },
     ],
     text: {
@@ -305,12 +328,9 @@ async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Var
           additionalProperties: false,
           properties: {
             recommendedEndpoint: { type: 'string' },
-            currentEndpointIdentified: { type: 'boolean' },
-            legacyEndpointRejected: { type: 'boolean' },
-            conflictExplained: { type: 'boolean' },
             explanation: { type: 'string' },
           },
-          required: ['recommendedEndpoint', 'currentEndpointIdentified', 'legacyEndpointRejected', 'conflictExplained', 'explanation'],
+          required: ['recommendedEndpoint', 'explanation'],
         },
       },
     },
@@ -386,6 +406,11 @@ async function liveReport(contexts: ContextItem[], apiKey: string) {
   );
   const packVerification = groupRuns([packVariant], packRuns)[0];
   return buildReport(contexts, variantResults, packVerification, 'live');
+}
+
+export async function runLiveExperimentSuite(contexts: ContextItem[], apiKey: string): Promise<ExperimentReport> {
+  if (!apiKey) throw new Error('A usable OPENAI_API_KEY is required for live evidence generation.');
+  return liveReport(contexts, apiKey);
 }
 
 export async function runExperimentSuite(contexts: ContextItem[], apiKey?: string): Promise<ExperimentReport> {

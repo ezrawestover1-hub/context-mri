@@ -353,7 +353,7 @@
         </aside>
       </main>
 
-      <footer>When all seven scenes are saved, download them and attach the files in Codex. Cleanup, timing, captions, and the final video edit will be handled for you.</footer>
+      <footer>The original seven scenes are already complete. Record scene eight as the short Codex compliance pickup, download it, and attach that one file in Codex. Cleanup, timing, captions, and the final video edit will be handled for you.</footer>
     </div>
 
     <div class="countdown" id="countdown" hidden><div><span id="countdown-number">3</span><small id="countdown-label">Recording starts</small></div></div>
@@ -394,6 +394,11 @@
           title: "Why Context MRI matters",
           script: "Why does this matter? Teams can spend hours blaming the prompt or buying a stronger model when one bad file is the real problem. Context MRI replaces that guesswork with evidence, helping agents become more accurate, less expensive, and easier to trust.",
           note: "Make this the emotional conclusion. Pause after the opening question, then finish with confidence—not a sales voice.",
+        },
+        {
+          title: "How Codex helped build it",
+          script: "Codex helped me choose the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies through browser quality checks.",
+          note: "This is the competition-compliance pickup. Say Codex naturally. Keep it clear and conversational; one clean take is enough.",
         },
       ];
 
@@ -501,7 +506,7 @@
         enable.disabled = isBusy;
         device.disabled = isBusy || !stream;
         downloadAll.disabled = savedCount === 0 || isBusy;
-        downloadAll.textContent = savedCount === scenes.length ? "Download all 7 scenes" : `Download saved scenes (${savedCount})`;
+        downloadAll.textContent = savedCount === scenes.length ? `Download all ${scenes.length} scenes` : `Download saved scenes (${savedCount})`;
         renderTakeMap();
         showCurrentTake();
       };

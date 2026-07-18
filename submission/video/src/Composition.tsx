@@ -12,7 +12,9 @@ import {
 import { CaptionOverlay } from "./CaptionOverlay";
 
 const FPS = 30;
-const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24];
+// Scene eight is pre-wired with a conservative timing estimate. Replace 17.0
+// with the measured pickup duration before the final render.
+const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24, 17.0];
 const SCENE_FRAMES = AUDIO_DURATIONS.map((seconds) => Math.ceil((seconds + 0.9) * FPS));
 const SCENE_STARTS = SCENE_FRAMES.map((_, index) =>
   SCENE_FRAMES.slice(0, index).reduce((sum, duration) => sum + duration, 0),
@@ -167,13 +169,38 @@ const FinalScene = () => {
   </AbsoluteFill>;
 };
 
+const CodexScene = () => {
+  const frame = useCurrentFrame();
+  const steps = [
+    ["01", "IDEA + RULES", "Selected the concept and checked the official requirements."],
+    ["02", "EXPERIMENT", "Designed the ablation method and trust boundaries."],
+    ["03", "BUILD + TEST", "Implemented the engine, evaluator, and automated checks."],
+    ["04", "UI + QA", "Refined the interface and caught mathematical inconsistencies."],
+  ];
+  return <AbsoluteFill className="scene cream-scene codex-scene">
+    <div className="codex-heading">
+      <div><Kicker>06 · HOW CODEX WAS USED</Kicker><h2>From idea to tested evidence.</h2></div>
+      <Brand />
+    </div>
+    <div className="codex-steps">
+      {steps.map(([number, title, copy], index) => <div key={number} style={{
+        opacity: interpolate(frame, [10 + index * 8, 26 + index * 8], [0, 1], clamp),
+        translate: `0 ${interpolate(frame, [10 + index * 8, 26 + index * 8], [28, 0], clamp)}px`,
+      }}>
+        <b>{number}</b><span><strong>{title}</strong><small>{copy}</small></span>
+      </div>)}
+    </div>
+    <p className="codex-close">Codex accelerated the work. Context MRI is the tested product.</p>
+  </AbsoluteFill>;
+};
+
 const Progress = () => {
   const frame = useCurrentFrame();
   return <div className="progress-track"><div style={{ width: `${interpolate(frame, [0, TOTAL_FRAMES - 1], [0, 100], clamp)}%` }} /></div>;
 };
 
 const ContextMRIVideo = () => {
-  const scenes = [<TitleScene />, <MethodScene />, <RevealScene />, <EvidenceScene />, <ActionScene />, <ModeScene />, <FinalScene />];
+  const scenes = [<TitleScene />, <MethodScene />, <RevealScene />, <EvidenceScene />, <ActionScene />, <ModeScene />, <FinalScene />, <CodexScene />];
   return <AbsoluteFill className="video-root">
     {scenes.map((scene, index) => <Sequence key={index} from={SCENE_STARTS[index]} durationInFrames={SCENE_FRAMES[index]}><SceneShell index={index}>{scene}</SceneShell></Sequence>)}
     <CaptionOverlay />

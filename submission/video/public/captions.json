@@ -194,5 +194,26 @@
     "endMs": 113140,
     "timestampMs": null,
     "confidence": null
+  },
+  {
+    "text": "Codex helped me choose the idea and research the official requirements.",
+    "startMs": 114300,
+    "endMs": 119400,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "It helped design the experiment, build and test the engine, and refine the interface.",
+    "startMs": 119400,
+    "endMs": 125300,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "It also caught mathematical inconsistencies through browser quality checks.",
+    "startMs": 125300,
+    "endMs": 130900,
+    "timestampMs": null,
+    "confidence": null
   }
 ]

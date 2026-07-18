@@ -107,6 +107,17 @@ h2 em { color: #d58d72; font-weight: 500; }
 .built-with ul { margin: 32px 0 0; padding: 24px 0 0 25px; border-top: 1px solid #6f887d; color: #c4d3cc; font-size: 22px; line-height: 1.75; }
 .final-url { position: absolute; left: 0; right: 0; bottom: 154px; text-align: center; color: #b9cbc3; font-size: 26px; font-weight: 700; letter-spacing: .08em; }
 
+.codex-scene { padding: 92px 120px 148px; }
+.codex-heading { display: flex; align-items: start; justify-content: space-between; gap: 80px; }
+.codex-heading h2 { max-width: 1160px; margin-top: 28px; font-size: 100px; }
+.codex-steps { margin-top: 72px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.codex-steps > div { min-height: 350px; padding: 38px 34px; display: flex; flex-direction: column; gap: 36px; color: var(--paper); background: var(--pine-900); border-top: 5px solid #d58d72; border-radius: 7px; }
+.codex-steps b { color: #afc6bb; font: italic 500 38px/1 Georgia, serif; }
+.codex-steps span { display: flex; flex-direction: column; gap: 22px; }
+.codex-steps strong { font-size: 29px; letter-spacing: .08em; }
+.codex-steps small { color: #c7d5cf; font: 27px/1.42 Georgia, serif; }
+.codex-close { margin-top: 38px; color: var(--pine-800); font: italic 34px/1.25 Georgia, serif; text-align: center; }
+
 .caption-safe { position: absolute; left: 0; right: 0; bottom: 34px; height: 94px; display: grid; place-items: center; z-index: 50; pointer-events: none; }
 .caption { max-width: 1580px; padding: 16px 30px 18px; color: var(--paper); background: #09271ff2; border: 1px solid #789186; border-radius: 8px; box-shadow: 0 10px 36px #0000002b; text-align: center; font: 34px/1.25 Georgia, serif; }
 .progress-track { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; z-index: 60; background: #48685a; }

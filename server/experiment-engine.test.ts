@@ -6,12 +6,36 @@ import { fixtureReport, scoreAnswer } from './experiment-engine.js';
 test('scores a fully correct structured answer at 100', () => {
   const result = scoreAnswer({
     recommendedEndpoint: '/v1/responses',
-    currentEndpointIdentified: true,
-    legacyEndpointRejected: true,
-    conflictExplained: true,
-    explanation: 'The archived guide conflicts with the current schema.',
+    explanation: 'The current machine-readable schema specifies /v1/responses. The archived /v1/chat/completions guide conflicts with it and should not be used.',
   });
   assert.equal(result.score, 100);
+});
+
+test('independently scores the explanation instead of trusting model-reported claims', () => {
+  const unsupported = scoreAnswer({
+    recommendedEndpoint: '/v1/responses',
+    explanation: 'Use this endpoint.',
+  });
+
+  assert.equal(unsupported.score, 55);
+  assert.deepEqual(unsupported.breakdown, {
+    endpointAccuracy: 50,
+    recencyReasoning: 0,
+    legacyRejection: 0,
+    conflictExplanation: 0,
+    schemaValidity: 5,
+  });
+});
+
+test('does not award legacy or conflict points for keyword-free assertions', () => {
+  const result = scoreAnswer({
+    recommendedEndpoint: '/v1/responses',
+    explanation: 'The current tool schema is the source of truth.',
+  });
+
+  assert.equal(result.score, 75);
+  assert.equal(result.breakdown.legacyRejection, 0);
+  assert.equal(result.breakdown.conflictExplanation, 0);
 });
 
 test('runs three repeats for every ablation plus three pack-verification checks', () => {

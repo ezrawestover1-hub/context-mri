@@ -50,7 +50,7 @@ export function ProvenanceModal({ report, onClose }: { report: ExperimentReport;
     <div className="provenance-copy">
       <Info size={24} />
       <p>This screen is using a deterministic simulation of the bundled support-agent example because the connected API project has no model quota. It exercises the same ablation, classification, trace, pack-verification, and export pipeline—but it is <strong>not presented as fresh GPT-5.6 evidence.</strong></p>
-      <p>With API quota, Context MRI automatically replaces these records with {report.totalRuns} inspectable model traces and keeps the same fixed evaluator.</p>
+      <p>With API quota, Context MRI automatically replaces these records with {report.totalRuns} inspectable model traces and keeps the same independent evaluator. The subject model never supplies its own grading fields.</p>
     </div>
     <footer><span>{report.provenance.fixtureNote}</span><button className="apply-rewrite" onClick={onClose}>Understood</button></footer>
   </ModalShell>;

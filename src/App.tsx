@@ -30,6 +30,7 @@ export default function App() {
   const [running, setRunning] = useState(false);
   const [stage, setStage] = useState('Ready to inspect');
   const [recommendationApplied, setRecommendationApplied] = useState(false);
+  const [appliedVerification, setAppliedVerification] = useState<ExperimentReport | null>(null);
   const [trace, setTrace] = useState<ExperimentRun | null>(null);
   const [rewriteOpen, setRewriteOpen] = useState(false);
   const [provenanceOpen, setProvenanceOpen] = useState(false);
@@ -45,6 +46,7 @@ export default function App() {
   async function runMRI(scrollToResults = false) {
     setRunning(true);
     setRecommendationApplied(false);
+    setAppliedVerification(null);
     const stages = ['Testing full context…', 'Removing one item at a time…', 'Repeating each condition…', 'Verifying recommended pack…'];
     let index = 0;
     setStage(stages[0]);
@@ -84,6 +86,7 @@ export default function App() {
       },
       inputContexts: contexts,
       report,
+      appliedVerification,
     });
     setStage('Complete evidence ledger exported');
   }
@@ -133,6 +136,7 @@ export default function App() {
     setContexts(current => [...current, ...additions]);
     setSelected(additions[additions.length - 1].id);
     setRecommendationApplied(false);
+    setAppliedVerification(null);
     const skipped = selectedFiles.length - valid.length + Math.max(0, files.length - selectedFiles.length);
     setStage(`${additions.length} context file${additions.length === 1 ? '' : 's'} added${skipped ? ` · ${skipped} skipped` : ''} · run MRI to measure`);
   }
@@ -149,12 +153,47 @@ export default function App() {
       : context));
     setRewriteOpen(false);
     setRecommendationApplied(false);
+    setAppliedVerification(null);
     setStage('Rewrite staged · run MRI to verify it');
   }
 
   function applyRecommendation() {
     setRecommendationApplied(true);
-    setStage(`Recommended pack applied · ${report.optimizedTokens.toLocaleString()} tokens`);
+    setAppliedVerification(null);
+    setStage(`Recommended pack staged · ${report.optimizedTokens.toLocaleString()} tokens · rerun to verify`);
+  }
+
+  function restoreFullContext() {
+    setRecommendationApplied(false);
+    setAppliedVerification(null);
+    setStage('Full context restored');
+  }
+
+  async function verifyRecommendedPack() {
+    const recommended = new Set(report.recommendedContextIds);
+    const packContexts = contexts.filter(context => recommended.has(context.id));
+    if (packContexts.length < 2) {
+      setStage('Verification requires at least two files in the recommended pack');
+      return;
+    }
+
+    setRunning(true);
+    setStage('Rerunning with only the applied pack…');
+    try {
+      const response = await fetch('/api/experiments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contexts: packContexts }),
+      });
+      if (!response.ok) throw new Error((await response.json()).error || 'Applied-pack verification failed');
+      const verification = await response.json() as ExperimentReport;
+      setAppliedVerification(verification);
+      setStage(`Applied pack verified as the tested baseline · ${verification.baselineScore}/100 · ${packContexts.length} files`);
+    } catch (error) {
+      setStage(error instanceof Error ? `Verification failed · ${error.message}` : 'Verification failed');
+    } finally {
+      setRunning(false);
+    }
   }
 
   function openHarmfulRewrite() {
@@ -206,7 +245,7 @@ export default function App() {
         report={report}
         recommendationApplied={recommendationApplied}
         onApplyRecommendation={applyRecommendation}
-        onRestore={() => { setRecommendationApplied(false); setStage('Full context restored'); }}
+        onRestore={restoreFullContext}
         onRewrite={() => setRewriteOpen(true)}
       /> : null}
     </div>
@@ -215,12 +254,14 @@ export default function App() {
       report={report}
       running={running}
       recommendationApplied={recommendationApplied}
+      appliedVerification={appliedVerification}
       onApply={applyRecommendation}
       onRewrite={openHarmfulRewrite}
-      onRun={() => runMRI(false)}
+      onRun={verifyRecommendedPack}
+      onRestore={restoreFullContext}
     />
 
-    <ContextPack contexts={contexts} report={report} applied={recommendationApplied} onApply={applyRecommendation} onCopy={copyManifest} />
+    <ContextPack contexts={contexts} report={report} applied={recommendationApplied} verification={appliedVerification} onApply={applyRecommendation} onCopy={copyManifest} />
 
     <footer className="provenance-bar">
       <div><BrandMark /><span>{report.mode === 'live' ? 'Fresh GPT-5.6 run' : 'Fixture replay'} · inspectable evidence</span><Info size={14} /></div>

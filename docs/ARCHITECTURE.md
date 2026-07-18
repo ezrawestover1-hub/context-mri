@@ -7,7 +7,7 @@ flowchart LR
   A[Context bundle] --> B[Baseline + single-item variants]
   B --> C[Three runs per discovery condition]
   C --> D[GPT-5.6 Sol or fixture simulation]
-  D --> E[Fixed five-part evaluator]
+  D --> E[Independent five-part evaluator]
   E --> F[Trace ledger]
   F --> G[Measured file classifications]
   G --> H[Recommended context pack]
@@ -44,11 +44,11 @@ Both modes use the same:
 - JSON evidence export
 - UI workflow
 
-The fixture uses only rubric totals that the binary five-part evaluator can actually produce. Every displayed fixture score is the exact sum of its inspectable breakdown.
+The fixture uses only rubric totals that the binary five-part evaluator can actually produce. Every fixture explanation is run back through the independent evaluator during report construction, and generation fails if the displayed score and independently computed score disagree.
 
 ## Evaluator
 
-The model returns a strict object containing the recommended endpoint and four observable claims. Application code—not the subject model—assigns the fixed weighted score. The pass threshold is 80.
+The model returns only a recommended endpoint and a natural-language explanation. Application code independently inspects those two outputs for the expected endpoint, current-source reasoning, explicit rejection of the legacy instruction, and explanation of the conflict. The subject model does not return grading booleans or assign itself points. The pass threshold is 80.
 
 ```text
 endpoint accuracy    50
@@ -70,6 +70,8 @@ contribution(i) = mean(baseline) - mean(omit i)
 - `<= −5`: harmful
 
 Positive contribution means removal hurt performance. Negative contribution means removal improved performance. These thresholds produce the candidate pack, which receives three separate verification runs before its score appears as the optimized result.
+
+When a user clicks **Apply recommended pack**, the client stages the measured context IDs. **Run applied pack to verify** then submits only those files as a second complete experiment. Its reduced bundle becomes the new baseline and produces a separate report ID and trace set; the UI does not treat a local state toggle as verification.
 
 This is controlled evidence for the tested task distribution. It is not universal causal proof, and single-item experiments can miss interactions.
 

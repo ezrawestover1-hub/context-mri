@@ -95,7 +95,7 @@ export const seedReport: ExperimentReport = {
   minimalContextIds: ['system', 'schema', 'rules'],
   provenance: {
     dataset: 'support-api-migration-v1',
-    evaluator: 'Five-part deterministic rubric (endpoint, recency, legacy handling, conflict, schema)',
+    evaluator: 'Independent deterministic assertions over the returned endpoint and explanation; no model-reported grading fields',
     passThreshold: 80,
     fixtureNote: 'Deterministic fixture simulation. Add API quota to generate fresh GPT-5.6 traces for custom context.',
   },

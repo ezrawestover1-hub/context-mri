@@ -6,8 +6,8 @@
 - [x] Category selected: Developer Tools
 - [x] Project description drafted in `submission/DEVPOST.md`
 - [x] Devpost project draft created: https://devpost.com/software/context-mri
-- [x] Under-three-minute video script with Codex and GPT‑5.6 audio coverage
-- [x] Render and verify 1:54.53 demo video at 1080p with stereo audio
+- [ ] Record the short scene-eight human-voice pickup that explicitly explains Codex usage
+- [ ] Render and verify the updated under-three-minute demo at 1080p with stereo audio
 - [ ] Upload public YouTube demo
 - [x] Public repository: https://github.com/ezrawestover1-hub/context-mri
 - [x] README with setup, sample data, and judge test path
@@ -26,8 +26,9 @@
 - Concurrency-limited 18-run discovery suite with one-call quota probe
 - Three independent recommended-pack verification runs (21 traces total)
 - Evidence-derived file classifications and context pack
-- Deterministic application evaluator and full trace ledger
+- Independent deterministic evaluator over endpoint + explanation; no self-reported model grades
 - Unit-tested evaluator, aggregate, classification, and provenance invariants
+- Applied-pack rerun submits the reduced bundle as a separate experiment and captures its report ID
 
 ### Design
 
@@ -52,9 +53,11 @@
 
 ## Final manual actions
 
-1. Upload `submission/video/out/context-mri-demo.mp4` publicly to YouTube and add the URL to Devpost.
-2. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
-3. Submit before **July 21, 2026 at 5:00 PM PDT**.
+1. Record scene eight in the local recording booth and rebuild `submission/video/out/context-mri-demo.mp4` with explicit Codex audio coverage.
+2. Add API billing or credits, run `npm run evidence:live`, and verify the authentic GPT-5.6 artifact.
+3. Upload the final video publicly to YouTube and add the URL to Devpost.
+4. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
+5. Submit before **July 21, 2026 at 5:00 PM PDT**.
 
 ## Verified public judge path
 
@@ -62,5 +65,6 @@
 - Anonymous page load: passed
 - Evidence trace inspector: passed
 - Full fixture MRI replay: passed
-- Recommended pack application: passed at 1,602 tokens
+- Recommended pack staging: passed at 1,602 tokens
+- Reduced-pack second experiment and distinct verification report: pending deployed-browser recheck
 - Browser console errors or warnings: none

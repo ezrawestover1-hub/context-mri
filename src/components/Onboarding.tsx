@@ -64,7 +64,7 @@ export function BeforeRun() {
     <ol className="input-guide">
       <li><span>1</span><div><h3>Define the task</h3><p>“Which API endpoint should a support agent recommend when the sources conflict?”</p></div></li>
       <li><span>2</span><div><h3>Add the context</h3><p>The <code>.md</code>, <code>.json</code>, or <code>.txt</code> files your agent reads before answering.</p></div></li>
-      <li><span>3</span><div><h3>Know what success means</h3><p>The fixed evaluator checks the endpoint, source recency, legacy risk, conflict explanation, and output schema.</p></div></li>
+      <li><span>3</span><div><h3>Know what success means</h3><p>The independent evaluator checks the returned endpoint and explanation for source recency, legacy risk, conflict handling, and schema validity.</p></div></li>
     </ol>
     <div className="loaded-note"><Check size={18} /><span><strong>Ready now:</strong> a completed sample result is shown below. Run the example to watch Context MRI rebuild it from the loaded task, five files, and scoring rubric.</span></div>
     <div className="upload-guidance">
@@ -94,13 +94,16 @@ type NextStepsProps = {
   report: ExperimentReport;
   running: boolean;
   recommendationApplied: boolean;
+  appliedVerification: ExperimentReport | null;
   onApply: () => void;
   onRewrite: () => void;
   onRun: () => void;
+  onRestore: () => void;
 };
 
-export function NextSteps({ report, running, recommendationApplied, onApply, onRewrite, onRun }: NextStepsProps) {
+export function NextSteps({ report, running, recommendationApplied, appliedVerification, onApply, onRewrite, onRun, onRestore }: NextStepsProps) {
   const harmfulFile = report.diagnosis.harmfulItem || 'the harmful file';
+  const verified = Boolean(appliedVerification);
   return <section className="next-steps" aria-labelledby="next-steps-title">
     <div className="next-step-heading"><h2 id="next-steps-title">What to do next</h2><p>The result is useful only if it changes your context—and the change survives another test.</p></div>
     <ol>
@@ -109,14 +112,19 @@ export function NextSteps({ report, running, recommendationApplied, onApply, onR
       <li><span>3</span><p>Run Context MRI again. Trust the change only if the score recovers.</p></li>
     </ol>
     <div className="next-step-actions">
-      <button className="next-primary" onClick={onApply} disabled={recommendationApplied}><Check size={17} /> {recommendationApplied ? 'Recommended pack applied' : 'Apply recommended pack'}</button>
+      <button className="next-primary" onClick={onApply} disabled={recommendationApplied}><Check size={17} /> {recommendationApplied ? 'Recommended pack staged' : 'Apply recommended pack'}</button>
       {report.diagnosis.harmfulItem ? <button onClick={onRewrite}><Sparkles size={17} /> Preview safe rewrite</button> : null}
-      <button onClick={onRun} disabled={running}><RefreshCw size={17} /> {running ? stageLabel(report.mode) : 'Run again to verify'}</button>
+      <button onClick={onRun} disabled={running || !recommendationApplied}><RefreshCw size={17} /> {running ? stageLabel(report.mode) : verified ? 'Verify applied pack again' : recommendationApplied ? 'Run applied pack to verify' : 'Apply pack before verification'}</button>
+      {recommendationApplied ? <button onClick={onRestore}>Restore full context</button> : null}
     </div>
+    {appliedVerification ? <div className="verification-proof" role="status">
+      <Check size={18} />
+      <div><strong>Applied pack verified as the new baseline: {appliedVerification.baselineScore}/100</strong><span>{appliedVerification.variants[0].runs.length} independent rerun traces · {appliedVerification.mode === 'live' ? 'fresh GPT-5.6 evidence' : 'clearly labeled fixture replay'} · report {appliedVerification.id}</span></div>
+    </div> : null}
     <p className="fixture-honesty">{report.mode === 'fixture-replay' ? 'This public demo is a deterministic fixture replay. Fresh claims require live GPT-5.6 traces.' : 'This result comes from fresh GPT-5.6 traces. Run IDs and prompt hashes are available in every score.'}</p>
   </section>;
 }
 
 function stageLabel(mode: ExperimentReport['mode']) {
-  return mode === 'live' ? 'Running live traces…' : 'Replaying experiment…';
+  return mode === 'live' ? 'Testing the applied pack live…' : 'Replaying the applied pack…';
 }

@@ -1,6 +1,6 @@
-# Demo video script — final 1:54 cut
+# Demo video script — final under-three-minute cut
 
-The rendered video uses the real deployed interface, burned-in captions, and the narration below. Final file: `submission/video/out/context-mri-demo.mp4`.
+The current seven-scene render uses the real deployed interface, burned-in captions, and the narration below. After the short scene-eight Codex pickup is recorded, rebuild the final file at `submission/video/out/context-mri-demo.mp4`.
 
 ## 0:00–0:15 — Hook
 
@@ -38,17 +38,16 @@ The rendered video uses the real deployed interface, burned-in captions, and the
 
 “The hosted judge demo is clearly labeled deterministic fixture replay, so it never presents simulated evidence as a fresh model call. With funded quota, the same runner uses GPT-5.6 Sol through the Responses API, medium reasoning, and strict Structured Outputs.”
 
-## 1:38–1:55 — Codex and close
+## Final scene — Codex and close
 
 **Screen:** Final Context MRI card, public URL, and the Codex + GPT-5.6 build summary.
 
-“Codex helped select the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies through browser QA. Context MRI turns prompt debugging from intuition into evidence.”
+“Why does this matter? Teams can spend hours blaming the prompt or buying a stronger model when one bad file is the real problem. Context MRI replaces that guesswork with evidence, helping agents become more accurate, less expensive, and easier to trust. Codex helped me choose the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies through browser quality checks.”
 
-## Verified render
+## Render status
 
-- Duration: 1:54.53
-- Video: H.264, 1920×1080, 30 fps
-- Audio: AAC, 48 kHz stereo
-- File size: 22.6 MB
-- Both Codex and GPT-5.6 are explained in the narration and captions.
+- Original seven-scene render: verified H.264, 1920×1080, 30 fps with stereo audio.
+- Final scene-eight human recording: pending.
+- Final render verification: pending after the scene-eight pickup is mastered and captioned.
+- Both Codex and GPT-5.6 must be explained in the final narration and captions.
 - Fixture replay and live-model provenance are explicitly distinguished.

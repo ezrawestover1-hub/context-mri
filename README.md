@@ -22,7 +22,7 @@ The hosted demo opens without an account, API key, install, or build step. It in
 2. The app automatically moves to the diagnosis and explains what each result label means.
 3. Compare **Baseline** with **−Legacy API**, then click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
 4. Follow **What to do next** to apply the 1,602-token pack or preview a safe rewrite.
-5. Click **Run again to verify** rather than trusting an untested change.
+5. Click **Apply recommended pack**, then **Run applied pack to verify**. The app submits only the reduced file set as a second experiment and records a separate verification report ID.
 6. Use **Export evidence** to download the complete JSON ledger.
 
 ### Local development and live GPT-5.6 mode
@@ -41,7 +41,7 @@ Open [http://localhost:5173](http://localhost:5173), then:
 3. Click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
 4. Compare **Baseline** with **−Legacy API**.
 5. Click **Remove harmful file** or **Apply pack**.
-6. Preview the safe rewrite, then run the MRI again to verify the repair.
+6. Run the applied pack as a new baseline. The second report proves which files were actually tested instead of treating a UI state change as verification.
 7. Use **Export evidence** to download the complete JSON ledger.
 
 No API quota is required to judge the complete interface and workflow. Without quota, the server uses a clearly labeled deterministic **fixture simulation** of the bundled support-agent example. It is never represented as fresh model evidence. With a funded `OPENAI_API_KEY` in `.env.local`, the same endpoint automatically generates fresh GPT‑5.6 Sol traces instead.
@@ -61,11 +61,19 @@ npm audit --audit-level=high
 curl http://localhost:8787/api/health
 ```
 
+With funded quota, generate a judge-shareable authentic trace artifact:
+
+```bash
+npm run evidence:live
+```
+
+This command requires live GPT-5.6 Sol responses and writes `public/evidence/live-gpt-5.6.json`. It fails rather than falling back to the fixture if the API project lacks quota, so the artifact cannot be mislabeled.
+
 ## How the experiment works
 
 For the five-item demo, Context MRI creates six discovery conditions: the full baseline plus one condition omitting each item. It runs each condition three times for **18 ablation traces**. It then builds a recommended pack from measured contribution and runs that pack three more times, producing **21 inspectable traces** total.
 
-Each model output is scored from 0–100 by application code using a fixed rubric:
+Each model output contains only a recommended endpoint and explanation. Independent application code—not model-reported grading fields—scores it from 0–100 using a fixed rubric:
 
 | Criterion | Points |
 | --- | ---: |
@@ -96,6 +104,7 @@ Positive contribution means removing the file hurts the task. Negative contribut
 
 - The live subject uses the Responses API with `gpt-5.6-sol`, medium reasoning, and strict Structured Outputs.
 - A one-call quota probe prevents the server from starting a full live suite when the project cannot run it.
+- The subject model cannot grade itself: it returns only the endpoint and explanation, while deterministic application assertions assign every rubric point.
 - Codex was used for idea selection, official-requirement research, architecture, API implementation, tests, interaction design, mathematical consistency checks, and browser QA.
 - GPT‑5.6 guidance shaped the product thesis: test leaner context by removing one instruction or tool group at a time and rerunning representative evals.
 - Codex task/session ID: `019f71e4-f746-7083-a465-1c84948bbd8c`.
@@ -121,6 +130,8 @@ The browser app and Node server are platform-independent and have been verified 
 - Fixture results are a deterministic simulation of the bundled scenario, not fresh GPT‑5.6 traces.
 - The included evaluator is intentionally task-specific; production use needs representative datasets and human-calibrated labels.
 - Uploaded context is held only in browser memory for the current session.
+
+Dependencies are pinned to exact versions and the committed lockfile is the reproducible installation source.
 
 ## License
 

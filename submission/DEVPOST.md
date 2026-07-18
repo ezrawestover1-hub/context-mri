@@ -36,9 +36,9 @@ In the included demo, an archived guide tells the agent to use `/v1/chat/complet
 
 ## How we built it
 
-The product is a React + TypeScript application with a Node/Express experiment server and a Cloudflare-compatible public fixture adapter. The live runner uses the OpenAI Responses API with GPT‑5.6 Sol, medium reasoning, and strict Structured Outputs. A fixed five-part application evaluator scores endpoint accuracy, recency reasoning, legacy handling, conflict explanation, and schema validity.
+The product is a React + TypeScript application with a Node/Express experiment server and a Cloudflare-compatible public fixture adapter. The live runner uses the OpenAI Responses API with GPT‑5.6 Sol, medium reasoning, and strict Structured Outputs. The subject returns only an endpoint and explanation; an independent deterministic application evaluator assigns every point for endpoint accuracy, recency reasoning, legacy handling, conflict explanation, and schema validity. The model cannot report its own grades.
 
-Each trace records its run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture simulation. All headline metrics are derived from those records. The default suite contains 18 discovery traces plus three pack-verification traces.
+Each trace records its run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture simulation. All headline metrics are derived from those records. The default suite contains 18 discovery traces plus three pack-verification traces. Applying the recommended pack and rerunning submits only the reduced file set as a second experiment with its own report ID and traces.
 
 Codex accelerated the project from critical idea selection through implementation: official-requirement research, architecture, UI concept generation, API integration, automated tests, mathematical consistency checks, and browser-based interaction and visual QA.
 
@@ -52,6 +52,8 @@ The hardest problem was epistemic honesty. A beautiful dashboard can make weak e
 - Twenty-one inspectable traces in the default experiment
 - Mathematically derived contribution and token-reduction claims
 - Independent verification runs for the recommended pack
+- A real apply-and-rerun loop that tests the reduced pack as the new baseline
+- Independent scoring that never trusts subject-model grading claims
 - Fresh GPT‑5.6 mode plus an honestly labeled no-secret fixture mode
 - Trace export, manifest copy, context upload, and suggested rewrite flows
 - Unit tests protecting the evaluator, classifications, aggregate claims, and provenance

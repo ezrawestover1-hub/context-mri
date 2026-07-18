@@ -57,7 +57,7 @@ export function Matrix({ report, selectedContextId, running, onOpenTrace }: Matr
     <div className="pack-proof">
       <span>PACK VERIFICATION</span>
       <strong>{report.packVerification.mean}/100</strong>
-      <small>{report.packVerification.runs.map(run => run.score).join(' · ')} across {report.repeats} fresh checks</small>
+      <small>{report.packVerification.runs.map(run => run.score).join(' · ')} across {report.repeats} {report.mode === 'live' ? 'fresh GPT-5.6 checks' : 'fixture checks'}</small>
     </div>
   </section>;
 }
