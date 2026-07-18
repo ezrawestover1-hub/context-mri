@@ -13,7 +13,7 @@ import {
 } from "remotion";
 
 const FPS = 30;
-const AUDIO_DURATIONS = [15.7, 15.7, 18.55, 17.7, 15.525, 18.9, 18.275];
+const AUDIO_DURATIONS = [14.625, 15.575, 16.05, 13.85, 13.375, 17.175, 15.9];
 const SCENE_FRAMES = AUDIO_DURATIONS.map((seconds) => Math.ceil((seconds + 1.2) * FPS));
 const SCENE_STARTS = SCENE_FRAMES.map((_, index) =>
   SCENE_FRAMES.slice(0, index).reduce((sum, duration) => sum + duration, 0),
@@ -22,43 +22,43 @@ const TOTAL_FRAMES = SCENE_FRAMES.reduce((sum, duration) => sum + duration, 0);
 
 const CAPTION_TEXT = [
   [
-    "Most AI agent failures are not model failures.",
-    "One stale file can quietly override a correct schema.",
-    "Context MRI finds the file—and proves the diagnosis.",
+    "A good AI model can still fail because of bad context.",
+    "Think of Context MRI as a medical scan for an agent's instructions.",
+    "It finds the harmful file and verifies that removing it helps.",
   ],
   [
-    "Give it the task, the context files, and a fixed definition of success.",
-    "It removes one file at a time and repeats every condition three times.",
-    "Every answer is scored with the same rubric.",
+    "Provide the job, the files, and a clear example of success.",
+    "Change one file at a time while everything else stays fixed.",
+    "Repeated runs make the comparison fair.",
   ],
   [
-    "A current Responses API schema conflicts with an archived guide.",
-    "The full context bundle averages 43 out of 100.",
-    "Without legacy-api.md, the mean jumps to 92 in all three repeats.",
-    "The verified pack also uses 44% fewer context tokens.",
+    "An old API guide conflicts with the current Responses API schema.",
+    "With every file included, the agent scores 43.",
+    "Remove the old guide: 92 in all three repeats.",
+    "The smaller pack also uses 44% fewer context tokens.",
   ],
   [
-    "Every score opens into inspectable evidence.",
-    "Run ID, prompt hash, latency, tokens, output, and exact rubric.",
-    "Eighteen discovery traces plus three independent pack checks.",
-    "Twenty-one evidence records—not one lucky answer.",
+    "You do not have to trust a mystery score.",
+    "Inspect the prompt, answer, rubric, speed, and token use.",
+    "Twenty-one records show the improvement is repeatable.",
+    "Not one lucky answer.",
   ],
   [
-    "The diagnosis becomes a concrete action plan.",
-    "Remove or rewrite, apply the smaller pack, then run again.",
-    "Even a suggested rewrite stays untrusted until it survives another test.",
+    "Remove or rewrite the harmful file.",
+    "Use the smaller verified context pack.",
+    "Then test again before trusting the fix.",
   ],
   [
-    "The hosted demo is clearly labeled deterministic fixture replay.",
-    "It never presents simulated evidence as a fresh model call.",
-    "Live mode uses GPT-5.6 Sol through the Responses API.",
-    "Medium reasoning and strict structured outputs keep the test controlled.",
+    "The public demo replays one fixed, clearly labeled experiment.",
+    "Anyone can explore it without an account or API key.",
+    "Live mode runs the same controlled test with GPT-5.6.",
+    "The Responses API keeps the evidence inspectable.",
   ],
   [
-    "Codex helped select the idea and research the official requirements.",
-    "It helped design, build, test, and refine the complete experiment.",
-    "Browser QA caught usability and mathematical inconsistencies.",
-    "Context MRI turns prompt debugging from intuition into evidence.",
+    "Teams often blame the prompt or buy a stronger model.",
+    "The real problem may be one bad context file.",
+    "Context MRI replaces guesswork with evidence.",
+    "More accurate, less expensive, and easier-to-trust agents.",
   ],
 ];
 
@@ -117,7 +117,7 @@ const SceneShell = ({ index, children }: { index: number; children: React.ReactN
   return <AbsoluteFill style={{ opacity }}>
     {children}
     <Sequence from={12} layout="none">
-      <Audio src={staticFile(`voice-${String(index + 1).padStart(2, "0")}.wav`)} volume={0.95} />
+      <Audio src={staticFile(`voice-${String(index + 1).padStart(2, "0")}.wav`)} volume={0.72} />
     </Sequence>
   </AbsoluteFill>;
 };

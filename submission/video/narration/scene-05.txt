@@ -1,1 +1,1 @@
-The result becomes a concrete action plan: remove or rewrite the harmful file, apply the smaller verified pack, then run the experiment again. Even a suggested rewrite is labeled untrusted until it survives another test.
+That turns the finding into a clear next step: remove or rewrite the harmful file, use the smaller verified context pack, and test again. Even a suggested fix stays untrusted until the scores show that it works.

@@ -1,1 +1,1 @@
-Give Context M R I the task, the files the agent reads, and a fixed definition of success. It tests the full bundle, removes one file at a time, repeats every condition three times, and scores each answer with the same rubric.
+Here is the whole test. Give Context M, R, I the job, the files the agent reads, and a clear example of success. It runs the same task several times, changing only one file at a time. Everything else stays fixed, so the comparison is fair.

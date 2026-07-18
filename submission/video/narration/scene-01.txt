@@ -1,1 +1,1 @@
-Most AI agent failures are not model failures. One stale, authoritative-looking file can quietly override a correct schema. Context M R I finds the file making an agent worse, and proves it with controlled experiments.
+An A I agent can fail even when its model is good. Context M, R, I works like a medical scan for the instructions around that model. It finds the one file causing damage, measures the effect, and checks that removing it really helps.
