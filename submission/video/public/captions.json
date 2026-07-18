@@ -1,0 +1,198 @@
+[
+  {
+    "text": "An AI agent can fail even when its model is good.",
+    "startMs": 580,
+    "endMs": 4028,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Context MRI works like a medical scan for the instructions around that model.",
+    "startMs": 4028,
+    "endMs": 8027,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "It finds the one file causing damage, measures the effect, and checks that removing it really helps.",
+    "startMs": 8027,
+    "endMs": 13130,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Here is the whole test.",
+    "startMs": 14313,
+    "endMs": 16180,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Give Context MRI the job, the files the agent reads, and a clear example of success.",
+    "startMs": 16180,
+    "endMs": 21206,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "It runs the same task several times, changing only one file at a time.",
+    "startMs": 21206,
+    "endMs": 25658,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Everything else stays fixed, so the comparison is fair.",
+    "startMs": 25658,
+    "endMs": 28673,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "In this example, an old API guide disagrees with the current Responses API schema.",
+    "startMs": 29880,
+    "endMs": 35157,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "With every file included, the agent scores forty-three.",
+    "startMs": 35157,
+    "endMs": 38391,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Remove the old guide, and it scores ninety-two in all three repeats,",
+    "startMs": 38391,
+    "endMs": 42986,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "while using forty-four percent fewer context tokens.",
+    "startMs": 42986,
+    "endMs": 45880,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "And you do not have to trust a mystery score.",
+    "startMs": 47080,
+    "endMs": 50281,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Open any result to see the prompt, the model's answer, the scoring rubric, speed, and token use.",
+    "startMs": 50281,
+    "endMs": 55430,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Twenty-one evidence records show the improvement happens again and again,",
+    "startMs": 55430,
+    "endMs": 58631,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "not just once by luck.",
+    "startMs": 58631,
+    "endMs": 60440,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "That turns the finding into a clear next step:",
+    "startMs": 61647,
+    "endMs": 65131,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "remove or rewrite the harmful file, use the smaller verified context pack, and test again.",
+    "startMs": 65131,
+    "endMs": 70605,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Even a suggested fix stays untrusted until the scores show that it works.",
+    "startMs": 70605,
+    "endMs": 75417,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "The public judge demo replays one fixed experiment,",
+    "startMs": 76613,
+    "endMs": 79937,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "so anyone can explore the full workflow without an account or API key.",
+    "startMs": 79937,
+    "endMs": 85011,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "It is clearly labeled as a replay.",
+    "startMs": 85011,
+    "endMs": 87985,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "With funded quota, live mode runs the same controlled test",
+    "startMs": 87985,
+    "endMs": 92009,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "through GPT-five-point-six Sol and the Responses API.",
+    "startMs": 92009,
+    "endMs": 94983,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Why does this matter?",
+    "startMs": 96180,
+    "endMs": 98064,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Teams can spend hours blaming the prompt or buying a stronger model",
+    "startMs": 98064,
+    "endMs": 102690,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "when one bad file is the real problem.",
+    "startMs": 102690,
+    "endMs": 105945,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Context MRI replaces that guesswork with evidence,",
+    "startMs": 105945,
+    "endMs": 108857,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "helping agents become more accurate, less expensive, and easier to trust.",
+    "startMs": 108857,
+    "endMs": 113140,
+    "timestampMs": null,
+    "confidence": null
+  }
+]

@@ -1,4 +1,3 @@
-import type { Caption } from "@remotion/captions";
 import { Audio } from "@remotion/media";
 import {
   AbsoluteFill,
@@ -9,73 +8,16 @@ import {
   Sequence,
   staticFile,
   useCurrentFrame,
-  useVideoConfig,
 } from "remotion";
+import { CaptionOverlay } from "./CaptionOverlay";
 
 const FPS = 30;
-const AUDIO_DURATIONS = [14.625, 15.575, 16.05, 13.85, 13.375, 17.175, 15.9];
-const SCENE_FRAMES = AUDIO_DURATIONS.map((seconds) => Math.ceil((seconds + 1.2) * FPS));
+const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24];
+const SCENE_FRAMES = AUDIO_DURATIONS.map((seconds) => Math.ceil((seconds + 0.9) * FPS));
 const SCENE_STARTS = SCENE_FRAMES.map((_, index) =>
   SCENE_FRAMES.slice(0, index).reduce((sum, duration) => sum + duration, 0),
 );
 const TOTAL_FRAMES = SCENE_FRAMES.reduce((sum, duration) => sum + duration, 0);
-
-const CAPTION_TEXT = [
-  [
-    "A good AI model can still fail because of bad context.",
-    "Think of Context MRI as a medical scan for an agent's instructions.",
-    "It finds the harmful file and verifies that removing it helps.",
-  ],
-  [
-    "Provide the job, the files, and a clear example of success.",
-    "Change one file at a time while everything else stays fixed.",
-    "Repeated runs make the comparison fair.",
-  ],
-  [
-    "An old API guide conflicts with the current Responses API schema.",
-    "With every file included, the agent scores 43.",
-    "Remove the old guide: 92 in all three repeats.",
-    "The smaller pack also uses 44% fewer context tokens.",
-  ],
-  [
-    "You do not have to trust a mystery score.",
-    "Inspect the prompt, answer, rubric, speed, and token use.",
-    "Twenty-one records show the improvement is repeatable.",
-    "Not one lucky answer.",
-  ],
-  [
-    "Remove or rewrite the harmful file.",
-    "Use the smaller verified context pack.",
-    "Then test again before trusting the fix.",
-  ],
-  [
-    "The public demo replays one fixed, clearly labeled experiment.",
-    "Anyone can explore it without an account or API key.",
-    "Live mode runs the same controlled test with GPT-5.6.",
-    "The Responses API keeps the evidence inspectable.",
-  ],
-  [
-    "Teams often blame the prompt or buy a stronger model.",
-    "The real problem may be one bad context file.",
-    "Context MRI replaces guesswork with evidence.",
-    "More accurate, less expensive, and easier-to-trust agents.",
-  ],
-];
-
-const buildCaptions = (): Caption[] =>
-  CAPTION_TEXT.flatMap((texts, sceneIndex) => {
-    const startMs = (SCENE_STARTS[sceneIndex] / FPS + 0.4) * 1000;
-    const chunkMs = (AUDIO_DURATIONS[sceneIndex] * 1000) / texts.length;
-    return texts.map((text, index) => ({
-      text,
-      startMs: startMs + index * chunkMs,
-      endMs: startMs + (index + 1) * chunkMs,
-      timestampMs: null,
-      confidence: null,
-    }));
-  });
-
-const CAPTIONS = buildCaptions();
 
 const clamp = {
   extrapolateLeft: "clamp" as const,
@@ -117,7 +59,7 @@ const SceneShell = ({ index, children }: { index: number; children: React.ReactN
   return <AbsoluteFill style={{ opacity }}>
     {children}
     <Sequence from={12} layout="none">
-      <Audio src={staticFile(`voice-${String(index + 1).padStart(2, "0")}.wav`)} volume={0.72} />
+      <Audio src={staticFile(`narration/scene-${String(index + 1).padStart(2, "0")}.wav`)} volume={1} />
     </Sequence>
   </AbsoluteFill>;
 };
@@ -223,16 +165,6 @@ const FinalScene = () => {
     </div>
     <div className="final-url">context-mri.ezra-westover1.chatgpt.site</div>
   </AbsoluteFill>;
-};
-
-const CaptionOverlay = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const nowMs = (frame / fps) * 1000;
-  const caption = CAPTIONS.find((item) => nowMs >= item.startMs && nowMs < item.endMs);
-  if (!caption) return null;
-  const opacity = interpolate(nowMs, [caption.startMs, caption.startMs + 140, caption.endMs - 140, caption.endMs], [0, 1, 1, 0], clamp);
-  return <div className="caption-safe"><div className="caption" style={{ opacity }}>{caption.text}</div></div>;
 };
 
 const Progress = () => {

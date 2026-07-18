@@ -9,7 +9,7 @@ npm run dev
 npx remotion render ContextMRI out/context-mri-demo.mp4
 ```
 
-The final composition is approximately 1 minute 54 seconds and remains under the three-minute submission limit.
+The final composition is approximately 1 minute 54 seconds and remains under the three-minute submission limit. The approved human narration is mastered scene-by-scene in `public/narration`, and the matching caption timeline is stored in `public/captions.json`.
 
 ## Record a human voice-over
 
@@ -19,4 +19,4 @@ Start the local recording booth:
 npm run record
 ```
 
-Then open `http://127.0.0.1:4173`, enable the microphone, and record one continuous take. The recorder includes the seven-scene script, pronunciation notes, clean-edit pauses, playback, and a download button.
+Then open `http://127.0.0.1:4173`, enable the microphone, and record each scene separately. Saved scenes turn green, any scene can be redone without losing the others, and the finished scene files can be downloaded together.
