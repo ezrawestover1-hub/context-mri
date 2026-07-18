@@ -12,9 +12,9 @@ import {
 import { CaptionOverlay } from "./CaptionOverlay";
 
 const FPS = 30;
-// Scene eight is pre-wired with a conservative timing estimate. Replace 25.0
-// with the measured pickup duration before the final render.
-const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24, 25.0];
+// Scene eight is the mastered human pickup, measured after trimming only
+// leading and trailing room tone (natural pauses remain intact).
+const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24, 22.49];
 const SCENE_FRAMES = AUDIO_DURATIONS.map((seconds) => Math.ceil((seconds + 0.9) * FPS));
 const SCENE_STARTS = SCENE_FRAMES.map((_, index) =>
   SCENE_FRAMES.slice(0, index).reduce((sum, duration) => sum + duration, 0),

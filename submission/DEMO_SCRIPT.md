@@ -1,6 +1,6 @@
 # Demo video script — final under-three-minute cut
 
-The current seven-scene render uses the real deployed interface, burned-in captions, and the narration below. After the short scene-eight Codex pickup is recorded, rebuild the final file at `submission/video/out/context-mri-demo.mp4`.
+The final eight-scene render uses the real deployed interface, burned-in captions, and the narration below. The delivery file is `submission/video/out/context-mri-demo.mp4`.
 
 ## 0:00–0:15 — Hook
 
@@ -46,8 +46,7 @@ The current seven-scene render uses the real deployed interface, burned-in capti
 
 ## Render status
 
-- Original seven-scene render: verified H.264, 1920×1080, 30 fps with stereo audio.
-- Final scene-eight human recording: pending.
-- Final render verification: pending after the scene-eight pickup is mastered and captioned.
-- Both Codex and GPT-5.6 must be explained in the final narration and captions.
+- Final scene-eight human recording: mastered, timed, and captioned.
+- Final render: verified H.264, 1920×1080, 30 fps, stereo AAC, 2:17.17 (well under three minutes).
+- Both Codex and GPT-5.6 Terra are explicitly explained in the final narration and captions.
 - Fixture replay and live-model provenance are explicitly distinguished.

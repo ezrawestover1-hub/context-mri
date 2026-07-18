@@ -196,30 +196,44 @@
     "confidence": null
   },
   {
-    "text": "Codex helped me choose the idea, research the official requirements, and design the experiment.",
-    "startMs": 114300,
-    "endMs": 120400,
+    "text": "Codex helped me choose the idea, research the official requirements.",
+    "startMs": 114294,
+    "endMs": 117914,
     "timestampMs": null,
     "confidence": null
   },
   {
-    "text": "It helped build and test the engine, refine the interface, and catch mathematical inconsistencies.",
-    "startMs": 120400,
-    "endMs": 126100,
+    "text": "Design the experiment, build and test the engine.",
+    "startMs": 117914,
+    "endMs": 120809,
     "timestampMs": null,
     "confidence": null
   },
   {
-    "text": "Then I used GPT-five-point-six Terra in Codex for an adversarial audit of the evaluator, fixture claims, and final judge flow.",
-    "startMs": 126100,
-    "endMs": 133600,
+    "text": "Refine the interface, and catch mathematical inconsistencies.",
+    "startMs": 120809,
+    "endMs": 123339,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Then I used GPT-five-point-six Terra in Codex for an adversarial audit",
+    "startMs": 123948,
+    "endMs": 126652,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "of the evaluator, the fixture claims, and the final judge flow.",
+    "startMs": 126652,
+    "endMs": 129362,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "It made the submission more honest and more defensible.",
-    "startMs": 133600,
-    "endMs": 138400,
+    "startMs": 129967,
+    "endMs": 136460,
     "timestampMs": null,
     "confidence": null
   }
