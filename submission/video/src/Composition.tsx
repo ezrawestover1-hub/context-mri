@@ -13,7 +13,7 @@ import {
 } from "remotion";
 
 const FPS = 30;
-const AUDIO_DURATIONS = [13.414, 13.847, 16.751, 16.367, 13.016, 16.789, 15.811];
+const AUDIO_DURATIONS = [15.7, 15.7, 18.55, 17.7, 15.525, 18.9, 18.275];
 const SCENE_FRAMES = AUDIO_DURATIONS.map((seconds) => Math.ceil((seconds + 1.2) * FPS));
 const SCENE_STARTS = SCENE_FRAMES.map((_, index) =>
   SCENE_FRAMES.slice(0, index).reduce((sum, duration) => sum + duration, 0),
@@ -117,7 +117,7 @@ const SceneShell = ({ index, children }: { index: number; children: React.ReactN
   return <AbsoluteFill style={{ opacity }}>
     {children}
     <Sequence from={12} layout="none">
-      <Audio src={staticFile(`voice-${String(index + 1).padStart(2, "0")}.m4a`)} volume={0.95} />
+      <Audio src={staticFile(`voice-${String(index + 1).padStart(2, "0")}.wav`)} volume={0.95} />
     </Sequence>
   </AbsoluteFill>;
 };
