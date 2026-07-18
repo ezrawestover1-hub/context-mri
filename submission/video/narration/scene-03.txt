@@ -1,0 +1,1 @@
+In this example, a current Responses A P I schema conflicts with an archived chat-completions guide. The full bundle averages forty-three. Without legacy-api dot markdown, the mean jumps to ninety-two in all three paired repeats, with forty-four percent fewer context tokens.

@@ -1,0 +1,1 @@
+Codex helped select the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies through browser Q A. Context M R I turns prompt debugging from intuition into evidence.

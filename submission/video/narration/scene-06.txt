@@ -1,0 +1,1 @@
+The hosted judge demo is clearly labeled deterministic fixture replay, so it never presents simulated evidence as a fresh model call. With funded quota, the same runner uses G P T five point six Sol through the Responses A P I, medium reasoning, and strict structured outputs.

@@ -1,0 +1,1 @@
+Every score is inspectable. Open any cell to see its run I D, prompt hash, latency, token use, model output, and exact rubric. Eighteen discovery traces plus three independent pack checks produce twenty-one evidence records, not one lucky answer.

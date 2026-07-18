@@ -1,58 +1,54 @@
-# Demo video script — 2:35 target
+# Demo video script — final 1:54 cut
 
-## 0:00–0:12 — Hook
+The rendered video uses the real deployed interface, burned-in captions, and the narration below. Final file: `submission/video/out/context-mri-demo.mp4`.
 
-**Screen:** Context MRI overview and diagnosis.
+## 0:00–0:15 — Hook
 
-“AI agents often fail because one stale, authoritative-looking file quietly overrides everything else. Context MRI finds that file with controlled experiments.”
+**Screen:** Context MRI title card and the 43 → 92 result.
 
-## 0:12–0:30 — Explain the MRI
+“Most AI agent failures are not model failures. One stale, authoritative-looking file can quietly override a correct schema. Context MRI finds the file making an agent worse, and proves it with controlled experiments.”
 
-**Screen:** Move slowly across the three numbered steps.
+## 0:15–0:30 — Explain the method
 
-“The method is simple: test the full context, remove one file at a time, then keep only what measurably helps. This agent has a current schema and an archived guide that contradict each other.”
+**Screen:** Input, test, action steps and the product’s beginner-first landing page.
 
-## 0:30–0:50 — Run the experiment
+“Give Context MRI the task, the files the agent reads, and a fixed definition of success. It tests the full bundle, removes one file at a time, repeats every condition three times, and scores each answer with the same rubric.”
 
-**Screen:** Click **Run MRI** and let the four stages animate.
+## 0:30–0:48 — Show the finding
 
-“Every condition runs three times against the same fixed evaluator: 18 ablation traces, followed by three independent pack checks—21 inspectable traces in total.”
+**Screen:** The harmful file diagnosis, baseline score, verified score, repeats, and token reduction.
 
-## 0:50–1:15 — The reveal
+“In this example, a current Responses API schema conflicts with an archived chat-completions guide. The full bundle averages forty-three. Without legacy-api dot markdown, the mean jumps to ninety-two in all three paired repeats, with forty-four percent fewer context tokens.”
 
-**Screen:** Point to the diagnosis, matrix, and contribution graph.
+## 0:48–1:05 — Inspect the evidence
 
-“The baseline averages 43. Removing required context makes the task worse, and removing examples changes nothing. But removing `legacy-api.md` raises the mean to 92 in all three paired repeats. The recommended pack verifies at 92 with 44% fewer context tokens.”
+**Screen:** The experiment matrix, contribution graph, file inspector, and evidence-field labels.
 
-## 1:15–1:37 — Prove the evidence
+“Every score is inspectable. Open any cell to see its run ID, prompt hash, latency, token use, model output, and exact rubric. Eighteen discovery traces plus three independent pack checks produce twenty-one evidence records, not one lucky answer.”
 
-**Screen:** Click the green `−Legacy API` score of 90.
+## 1:05–1:20 — Explain what to do next
 
-“Every score opens its run ID, prompt hash, tokens, output, and exact rubric. This public demo is explicitly labeled fixture replay—it never pretends simulated evidence is a fresh GPT‑5.6 call.”
+**Screen:** Remove or rewrite, apply the pack, and run again.
 
-## 1:37–1:56 — Apply the result
+“The result becomes a concrete action plan: remove or rewrite the harmful file, apply the smaller verified pack, then run the experiment again. Even a suggested rewrite is labeled untrusted until it survives another test.”
 
-**Screen:** Close the trace, click **Remove harmful file**, then **Copy manifest** and briefly show **Export evidence**.
+## 1:20–1:38 — Explain fixture and live modes
 
-“One click applies the measured recommendation. The manifest keeps only proven context, and Export Evidence downloads the full JSON ledger—not just a summary.”
+**Screen:** Side-by-side public fixture replay and GPT-5.6 Sol live runner.
 
-## 1:56–2:18 — Repair and re-test
+“The hosted judge demo is clearly labeled deterministic fixture replay, so it never presents simulated evidence as a fresh model call. With funded quota, the same runner uses GPT-5.6 Sol through the Responses API, medium reasoning, and strict Structured Outputs.”
 
-**Screen:** Click **Preview safe rewrite**, stage it, then click **Run MRI** again.
+## 1:38–1:55 — Codex and close
 
-“Context MRI can suggest a safe rewrite, but it does not trust its own edit. After another experiment, baseline recovers to 92 and the repaired file changes from harmful to redundant.”
+**Screen:** Final Context MRI card, public URL, and the Codex + GPT-5.6 build summary.
 
-## 2:18–2:35 — GPT‑5.6 and Codex
+“Codex helped select the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies through browser QA. Context MRI turns prompt debugging from intuition into evidence.”
 
-**Screen:** Open the fixture explanation briefly, then return to the clean diagnosis.
+## Verified render
 
-“With API quota, the same runner uses GPT‑5.6 Sol through the Responses API with strict Structured Outputs. Codex helped select the idea, design the product, build and test the engine, and catch mathematical inconsistencies. Context MRI turns prompt debugging from intuition into evidence.”
-
-## Recording checklist
-
-- Record at 1440p or 1080p with browser zoom at 100%.
-- Keep the cursor slow and deliberate.
-- Start from a clean reload so the stale-file diagnosis is visible.
-- Ensure the fixture label is visible; never imply fixture simulation is live.
-- Keep the final upload under three minutes and public on YouTube.
-- Mention both Codex and GPT‑5.6 in the audio.
+- Duration: 1:54.53
+- Video: H.264, 1920×1080, 30 fps
+- Audio: AAC, 48 kHz stereo
+- File size: 22.6 MB
+- Both Codex and GPT-5.6 are explained in the narration and captions.
+- Fixture replay and live-model provenance are explicitly distinguished.

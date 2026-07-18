@@ -7,7 +7,8 @@
 - [x] Project description drafted in `submission/DEVPOST.md`
 - [x] Devpost project draft created: https://devpost.com/software/context-mri
 - [x] Under-three-minute video script with Codex and GPT‑5.6 audio coverage
-- [ ] Record and upload public YouTube demo
+- [x] Render and verify 1:54.53 demo video at 1080p with stereo audio
+- [ ] Upload public YouTube demo
 - [x] Public repository: https://github.com/ezrawestover1-hub/context-mri
 - [x] README with setup, sample data, and judge test path
 - [x] Codex task/session ID captured: `019f71e4-f746-7083-a465-1c84948bbd8c`
@@ -51,10 +52,9 @@
 
 ## Final manual actions
 
-1. Record the demo using `submission/DEMO_SCRIPT.md`.
-2. Upload it publicly to YouTube and add the URL to Devpost.
-3. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
-4. Submit before **July 21, 2026 at 5:00 PM PDT**.
+1. Upload `submission/video/out/context-mri-demo.mp4` publicly to YouTube and add the URL to Devpost.
+2. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
+3. Submit before **July 21, 2026 at 5:00 PM PDT**.
 
 ## Verified public judge path
 

@@ -1,0 +1,1 @@
+The result becomes a concrete action plan: remove or rewrite the harmful file, apply the smaller verified pack, then run the experiment again. Even a suggested rewrite is labeled untrusted until it survives another test.

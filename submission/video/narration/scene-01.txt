@@ -1,0 +1,1 @@
+Most AI agent failures are not model failures. One stale, authoritative-looking file can quietly override a correct schema. Context M R I finds the file making an agent worse, and proves it with controlled experiments.
