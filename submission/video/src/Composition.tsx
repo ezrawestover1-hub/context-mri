@@ -133,7 +133,13 @@ const ActionScene = () => {
     <div className="action-rail">
       {["REMOVE OR REWRITE", "APPLY THE PACK", "RUN AGAIN"].map((label, index) => <div key={label} style={{ opacity: interpolate(frame, [12 + index * 10, 28 + index * 10], [0, 1], clamp), translate: `${interpolate(frame, [12 + index * 10, 28 + index * 10], [-24, 0], clamp)}px 0` }}><b>{index + 1}</b><span>{label}</span></div>)}
     </div>
-    <p className="trust-line">A rewrite is not trusted until the score recovers.</p>
+    <div className="guard-proof" style={{
+      opacity: interpolate(frame, [74, 96], [0, 1], clamp),
+      translate: `0 ${interpolate(frame, [74, 96], [24, 0], clamp)}px`,
+    }}>
+      <div><span>LOCK IN THE FIX</span><strong>Context Guard</strong><small>Block the stale instruction before it returns.</small></div>
+      <div className="guard-proof-score"><b>43 blocked</b><i>→</i><strong>92 passed</strong></div>
+    </div>
   </AbsoluteFill>;
 };
 

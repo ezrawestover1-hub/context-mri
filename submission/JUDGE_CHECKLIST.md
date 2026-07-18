@@ -7,7 +7,7 @@
 - [x] Project description drafted in `submission/DEVPOST.md`
 - [x] Devpost project draft created: https://devpost.com/software/context-mri
 - [x] Record the short scene-eight human-voice pickup that explicitly explains Codex usage
-- [x] Render and verify the updated under-three-minute demo at 1080p with stereo audio (H.264, 1920×1080, 30 fps, stereo AAC, 2:17.17)
+- [x] Render and verify the updated under-three-minute demo at 1080p with stereo audio (H.264, 1920×1080, 30 fps, stereo AAC, 2:17.17); the action scene now visibly shows Context Guard blocking 43 and passing 92 without changing narration or runtime
 - [ ] Upload public YouTube demo
 - [x] Public repository: https://github.com/ezrawestover1-hub/context-mri
 - [x] README with setup, sample data, and judge test path

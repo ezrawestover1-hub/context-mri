@@ -28,7 +28,7 @@ The final eight-scene render uses the real deployed interface, burned-in caption
 
 ## 1:05–1:20 — Explain what to do next
 
-**Screen:** Remove or rewrite, apply the pack, and run again.
+**Screen:** Remove or rewrite, apply the pack, and run again. The scene closes with Context Guard visibly blocking the old 43-point bundle and passing the repaired 92-point pack.
 
 “The result becomes a concrete action plan: remove or rewrite the harmful file, apply the smaller verified pack, then run the experiment again. Even a suggested rewrite is labeled untrusted until it survives another test.”
 
@@ -48,5 +48,6 @@ The final eight-scene render uses the real deployed interface, burned-in caption
 
 - Final scene-eight human recording: mastered, timed, and captioned.
 - Final render: verified H.264, 1920×1080, 30 fps, stereo AAC, 2:17.17 (well under three minutes).
+- Context Guard is now visible in the action scene as a late proof card: `43 blocked → 92 passed`; no narration, caption timing, or duration changed.
 - Both Codex and GPT-5.6 Terra are explicitly explained in the final narration and captions.
 - Fixture replay and live-model provenance are explicitly distinguished.

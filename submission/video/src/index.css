@@ -83,7 +83,13 @@ h2 em { color: #d58d72; font-weight: 500; }
 .action-rail > div { padding: 16px 22px; display: flex; align-items: center; gap: 12px; color: var(--paper); background: var(--pine-900); border: 1px solid #739184; border-radius: 6px; box-shadow: 0 10px 30px #09271f24; }
 .action-rail b { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #b8cbc2; border-radius: 50%; font: italic 600 18px Georgia, serif; }
 .action-rail span { font-size: 18px; font-weight: 800; letter-spacing: .06em; }
-.trust-line { position: absolute; right: 104px; bottom: 154px; z-index: 3; padding: 14px 20px; color: #b83f28; background: #fff8edeb; border-left: 4px solid var(--rust); font: italic 27px Georgia, serif; }
+.guard-proof { width: 700px; min-height: 140px; position: absolute; right: 104px; bottom: 154px; z-index: 3; padding: 23px 27px; display: flex; align-items: center; justify-content: space-between; gap: 28px; color: var(--paper); background: #10372bf2; border: 1px solid #739184; border-left: 5px solid #b8d0bd; border-radius: 7px; box-shadow: 0 14px 42px #09271f33; }
+.guard-proof > div:first-child { display: flex; flex-direction: column; gap: 7px; }
+.guard-proof > div:first-child > span { color: #b9d0c5; font-size: 17px; font-weight: 800; letter-spacing: .14em; }
+.guard-proof > div:first-child > strong { font: 500 40px/1 Georgia, serif; }
+.guard-proof > div:first-child > small { color: #d6e1da; font: 24px/1.25 Georgia, serif; }
+.guard-proof-score { display: grid; grid-template-columns: auto 28px auto; align-items: center; gap: 11px; white-space: nowrap; font-size: 19px; font-weight: 800; letter-spacing: .04em; }
+.guard-proof-score b { color: #edb09a; }.guard-proof-score i { color: #c8d8d1; font: 31px Georgia, serif; }.guard-proof-score strong { color: #c8e3d0; }
 
 .mode-scene { padding-top: 92px; }
 .mode-scene > h2 { max-width: 1380px; margin-top: 30px; font-size: 90px; }
