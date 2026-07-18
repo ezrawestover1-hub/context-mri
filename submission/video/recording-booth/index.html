@@ -279,7 +279,7 @@
 
           <div class="field">
             <label for="device">Microphone</label>
-            <select id="device" disabled><option>Enable microphone access first</option></select>
+            <select id="device" disabled><option value="">Enable microphone access first</option></select>
           </div>
 
           <div class="meter-wrap">
@@ -469,9 +469,8 @@
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             audio: {
-              deviceId: device.value ? { exact: device.value } : undefined,
+              deviceId: !device.disabled && device.value ? { exact: device.value } : undefined,
               channelCount: 1,
-              sampleRate: 48000,
               echoCancellation: true,
               noiseSuppression: true,
               autoGainControl: true,
@@ -483,7 +482,13 @@
           setStatus(`Ready · ${device.options[device.selectedIndex]?.textContent || "microphone connected"}`);
           startMeter();
         } catch (error) {
-          setStatus(error?.name === "NotAllowedError" ? "Microphone permission was denied." : "Could not open the microphone.");
+          const reasons = {
+            NotAllowedError: "Microphone permission was denied in this browser.",
+            NotFoundError: "No microphone was found.",
+            NotReadableError: "The microphone is busy or unavailable. Close other recording apps and try again.",
+            OverconstrainedError: "The selected microphone does not support the requested recording settings.",
+          };
+          setStatus(reasons[error?.name] || `Could not open the microphone (${error?.name || "unknown error"}).`);
         }
       };
 
