@@ -14,7 +14,7 @@ export function Matrix({ report, selectedContextId, running, onOpenTrace }: Matr
 
   return <section className="analysis panel">
     <div className="panel-heading analysis-heading">
-      <div><span>HOW WE KNOW</span><small>Each column removes exactly one file. Green means the agent passed.</small></div>
+      <div><span>ABLATION MATRIX</span><small>Each column removes one file. Select any score to inspect the exact trace.</small></div>
       <button className="inspect-score" onClick={() => firstTrace && onOpenTrace(firstTrace)} disabled={!firstTrace}>
         <Search size={15} /> Inspect any score
       </button>

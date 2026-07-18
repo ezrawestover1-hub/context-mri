@@ -4,11 +4,12 @@ import { contexts as initialContexts, seedReport } from './data';
 import type { ContextItem, ExperimentReport, ExperimentRun } from './types';
 import { BrandMark } from './components/BrandMark';
 import { ContextPack } from './components/ContextPack';
-import { DiagnosisBand, Explainer } from './components/Explainer';
+import { DiagnosisBand } from './components/Explainer';
 import { Inspector } from './components/Inspector';
 import { Inventory } from './components/Inventory';
 import { Matrix } from './components/Matrix';
 import { ProvenanceModal, RewriteModal, TraceModal } from './components/Modals';
+import { BeforeRun, HeroIntro, NextSteps, ResultGuide } from './components/Onboarding';
 
 function downloadJson(filename: string, value: unknown) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }));
@@ -33,6 +34,7 @@ export default function App() {
   const [rewriteOpen, setRewriteOpen] = useState(false);
   const [provenanceOpen, setProvenanceOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const selectedItem = useMemo(
     () => contexts.find(context => context.id === selected) ?? contexts[0],
@@ -40,7 +42,7 @@ export default function App() {
   );
   const selectedEvidence = report.contextEvidence.find(item => item.contextId === selectedItem?.id);
 
-  async function runMRI() {
+  async function runMRI(scrollToResults = false) {
     setRunning(true);
     setRecommendationApplied(false);
     const stages = ['Testing full context…', 'Removing one item at a time…', 'Repeating each condition…', 'Verifying recommended pack…'];
@@ -63,6 +65,7 @@ export default function App() {
       setReport(nextReport);
       setSelected(mostHarmful?.contextId ?? contexts[0].id);
       setStage(nextReport.mode === 'live' ? 'Complete · fresh GPT-5.6 evidence' : 'Complete · fixture replay');
+      if (scrollToResults) window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
     } catch (error) {
       setStage(error instanceof Error ? `Run failed · ${error.message}` : 'Run failed');
     } finally {
@@ -101,20 +104,37 @@ export default function App() {
     setStage('Recommended manifest copied');
   }
 
-  function addContext(file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const content = String(reader.result ?? '');
-      const baseId = file.name.replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 24) || `context-${contexts.length + 1}`;
+  async function addContexts(files: File[]) {
+    const availableSlots = Math.max(0, 12 - contexts.length);
+    const selectedFiles = files.slice(0, availableSlots);
+    if (!selectedFiles.length) {
+      setStage('Context library full · this experiment supports up to 12 files');
+      return;
+    }
+
+    const acceptedExtensions = /\.(md|json|txt)$/i;
+    const loaded = await Promise.all(selectedFiles.map(async file => ({ file, content: await file.text() })));
+    const valid = loaded.filter(({ file, content }) => acceptedExtensions.test(file.name) && content.length <= 20_000);
+    if (!valid.length) {
+      setStage('No files added · use .md, .json, or .txt files under 20,000 characters');
+      return;
+    }
+
+    const usedIds = new Set(contexts.map(context => context.id));
+    const additions = valid.map(({ file, content }, index) => {
+      const baseId = file.name.replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 24) || `context-${contexts.length + index + 1}`;
       let id = baseId;
       let suffix = 2;
-      while (contexts.some(context => context.id === id)) id = `${baseId}-${suffix++}`;
-      setContexts(current => [...current, { id, name: file.name, tokens: Math.max(1, Math.ceil(content.length / 4)), content }]);
-      setSelected(id);
-      setRecommendationApplied(false);
-      setStage('Context added · run MRI to measure it');
-    };
-    reader.readAsText(file);
+      while (usedIds.has(id)) id = `${baseId}-${suffix++}`;
+      usedIds.add(id);
+      return { id, name: file.name, tokens: Math.max(1, Math.ceil(content.length / 4)), content };
+    });
+
+    setContexts(current => [...current, ...additions]);
+    setSelected(additions[additions.length - 1].id);
+    setRecommendationApplied(false);
+    const skipped = selectedFiles.length - valid.length + Math.max(0, files.length - selectedFiles.length);
+    setStage(`${additions.length} context file${additions.length === 1 ? '' : 's'} added${skipped ? ` · ${skipped} skipped` : ''} · run MRI to measure`);
   }
 
   function applyRewrite() {
@@ -137,15 +157,24 @@ export default function App() {
     setStage(`Recommended pack applied · ${report.optimizedTokens.toLocaleString()} tokens`);
   }
 
+  function openHarmfulRewrite() {
+    const harmful = report.contextEvidence.find(item => item.status === 'harmful');
+    if (harmful) setSelected(harmful.contextId);
+    setRewriteOpen(true);
+  }
+
   return <main className="app-shell">
     <input
       ref={fileInput}
       className="hidden-input"
       type="file"
+      multiple
+      tabIndex={-1}
+      aria-hidden="true"
       accept=".md,.json,.txt,text/plain,application/json"
       onChange={event => {
-        const file = event.target.files?.[0];
-        if (file) addContext(file);
+        const files = Array.from(event.target.files ?? []);
+        if (files.length) void addContexts(files);
         event.target.value = '';
       }}
     />
@@ -154,13 +183,19 @@ export default function App() {
       <div className="brand"><BrandMark /><strong>Context MRI</strong></div>
       <div className="project-select"><span><small>Project:</small> Support Agent Diagnostic</span><ChevronDown size={15} /></div>
       <div className="top-actions">
+        <a className="how-link" href="#before-run">How it works</a>
         <button className="export-action" onClick={exportEvidence}><Download size={16} /> Export evidence</button>
-        <button className="run-action" onClick={runMRI} disabled={running}>{running ? <Sparkles size={17} /> : <Play size={17} fill="currentColor" />}{running ? stage : 'Run MRI'}</button>
+        <button className="run-action" onClick={() => runMRI(true)} disabled={running}>{running ? <Sparkles size={17} /> : <Play size={17} fill="currentColor" />}{running ? stage : 'Run guided demo'}</button>
       </div>
     </header>
 
-    <Explainer />
-    <DiagnosisBand report={report} />
+    <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} />
+    <BeforeRun />
+
+    <div className="results-anchor" ref={resultsRef}>
+      <DiagnosisBand report={report} />
+      <ResultGuide />
+    </div>
 
     <div className="workspace">
       <Inventory items={contexts} evidence={report.contextEvidence} selected={selected} onSelect={setSelected} onAdd={() => fileInput.current?.click()} />
@@ -175,6 +210,15 @@ export default function App() {
         onRewrite={() => setRewriteOpen(true)}
       /> : null}
     </div>
+
+    <NextSteps
+      report={report}
+      running={running}
+      recommendationApplied={recommendationApplied}
+      onApply={applyRecommendation}
+      onRewrite={openHarmfulRewrite}
+      onRun={() => runMRI(false)}
+    />
 
     <ContextPack contexts={contexts} report={report} applied={recommendationApplied} onApply={applyRecommendation} onCopy={copyManifest} />
 

@@ -6,7 +6,7 @@ Context MRI is an evidence-first profiler for agent context. It runs a baseline,
 
 The included Build Week example diagnoses an archived API guide that conflicts with the current tool schema. The baseline mean is **43/100**. Removing the stale guide scores **92/100**, and the recommended pack independently verifies at **92/100** with **44% fewer context tokens**.
 
-![Context MRI pine-and-cream interface](./design/context-mri-pine-cream-implementation.png)
+![Context MRI guided pine-and-cream interface](./design/context-mri-guided-implementation.png)
 
 ## Judge quickstart
 
@@ -18,11 +18,11 @@ The hosted demo opens without an account, API key, install, or build step. It in
 
 ### Fastest path: public demo
 
-1. Read the three-step method at the top of the app.
-2. Click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
-3. Compare **Baseline** with **−Legacy API**.
-4. Click **Run MRI** to replay the complete experiment.
-5. Click **Apply pack** and confirm the 1,602-token recommendation is applied.
+1. Read the input → experiment → action preview, then click **Run the included example**.
+2. The app automatically moves to the diagnosis and explains what each result label means.
+3. Compare **Baseline** with **−Legacy API**, then click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
+4. Follow **What to do next** to apply the 1,602-token pack or preview a safe rewrite.
+5. Click **Run again to verify** rather than trusting an untested change.
 6. Use **Export evidence** to download the complete JSON ledger.
 
 ### Local development and live GPT-5.6 mode
@@ -36,8 +36,8 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173), then:
 
-1. Read the three-step method at the top of the app.
-2. Click **Run MRI**.
+1. Read the guided input, output, and action instructions at the top of the app.
+2. Click **Run the included example**.
 3. Click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
 4. Compare **Baseline** with **−Legacy API**.
 5. Click **Remove harmful file** or **Apply pack**.
@@ -50,7 +50,7 @@ No API quota is required to judge the complete interface and workflow. Without q
 OPENAI_API_KEY=your_key_here
 ```
 
-Custom `.md`, `.json`, and `.txt` files can be added from the interface. Fixture mode exercises the dynamic variant, classification, trace, pack, and export pipeline; fresh claims about custom content require live API quota.
+Up to seven additional `.md`, `.json`, and `.txt` files can be added at once from the interface (20,000 characters maximum per file). Files stay in browser memory and the public demo measures them against the included support task and fixed success criteria. Fixture mode exercises the dynamic variant, classification, trace, pack, and export pipeline; fresh claims about custom content require live API quota.
 
 ## Verification
 
