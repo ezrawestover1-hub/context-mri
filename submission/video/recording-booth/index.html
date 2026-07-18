@@ -275,7 +275,7 @@
 
         <aside class="recorder">
           <h1>Record your full take</h1>
-          <p>Use the iPhone microphone if available. Keep it 6–8 inches from your mouth, slightly off to one side.</p>
+          <p>Choose <strong>MacBook Air Microphone</strong>. Sit about 12–18 inches from the laptop and speak across it instead of directly down into it.</p>
 
           <div class="field">
             <label for="device">Microphone</label>
@@ -454,7 +454,7 @@
           option.textContent = item.label || `Microphone ${index + 1}`;
           device.append(option);
         });
-        const preferred = devices.find((item) => /iphone/i.test(item.label)) || devices.find((item) => /macbook air microphone/i.test(item.label));
+        const preferred = devices.find((item) => /macbook air microphone/i.test(item.label)) || devices.find((item) => /iphone/i.test(item.label));
         if (devices.some((item) => item.deviceId === selected)) device.value = selected;
         else if (preferred) device.value = preferred.deviceId;
         device.disabled = devices.length === 0;
