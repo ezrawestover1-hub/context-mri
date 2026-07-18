@@ -5,6 +5,7 @@
 - [x] Working project
 - [x] Category selected: Developer Tools
 - [x] Project description drafted in `submission/DEVPOST.md`
+- [x] Devpost project draft created: https://devpost.com/software/context-mri
 - [x] Under-three-minute video script with Codex and GPT‑5.6 audio coverage
 - [ ] Record and upload public YouTube demo
 - [ ] Create/share repository URL
