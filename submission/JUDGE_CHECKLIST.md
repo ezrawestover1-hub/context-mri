@@ -66,5 +66,5 @@
 - Evidence trace inspector: passed
 - Full fixture MRI replay: passed
 - Recommended pack staging: passed at 1,602 tokens
-- Reduced-pack second experiment and distinct verification report: pending deployed-browser recheck
+- Reduced-pack second experiment and distinct verification report: passed on the production endpoint
 - Browser console errors or warnings: none

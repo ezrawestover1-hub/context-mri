@@ -71,14 +71,32 @@ function normalizeEvidenceText(value: string) {
 
 function evaluateExplanation(explanation: string) {
   const normalized = normalizeEvidenceText(explanation);
-  const mentionsCurrentEndpoint = normalized.includes('/v1/responses') || normalized.includes('responses api');
-  const mentionsLegacyEndpoint = normalized.includes('/v1/chat/completions') || normalized.includes('chat completions');
-  const identifiesCurrentSource = /\b(current|latest|newest|source of truth)\b/.test(normalized) &&
-    /\b(schema|machine-readable|tool definition|tool spec|tool specification)\b/.test(normalized);
-  const rejectsLegacySource = mentionsLegacyEndpoint &&
-    /\b(archived|legacy|obsolete|stale|deprecated|outdated|should not|do not use|must not)\b/.test(normalized);
-  const explainsConflict = mentionsCurrentEndpoint && mentionsLegacyEndpoint &&
-    /\b(conflict|conflicts|contradict|contradicts|disagree|disagrees|instead of|rather than)\b/.test(normalized);
+  const statements = normalized.split(/[.!?;]+/).map(statement => statement.trim()).filter(Boolean);
+  const mentionsCurrentAnywhere = normalized.includes('/v1/responses') || normalized.includes('responses api');
+  const identifiesCurrentSource = statements.some(statement => {
+    const hasRecency = /\b(current|latest|newest|source of truth)\b/.test(statement);
+    const hasSchema = /\b(schema|machine-readable|tool definition|tool spec|tool specification)\b/.test(statement);
+    const hasPositiveRelation = /\b(is|specifies|defines|provides|requires|source of truth)\b/.test(statement);
+    const negatesClaim = /\b(?:is|does|do)\s+not\b/.test(statement) || /\bnot\s+(?:the\s+)?(?:current|latest|newest)\b/.test(statement);
+    return hasRecency && hasSchema && hasPositiveRelation && !negatesClaim;
+  });
+  const rejectsLegacySource = statements.some(statement => {
+    const mentionsLegacyEndpoint = statement.includes('/v1/chat/completions') || statement.includes('chat completions');
+    const labelsLegacy = /\b(?:is|was|appears|looks)\s+(?:like\s+|to\s+be\s+)?(?:an?\s+)?(?:archived|legacy|obsolete|stale|deprecated|outdated)\b/.test(statement) ||
+      /\b(?:archived|legacy|obsolete|stale|deprecated|outdated)\s+[^.]*\b(?:guide|instruction|endpoint|source)\b/.test(statement);
+    const rejectsUse = /\b(?:should not|do not|must not|cannot)\s+(?:be\s+)?used?\b/.test(statement) ||
+      /\b(?:avoid|reject|ignore)\b/.test(statement);
+    const negatesLegacy = /\bnot\s+(?:archived|legacy|obsolete|stale|deprecated|outdated)\b/.test(statement);
+    return mentionsLegacyEndpoint && (labelsLegacy || rejectsUse) && !negatesLegacy;
+  });
+  const explainsConflict = statements.some(statement => {
+    const mentionsCurrentEndpoint = statement.includes('/v1/responses') || statement.includes('responses api');
+    const mentionsLegacyEndpoint = statement.includes('/v1/chat/completions') || statement.includes('chat completions');
+    const namesRelation = /\b(conflict|conflicts|contradict|contradicts|disagree|disagrees|instead of|rather than)\b/.test(statement);
+    const relatesToPriorSource = mentionsCurrentAnywhere && /\b(?:conflict|conflicts|contradict|contradicts|disagree|disagrees)\s+with\s+(?:it|that)\b/.test(statement);
+    const negatesRelation = /\b(?:do|does|did|are|is)\s+not\s+(?:conflict|conflicting|contradict|contradictory|disagree)\b/.test(statement);
+    return mentionsLegacyEndpoint && namesRelation && (mentionsCurrentEndpoint || relatesToPriorSource) && !negatesRelation;
+  });
 
   return { identifiesCurrentSource, rejectsLegacySource, explainsConflict };
 }

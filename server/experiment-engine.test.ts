@@ -38,6 +38,18 @@ test('does not award legacy or conflict points for keyword-free assertions', () 
   assert.equal(result.breakdown.conflictExplanation, 0);
 });
 
+test('does not award semantic points for negated rubric claims', () => {
+  const result = scoreAnswer({
+    recommendedEndpoint: '/v1/responses',
+    explanation: 'The current machine-readable schema is not the source of truth. The /v1/chat/completions guide is not archived. The /v1/responses and /v1/chat/completions instructions do not conflict.',
+  });
+
+  assert.equal(result.score, 55);
+  assert.equal(result.breakdown.recencyReasoning, 0);
+  assert.equal(result.breakdown.legacyRejection, 0);
+  assert.equal(result.breakdown.conflictExplanation, 0);
+});
+
 test('runs three repeats for every ablation plus three pack-verification checks', () => {
   const report = fixtureReport(contexts);
   assert.equal(report.variants.length, 6);
