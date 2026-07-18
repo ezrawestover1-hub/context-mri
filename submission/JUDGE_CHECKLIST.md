@@ -12,6 +12,7 @@
 - [x] Codex task/session ID captured: `019f71e4-f746-7083-a465-1c84948bbd8c`
 - [x] Installation instructions and supported platforms
 - [x] No-key fixture path for testing without rebuilding infrastructure
+- [x] Public no-login demo: https://context-mri.ezra-westover1.chatgpt.site
 - [x] MIT license for a public repository
 
 ## Judging-criteria mapping
@@ -54,3 +55,12 @@
 3. Publish this repository or share a private repository with `testing@devpost.com` and `build-week-event@openai.com`.
 4. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
 5. Submit before **July 21, 2026 at 5:00 PM PDT**.
+
+## Verified public judge path
+
+- URL: https://context-mri.ezra-westover1.chatgpt.site
+- Anonymous page load: passed
+- Evidence trace inspector: passed
+- Full fixture MRI replay: passed
+- Recommended pack application: passed at 1,602 tokens
+- Browser console errors or warnings: none

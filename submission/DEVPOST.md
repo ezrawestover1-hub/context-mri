@@ -16,6 +16,12 @@ Developer Tools
 
 Context MRI runs controlled context-ablation experiments against an AI agent, identifies instructions that are required, redundant, or harmful, and exports a smaller, tested context pack with inspectable evidence.
 
+## Try it
+
+Public no-login demo: https://context-mri.ezra-westover1.chatgpt.site
+
+The hosted judge path is an explicitly labeled deterministic fixture replay, so it needs no account, API key, or external setup. The repository also includes the live GPT-5.6 Sol experiment path for funded OpenAI API projects.
+
 ## Inspiration
 
 AI agents rarely fail because they lack context. They often fail because they have too much: an obsolete README, duplicated rules, irrelevant examples, or tool descriptions that contradict each other. Developers usually debug this by reading prompts and guessing. Context MRI turns that guesswork into a repeatable experiment.
@@ -28,7 +34,7 @@ In the included demo, an archived guide tells the agent to use `/v1/chat/complet
 
 ## How we built it
 
-The product is a React + TypeScript application with a Node/Express experiment server. The live runner uses the OpenAI Responses API with GPT‑5.6 Sol, medium reasoning, and strict Structured Outputs. A fixed five-part application evaluator scores endpoint accuracy, recency reasoning, legacy handling, conflict explanation, and schema validity.
+The product is a React + TypeScript application with a Node/Express experiment server and a Cloudflare-compatible public fixture adapter. The live runner uses the OpenAI Responses API with GPT‑5.6 Sol, medium reasoning, and strict Structured Outputs. A fixed five-part application evaluator scores endpoint accuracy, recency reasoning, legacy handling, conflict explanation, and schema validity.
 
 Each trace records its run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture simulation. All headline metrics are derived from those records. The default suite contains 18 discovery traces plus three pack-verification traces.
 

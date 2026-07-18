@@ -10,6 +10,21 @@ The included Build Week example diagnoses an archived API guide that conflicts w
 
 ## Judge quickstart
 
+**Public judge demo:** [context-mri.ezra-westover1.chatgpt.site](https://context-mri.ezra-westover1.chatgpt.site)
+
+The hosted demo opens without an account, API key, install, or build step. It intentionally uses the clearly labeled deterministic fixture replay so every judge gets the same complete, inspectable workflow. To generate fresh GPT-5.6 Sol traces instead, run the project locally with funded API quota as described below.
+
+### Fastest path: public demo
+
+1. Read the three-step method at the top of the app.
+2. Click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
+3. Compare **Baseline** with **−Legacy API**.
+4. Click **Run MRI** to replay the complete experiment.
+5. Click **Apply pack** and confirm the 1,602-token recommendation is applied.
+6. Use **Export evidence** to download the complete JSON ledger.
+
+### Local development and live GPT-5.6 mode
+
 Requirements: macOS, Windows, or Linux; Node.js 20+; npm.
 
 ```bash
@@ -23,8 +38,8 @@ Open [http://localhost:5173](http://localhost:5173), then:
 2. Click **Run MRI**.
 3. Click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
 4. Compare **Baseline** with **−Legacy API**.
-5. Click **Remove from context pack**, then **Copy manifest**.
-6. Preview the safe rewrite, stage it, and run the MRI again to verify the repair.
+5. Click **Remove harmful file** or **Apply pack**.
+6. Preview the safe rewrite, then run the MRI again to verify the repair.
 7. Use **Export evidence** to download the complete JSON ledger.
 
 No API quota is required to judge the complete interface and workflow. Without quota, the server uses a clearly labeled deterministic **fixture simulation** of the bundled support-agent example. It is never represented as fresh model evidence. With a funded `OPENAI_API_KEY` in `.env.local`, the same endpoint automatically generates fresh GPT‑5.6 Sol traces instead.
