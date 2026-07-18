@@ -1,0 +1,7 @@
+{
+  "create_response": {
+    "method": "POST",
+    "path": "/v1/responses",
+    "description": "Current endpoint for model responses"
+  }
+}

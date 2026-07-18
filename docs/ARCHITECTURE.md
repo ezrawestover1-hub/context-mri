@@ -1,0 +1,97 @@
+# Context MRI architecture
+
+## Data flow
+
+```mermaid
+flowchart LR
+  A[Context bundle] --> B[Baseline + single-item variants]
+  B --> C[Three runs per discovery condition]
+  C --> D[GPT-5.6 Sol or fixture simulation]
+  D --> E[Fixed five-part evaluator]
+  E --> F[Trace ledger]
+  F --> G[Measured file classifications]
+  G --> H[Recommended context pack]
+  H --> I[Three pack-verification runs]
+  I --> J[Exportable evidence report]
+```
+
+The server is the source of truth for scores, contributions, classifications, token reduction, recommended context IDs, pack verification, and provenance. The React client renders the returned `ExperimentReport`; input labels cannot declare themselves required or harmful.
+
+## Live mode
+
+`POST /api/experiments` validates a bundle of 2–12 context items. For the bundled five-file example it creates six discovery conditions and runs each three times. It then derives a recommended pack and runs that pack three additional times: 21 calls total.
+
+The first discovery call is a quota probe. If it succeeds, the remaining discovery jobs run with a concurrency limit of four. Pack checks run only after contribution analysis because their included IDs depend on the discovery result. Each Responses API call uses:
+
+- `gpt-5.6-sol`
+- `reasoning.effort: medium`
+- strict `text.format` JSON schema
+- an instruction to use only the supplied context bundle
+- a 300-token output cap
+
+The probe prevents a missing-quota project from firing a full suite of doomed requests.
+
+## Fixture-simulation mode
+
+If no key is configured or the API reports quota exhaustion, the server returns a deterministic and explicitly labeled simulation of the bundled support-agent scenario. The simulation responds to added or rewritten context content, but it is not a substitute for fresh model evidence on custom data.
+
+Both modes use the same:
+
+- `ExperimentReport` schema
+- contribution and classification logic
+- pack-selection and verification path
+- trace inspector
+- JSON evidence export
+- UI workflow
+
+The fixture uses only rubric totals that the binary five-part evaluator can actually produce. Every displayed fixture score is the exact sum of its inspectable breakdown.
+
+## Evaluator
+
+The model returns a strict object containing the recommended endpoint and four observable claims. Application code—not the subject model—assigns the fixed weighted score. The pass threshold is 80.
+
+```text
+endpoint accuracy    50
+recency reasoning    20
+legacy handling      15
+conflict explanation 10
+schema validity       5
+```
+
+## Measurement semantics
+
+```text
+contribution(i) = mean(baseline) - mean(omit i)
+```
+
+- `>= +20`: required
+- `+5..+19`: useful
+- `−4..+4`: redundant
+- `<= −5`: harmful
+
+Positive contribution means removal hurt performance. Negative contribution means removal improved performance. These thresholds produce the candidate pack, which receives three separate verification runs before its score appears as the optimized result.
+
+This is controlled evidence for the tested task distribution. It is not universal causal proof, and single-item experiments can miss interactions.
+
+## Trace and export contract
+
+Every run records:
+
+- run and variant IDs
+- omitted or included context IDs
+- repeat number and pass/fail state
+- model or fixture provenance
+- prompt hash
+- input/output tokens and latency
+- model output and recommended endpoint
+- complete rubric breakdown
+
+**Export evidence** downloads the input bundle, decision state, all discovery runs, pack-verification runs, derived classifications, diagnosis, and provenance as JSON.
+
+## Security and privacy
+
+- The API key remains server-side in `.env.local`.
+- Input is limited to 12 items, 20,000 characters per item, unique IDs, and bounded names.
+- No client bundle contains the secret.
+- The demo does not persist uploaded context or model outputs.
+- Production use should add authentication, encrypted persistence, tenant isolation, rate limits, and explicit retention controls.
