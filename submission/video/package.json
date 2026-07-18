@@ -27,6 +27,7 @@
   },
   "scripts": {
     "dev": "remotion studio",
+    "record": "python3 -m http.server 4173 --directory recording-booth",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc"
