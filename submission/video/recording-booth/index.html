@@ -177,6 +177,36 @@
       #record { color: white; background: var(--rust); border: 0; }
       #stop { color: var(--paper); background: transparent; border: 1px solid #adc1b8; }
       .controls button:disabled { opacity: .42; cursor: not-allowed; }
+      .take-summary {
+        margin-top: 20px;
+        padding: 14px;
+        background: #0b2b22;
+        border: 1px solid #59776b;
+        border-radius: 7px;
+      }
+      .take-summary-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        color: #d7e4de;
+        font-size: 13px;
+        font-weight: 750;
+      }
+      .take-map { margin-top: 12px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+      .take-map button {
+        min-height: 38px;
+        padding: 0;
+        color: #bcd0c7;
+        background: #061e17;
+        border: 1px solid #668378;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .take-map button.saved { color: var(--pine-950); background: #b9d6c7; border-color: #b9d6c7; }
+      .take-map button.current { box-shadow: 0 0 0 2px #f4eddf; }
+      .take-map button:disabled { cursor: not-allowed; }
+      .take-note { margin: 10px 0 0; color: #9eb5aa; font-size: 12px; line-height: 1.45; }
       .recording-line {
         min-height: 48px;
         margin-top: 20px;
@@ -195,6 +225,7 @@
       @keyframes pulse { 50% { opacity: .35; } }
       audio { width: 100%; margin-top: 18px; }
       .download { margin-top: 12px; color: var(--pine-950); background: #c9dfd3; }
+      #download-all { margin-top: 10px; color: var(--paper); background: transparent; border: 1px solid #9fb7ac; }
       [hidden] { display: none !important; }
 
       .coach {
@@ -250,7 +281,7 @@
           <div class="mark">✦</div>
           <div><strong>CONTEXT MRI</strong><small>VOICE-OVER RECORDING BOOTH</small></div>
         </div>
-        <div class="header-note">One continuous take. Pause between scenes. If you stumble, pause and restart the sentence—editing comes later.</div>
+        <div class="header-note">Record one scene at a time. If scene five goes wrong, redo only scene five—every good take stays saved.</div>
       </header>
 
       <main>
@@ -274,8 +305,8 @@
         </section>
 
         <aside class="recorder">
-          <h1>Record your full take</h1>
-          <p>Choose <strong>MacBook Air Microphone</strong>. Sit about 12–18 inches from the laptop and speak across it instead of directly down into it.</p>
+          <h1>Record this scene</h1>
+          <p>Each scene is saved separately. Choose <strong>MacBook Air Microphone</strong>, then record, listen, and move on—or redo only the scene you dislike.</p>
 
           <div class="field">
             <label for="device">Microphone</label>
@@ -290,8 +321,14 @@
 
           <div class="controls">
             <button id="enable" type="button">Enable microphone</button>
-            <button id="record" type="button" disabled>Start full take</button>
-            <button id="stop" type="button" disabled>Stop recording</button>
+            <button id="record" type="button" disabled>Record this scene</button>
+            <button id="stop" type="button" disabled>Stop &amp; save scene</button>
+          </div>
+
+          <div class="take-summary">
+            <div class="take-summary-line"><span id="take-state">Scene 1 · Not recorded</span><span id="completed-count">0 / 7 saved</span></div>
+            <div class="take-map" id="take-map" aria-label="Saved scene recordings"></div>
+            <p class="take-note">The outlined number is the scene on screen. Green numbers already have a saved take.</p>
           </div>
 
           <div class="recording-line">
@@ -300,22 +337,23 @@
           </div>
 
           <audio id="playback" controls hidden></audio>
-          <a class="download" id="download" href="#" hidden>Download this take</a>
+          <a class="download" id="download" href="#" hidden>Download this scene</a>
+          <button class="download" id="download-all" type="button" disabled>Download all saved scenes</button>
 
           <div class="coach">
             <strong>How to get a clean take</strong>
             <ul>
               <li>Speak like you are explaining this to one smart friend.</li>
               <li>Pronounce MRI as three letters: M — R — I.</li>
-              <li>Use the Next Scene button to create a clean editing pause.</li>
-              <li>If you make a mistake, pause, then restart the sentence.</li>
-              <li>Do not stop for small breaths or harmless imperfections.</li>
+              <li>Stop after each scene, listen once, then go to the next scene.</li>
+              <li>If you dislike it, press Redo this scene. Only that clip is replaced.</li>
+              <li>Do not refresh or close this page until you download your clips.</li>
             </ul>
           </div>
         </aside>
       </main>
 
-      <footer>After downloading, attach the take in Codex. The editing, cleanup, scene splitting, captions, and final render will be handled for you.</footer>
+      <footer>When all seven scenes are saved, download them and attach the files in Codex. Cleanup, timing, captions, and the final video edit will be handled for you.</footer>
     </div>
 
     <div class="countdown" id="countdown" hidden><div><span id="countdown-number">3</span><small id="countdown-label">Recording starts</small></div></div>
@@ -375,14 +413,20 @@
       const timer = document.querySelector("#timer");
       const playback = document.querySelector("#playback");
       const download = document.querySelector("#download");
+      const downloadAll = document.querySelector("#download-all");
+      const takeState = document.querySelector("#take-state");
+      const completedCount = document.querySelector("#completed-count");
+      const takeMap = document.querySelector("#take-map");
       const countdown = document.querySelector("#countdown");
       const countdownNumber = document.querySelector("#countdown-number");
       const countdownLabel = document.querySelector("#countdown-label");
 
       let currentScene = 0;
+      const takes = Array(scenes.length).fill(null);
       let stream = null;
       let recorder = null;
       let chunks = [];
+      let preparing = false;
       let audioContext = null;
       let analyser = null;
       let meterFrame = null;
@@ -392,16 +436,74 @@
       let fontSize = 40;
       let recordingMime = "";
 
+      const formatTime = (totalSeconds) => {
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        return `${minutes}:${seconds}`;
+      };
+
+      const showCurrentTake = () => {
+        const take = takes[currentScene];
+        playback.pause();
+        if (!take || preparing || recorder?.state === "recording") {
+          playback.removeAttribute("src");
+          playback.hidden = true;
+          download.hidden = true;
+          return;
+        }
+        playback.src = take.url;
+        playback.hidden = false;
+        download.href = take.url;
+        download.download = take.filename;
+        download.textContent = `Download scene ${currentScene + 1}`;
+        download.hidden = false;
+      };
+
+      const renderTakeMap = () => {
+        const isBusy = preparing || recorder?.state === "recording";
+        takeMap.innerHTML = "";
+        takes.forEach((take, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = index + 1;
+          button.classList.toggle("saved", Boolean(take));
+          button.classList.toggle("current", index === currentScene);
+          button.disabled = isBusy;
+          button.setAttribute("aria-label", `Scene ${index + 1}: ${take ? "take saved" : "not recorded"}`);
+          button.addEventListener("click", () => {
+            currentScene = index;
+            renderScene();
+            if (stream) setStatus(`Ready · Scene ${currentScene + 1}`);
+          });
+          takeMap.append(button);
+        });
+      };
+
       const renderScene = () => {
         const scene = scenes[currentScene];
+        const take = takes[currentScene];
+        const savedCount = takes.filter(Boolean).length;
+        const isRecording = recorder?.state === "recording";
+        const isBusy = preparing || isRecording;
         sceneCount.textContent = `Scene ${currentScene + 1} of ${scenes.length}`;
         sceneHeading.textContent = scene.title;
         script.textContent = scene.script;
         script.style.fontSize = `${fontSize}px`;
         pronunciation.textContent = scene.note;
-        previous.disabled = currentScene === 0;
+        previous.disabled = isBusy || currentScene === 0;
         next.textContent = currentScene === scenes.length - 1 ? "Final scene" : "Next scene";
-        next.disabled = currentScene === scenes.length - 1;
+        next.disabled = isBusy || currentScene === scenes.length - 1;
+        takeState.textContent = take ? `Scene ${currentScene + 1} · Take saved (${formatTime(take.duration)})` : `Scene ${currentScene + 1} · Not recorded`;
+        completedCount.textContent = `${savedCount} / ${scenes.length} saved`;
+        record.textContent = take ? "Redo this scene" : "Record this scene";
+        record.disabled = !stream || isBusy;
+        stop.disabled = !isRecording;
+        enable.disabled = isBusy;
+        device.disabled = isBusy || !stream;
+        downloadAll.disabled = savedCount === 0 || isBusy;
+        downloadAll.textContent = savedCount === scenes.length ? "Download all 7 scenes" : `Download saved scenes (${savedCount})`;
+        renderTakeMap();
+        showCurrentTake();
       };
 
       const setStatus = (text, live = false) => {
@@ -466,6 +568,10 @@
           return;
         }
         if (stream) stream.getTracks().forEach((track) => track.stop());
+        stopMeter();
+        if (audioContext) audioContext.close();
+        audioContext = null;
+        stream = null;
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -478,9 +584,9 @@
           });
           await refreshDevices();
           enable.textContent = "Microphone enabled";
-          record.disabled = false;
           setStatus(`Ready · ${device.options[device.selectedIndex]?.textContent || "microphone connected"}`);
           startMeter();
+          renderScene();
         } catch (error) {
           const reasons = {
             NotAllowedError: "Microphone permission was denied in this browser.",
@@ -489,6 +595,7 @@
             OverconstrainedError: "The selected microphone does not support the requested recording settings.",
           };
           setStatus(reasons[error?.name] || `Could not open the microphone (${error?.name || "unknown error"}).`);
+          renderScene();
         }
       };
 
@@ -504,51 +611,66 @@
 
       const updateTimer = () => {
         const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-        const minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
-        const seconds = String(elapsed % 60).padStart(2, "0");
-        timer.textContent = `${minutes}:${seconds}`;
+        timer.textContent = formatTime(elapsed);
       };
 
       const startRecording = async () => {
-        if (!stream) return;
-        currentScene = 0;
+        if (!stream || preparing || recorder?.state === "recording") return;
+        const sceneIndex = currentScene;
+        const isReplacement = Boolean(takes[sceneIndex]);
+        preparing = true;
         renderScene();
-        await showCountdown(["3", "2", "1"], "Recording starts");
-        chunks = [];
-        recordingMime = chooseMime();
-        recorder = new MediaRecorder(stream, recordingMime ? { mimeType: recordingMime, audioBitsPerSecond: 192000 } : undefined);
-        recorder.addEventListener("dataavailable", (event) => { if (event.data.size) chunks.push(event.data); });
-        recorder.addEventListener("stop", finishRecording, { once: true });
-        recorder.start(250);
-        startedAt = Date.now();
-        updateTimer();
-        timerInterval = setInterval(updateTimer, 250);
-        record.disabled = true;
-        stop.disabled = false;
-        device.disabled = true;
-        enable.disabled = true;
-        playback.hidden = true;
-        download.hidden = true;
-        setStatus("Recording · Scene 1", true);
-        try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {}
+        setStatus(`${isReplacement ? "Redoing" : "Preparing"} scene ${sceneIndex + 1}`);
+        await showCountdown(["3", "2", "1"], `${isReplacement ? "Redo" : "Recording"} scene ${sceneIndex + 1}`);
+        try {
+          chunks = [];
+          recordingMime = chooseMime();
+          recorder = new MediaRecorder(stream, recordingMime ? { mimeType: recordingMime, audioBitsPerSecond: 192000 } : undefined);
+          recorder.addEventListener("dataavailable", (event) => { if (event.data.size) chunks.push(event.data); });
+          recorder.addEventListener("stop", () => finishRecording(sceneIndex, isReplacement), { once: true });
+          recorder.start(250);
+          preparing = false;
+          startedAt = Date.now();
+          updateTimer();
+          timerInterval = setInterval(updateTimer, 250);
+          renderScene();
+          setStatus(`Recording · Scene ${sceneIndex + 1}`, true);
+          try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {}
+        } catch (error) {
+          preparing = false;
+          recorder = null;
+          renderScene();
+          setStatus(`Recording could not start (${error?.name || "unknown error"}). Your saved takes are safe.`);
+        }
       };
 
-      const finishRecording = () => {
+      const finishRecording = (sceneIndex, isReplacement) => {
         clearInterval(timerInterval);
         const blob = new Blob(chunks, { type: recordingMime || "audio/webm" });
+        const duration = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+        if (!blob.size) {
+          recorder = null;
+          renderScene();
+          setStatus("Nothing was recorded. Your previous take is still safe.");
+          wakeLock?.release();
+          wakeLock = null;
+          return;
+        }
         const url = URL.createObjectURL(blob);
         const extension = blob.type.includes("mp4") ? "m4a" : "webm";
         const stamp = new Date().toISOString().replaceAll(":", "-").replaceAll(".", "-");
-        playback.src = url;
-        playback.hidden = false;
-        download.href = url;
-        download.download = `context-mri-voiceover-${stamp}.${extension}`;
-        download.hidden = false;
-        record.disabled = false;
-        stop.disabled = true;
-        device.disabled = false;
-        enable.disabled = false;
-        setStatus("Take ready · listen, then download");
+        const slug = scenes[sceneIndex].title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        if (takes[sceneIndex]?.url) URL.revokeObjectURL(takes[sceneIndex].url);
+        takes[sceneIndex] = {
+          blob,
+          url,
+          duration,
+          filename: `context-mri-scene-${String(sceneIndex + 1).padStart(2, "0")}-${slug}-${stamp}.${extension}`,
+        };
+        recorder = null;
+        timer.textContent = formatTime(duration);
+        renderScene();
+        setStatus(`${isReplacement ? "Replacement" : "Take"} saved · Scene ${sceneIndex + 1}`);
         wakeLock?.release();
         wakeLock = null;
       };
@@ -557,29 +679,46 @@
         if (recorder?.state === "recording") recorder.stop();
       };
 
-      const goToNext = async () => {
-        if (currentScene >= scenes.length - 1) return;
-        if (recorder?.state === "recording") await showCountdown(["2", "1"], "Hold silence for a clean edit");
-        currentScene += 1;
+      const goToScene = (index) => {
+        if (preparing || recorder?.state === "recording" || index < 0 || index >= scenes.length) return;
+        currentScene = index;
         renderScene();
-        if (recorder?.state === "recording") setStatus(`Recording · Scene ${currentScene + 1}`, true);
+        if (stream) setStatus(`Ready · Scene ${currentScene + 1}`);
       };
 
-      previous.addEventListener("click", () => { if (currentScene > 0) { currentScene -= 1; renderScene(); } });
-      next.addEventListener("click", goToNext);
+      const downloadSavedScenes = async () => {
+        const saved = takes.map((take, index) => ({ take, index })).filter(({ take }) => take);
+        if (!saved.length) return;
+        setStatus(`Downloading ${saved.length} saved scene${saved.length === 1 ? "" : "s"}…`);
+        for (const { take } of saved) {
+          const link = document.createElement("a");
+          link.href = take.url;
+          link.download = take.filename;
+          document.body.append(link);
+          link.click();
+          link.remove();
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        }
+        setStatus(`Downloads started · ${saved.length} scene${saved.length === 1 ? "" : "s"}`);
+      };
+
+      previous.addEventListener("click", () => goToScene(currentScene - 1));
+      next.addEventListener("click", () => goToScene(currentScene + 1));
       enable.addEventListener("click", openMicrophone);
       record.addEventListener("click", startRecording);
       stop.addEventListener("click", stopRecording);
+      downloadAll.addEventListener("click", downloadSavedScenes);
       device.addEventListener("change", openMicrophone);
       document.querySelector("#font-down").addEventListener("click", () => { fontSize = Math.max(27, fontSize - 3); renderScene(); });
       document.querySelector("#font-up").addEventListener("click", () => { fontSize = Math.min(58, fontSize + 3); renderScene(); });
       window.addEventListener("keydown", (event) => {
-        if (event.key === "ArrowRight") goToNext();
-        if (event.key === "ArrowLeft" && currentScene > 0) { currentScene -= 1; renderScene(); }
+        if (event.key === "ArrowRight") goToScene(currentScene + 1);
+        if (event.key === "ArrowLeft") goToScene(currentScene - 1);
       });
       window.addEventListener("beforeunload", () => {
         stopMeter();
         stream?.getTracks().forEach((track) => track.stop());
+        takes.forEach((take) => { if (take?.url) URL.revokeObjectURL(take.url); });
       });
 
       renderScene();
