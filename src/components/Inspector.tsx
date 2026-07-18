@@ -27,7 +27,7 @@ export function Inspector({ item, evidence, report, recommendationApplied, onApp
   const isRecommended = report.recommendedContextIds.includes(item.id);
 
   return <aside className="inspector panel">
-    <div className="panel-heading inspector-heading"><div><span>WHY IT MATTERS</span><small>Evidence inspector</small></div><span className={`status-tag ${evidence.status}`}>{evidence.status.toUpperCase()}</span></div>
+    <div className="panel-heading inspector-heading"><div><span>EVIDENCE INSPECTOR</span><small>Why this file matters</small></div><span className={`status-tag ${evidence.status}`}>{evidence.status.toUpperCase()}</span></div>
     <div className="inspector-body">
       <code className="inspector-file">{item.name}</code>
 
@@ -51,7 +51,7 @@ export function Inspector({ item, evidence, report, recommendationApplied, onApp
     </div>
 
     <div className="inspector-actions">
-      {isRecommended ? <div className="keep-decision"><Check size={17} /><span>Included in the recommended pack</span></div> : recommendationApplied ? <button className="secondary-action" onClick={onRestore}><RotateCcw size={16} /> Restore all context</button> : <button className="danger-action" onClick={onApplyRecommendation}><Trash2 size={16} /> Remove from context pack</button>}
+      {isRecommended ? <div className="keep-decision"><Check size={17} /><span>Included in the recommended pack</span></div> : recommendationApplied ? <button className="secondary-action" onClick={onRestore}><RotateCcw size={16} /> Restore all context</button> : <button className="danger-action" onClick={onApplyRecommendation}><Trash2 size={16} /> Remove harmful file</button>}
       {isHarmful ? <button className="secondary-action" onClick={onRewrite}><Sparkles size={16} /> Preview safe rewrite</button> : null}
       <p>Controlled single-item evidence—not a claim of universal causality.</p>
     </div>

@@ -6,7 +6,7 @@ Context MRI is an evidence-first profiler for agent context. It runs a baseline,
 
 The included Build Week example diagnoses an archived API guide that conflicts with the current tool schema. The baseline mean is **43/100**. Removing the stale guide scores **92/100**, and the recommended pack independently verifies at **92/100** with **44% fewer context tokens**.
 
-![Context MRI interface](./design/context-mri-implementation-v2-viewport.png)
+![Context MRI pine-and-cream interface](./design/context-mri-pine-cream-implementation.png)
 
 ## Judge quickstart
 

@@ -152,7 +152,7 @@ export default function App() {
 
     <header className="topbar">
       <div className="brand"><BrandMark /><strong>Context MRI</strong></div>
-      <div className="project-select"><span>Support Agent · API migration</span><ChevronDown size={16} /></div>
+      <div className="project-select"><span><small>Project:</small> Support Agent Diagnostic</span><ChevronDown size={15} /></div>
       <div className="top-actions">
         <button className="export-action" onClick={exportEvidence}><Download size={16} /> Export evidence</button>
         <button className="run-action" onClick={runMRI} disabled={running}>{running ? <Sparkles size={17} /> : <Play size={17} fill="currentColor" />}{running ? stage : 'Run MRI'}</button>
