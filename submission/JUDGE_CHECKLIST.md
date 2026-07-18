@@ -33,6 +33,7 @@
 - Independent deterministic evaluator over endpoint + explanation; no self-reported model grades
 - Unit-tested evaluator, aggregate, classification, and provenance invariants
 - Applied-pack rerun submits the reduced bundle as a separate experiment and captures its report ID
+- Downloadable Context Guard blocks the original stale library, passes the repaired pack, and has a zero-service CI runner that exits nonzero on regression
 
 ### Design
 
@@ -48,6 +49,7 @@
 - Solves context rot and prompt/tool conflict in production agents
 - Gives teams a repeatable alternative to manual prompt archaeology
 - Reduces tokens only when task-specific evidence supports removal
+- Turns one measured finding into a portable regression check, so an obsolete endpoint cannot quietly return in the same task contract
 
 ### Quality of idea
 

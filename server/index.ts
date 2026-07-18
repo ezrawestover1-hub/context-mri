@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import type { ContextItem } from '../src/types.js';
 import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
+import { checkContextGuard, isContextGuard } from './context-guard.js';
 import { fixtureReport, runExperimentSuite } from './experiment-engine.js';
 
 dotenv.config({ path: '.env.local', override: false });
@@ -58,6 +59,17 @@ app.post('/api/fixture', (req, res) => {
   const projectId = req.body?.projectId ?? defaultDiagnosticProject.id;
   if (!validProjectId(projectId)) return res.status(400).json({ error: 'Supply a supported diagnostic project id.' });
   res.json(fixtureReport(req.body.contexts, projectId));
+});
+
+app.post('/api/guard/check', (req, res) => {
+  if (!validContexts(req.body?.contexts)) return res.status(400).json({ error: 'Supply 2–12 valid context items.' });
+  if (!isContextGuard(req.body?.guard)) return res.status(400).json({ error: 'Supply a valid Context Guard created by Context MRI.' });
+  try {
+    res.json(checkContextGuard(req.body.guard, req.body.contexts));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Context Guard check failed.';
+    res.status(400).json({ error: message });
+  }
 });
 
 const port = Number(process.env.PORT || 8787);

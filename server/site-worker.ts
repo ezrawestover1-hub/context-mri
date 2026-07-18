@@ -1,5 +1,6 @@
 import type { ContextItem } from '../src/types.js';
 import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
+import { checkContextGuard, isContextGuard } from './context-guard.js';
 import { fixtureReport } from './experiment-engine.js';
 
 type AssetsBinding = {
@@ -79,6 +80,24 @@ const worker = {
       const projectId = payload?.projectId ?? defaultDiagnosticProject.id;
       if (!validProjectId(projectId)) return json({ error: 'Supply a supported diagnostic project id.' }, 400);
       return json(fixtureReport(contexts, projectId));
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/guard/check') {
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: 'Request body must be valid JSON.' }, 400);
+      }
+      const payload = body as { contexts?: unknown; guard?: unknown } | null;
+      if (!validContexts(payload?.contexts)) return json({ error: 'Supply 2–12 valid context items.' }, 400);
+      if (!isContextGuard(payload?.guard)) return json({ error: 'Supply a valid Context Guard created by Context MRI.' }, 400);
+      try {
+        return json(checkContextGuard(payload.guard, payload.contexts));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Context Guard check failed.';
+        return json({ error: message }, 400);
+      }
     }
 
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found.' }, 404);

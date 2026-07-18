@@ -73,6 +73,40 @@ export interface EvaluationContractSummary {
   legacySourceLabel: string;
 }
 
+/** A portable, task-specific gate created from a completed Context MRI report. */
+export interface ContextGuard {
+  schemaVersion: '1.0';
+  id: string;
+  label: string;
+  createdAt: string;
+  sourceReportId: string;
+  sourceMode: ExperimentMode;
+  projectId: string;
+  task: string;
+  expectedEndpoint: string;
+  minimumScore: number;
+  recommendedContextIds: string[];
+  blockedTerms: string[];
+}
+
+export interface GuardFlaggedFile {
+  contextId: string;
+  name: string;
+  terms: string[];
+}
+
+export interface ContextGuardCheck {
+  status: 'pass' | 'blocked';
+  checkedAt: string;
+  reportId: string;
+  mode: ExperimentMode;
+  score: number;
+  minimumScore: number;
+  expectedEndpoint: string;
+  flaggedFiles: GuardFlaggedFile[];
+  reasons: string[];
+}
+
 export interface ExperimentReport {
   id: string;
   createdAt: string;

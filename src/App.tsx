@@ -2,8 +2,9 @@ import { useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Download, Info, Play, Sparkles } from 'lucide-react';
 import { contexts as initialContexts, seedReport } from './data';
 import { defaultDiagnosticProject, diagnosticProjects, findDiagnosticProject } from './projects';
-import type { ContextItem, ExperimentReport, ExperimentRun } from './types';
+import type { ContextGuard as ContextGuardType, ContextGuardCheck, ContextItem, ExperimentReport, ExperimentRun } from './types';
 import { BrandMark } from './components/BrandMark';
+import { ContextGuard } from './components/ContextGuard';
 import { ContextPack } from './components/ContextPack';
 import { DiagnosisBand } from './components/Explainer';
 import { Inspector } from './components/Inspector';
@@ -11,6 +12,7 @@ import { Inventory } from './components/Inventory';
 import { Matrix } from './components/Matrix';
 import { ProvenanceModal, RewriteModal, TraceModal } from './components/Modals';
 import { BeforeRun, HeroIntro, NextSteps, ResultGuide } from './components/Onboarding';
+import { createContextGuard } from './context-guard';
 
 function downloadJson(filename: string, value: unknown) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }));
@@ -36,6 +38,8 @@ export default function App() {
   const [trace, setTrace] = useState<ExperimentRun | null>(null);
   const [rewriteOpen, setRewriteOpen] = useState(false);
   const [provenanceOpen, setProvenanceOpen] = useState(false);
+  const [guard, setGuard] = useState<ContextGuardType | null>(null);
+  const [guardCheck, setGuardCheck] = useState<ContextGuardCheck | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +53,8 @@ export default function App() {
     setRunning(true);
     setRecommendationApplied(false);
     setAppliedVerification(null);
+    setGuard(null);
+    setGuardCheck(null);
     const stages = ['Testing full context…', 'Removing one item at a time…', 'Repeating each condition…', 'Verifying recommended pack…'];
     let index = 0;
     setStage(stages[0]);
@@ -89,6 +95,8 @@ export default function App() {
     setSelected('legacy');
     setRecommendationApplied(false);
     setAppliedVerification(null);
+    setGuard(null);
+    setGuardCheck(null);
     setStage(`Loading ${project.shortLabel} contract…`);
     void runMRI(false, project.contexts, project.id);
   }
@@ -215,6 +223,60 @@ export default function App() {
     }
   }
 
+  function createGuard() {
+    const nextGuard = createContextGuard(report);
+    setGuard(nextGuard);
+    setGuardCheck(null);
+    setStage(`Context Guard created · blocks ${nextGuard.blockedTerms.join(', ')} · requires ${nextGuard.minimumScore}/100`);
+  }
+
+  async function runGuardCheck(bundle: ContextItem[], label: string) {
+    if (!guard) return;
+    setRunning(true);
+    setGuardCheck(null);
+    setStage(`Checking ${label} against the Context Guard…`);
+    try {
+      const response = await fetch('/api/guard/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guard, contexts: bundle }),
+      });
+      const payload = await response.json() as ContextGuardCheck | { error?: string };
+      if (!response.ok) throw new Error('error' in payload ? payload.error : 'Context Guard check failed');
+      const result = payload as ContextGuardCheck;
+      setGuardCheck(result);
+      setStage(result.status === 'pass'
+        ? `Context Guard passed · ${result.score}/100`
+        : `Context Guard blocked ${label} · ${result.score}/100`);
+    } catch (error) {
+      setStage(error instanceof Error ? `Context Guard failed · ${error.message}` : 'Context Guard failed');
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  function checkRecommendedPack() {
+    const recommended = new Set(report.recommendedContextIds);
+    const packContexts = contexts.filter(context => recommended.has(context.id));
+    if (packContexts.length < 2) {
+      setStage('Context Guard needs at least two files in the recommended pack');
+      return;
+    }
+    void runGuardCheck(packContexts, 'recommended pack');
+  }
+
+  function checkOriginalLibrary() {
+    const original = findDiagnosticProject(projectId)?.contexts;
+    if (!original) return;
+    void runGuardCheck(original, 'original library');
+  }
+
+  function downloadGuard() {
+    if (!guard) return;
+    downloadJson(`${guard.id}.json`, guard);
+    setStage('Context Guard downloaded for CI');
+  }
+
   function openHarmfulRewrite() {
     const harmful = report.contextEvidence.find(item => item.status === 'harmful');
     if (harmful) setSelected(harmful.contextId);
@@ -283,6 +345,17 @@ export default function App() {
     />
 
     <ContextPack contexts={contexts} report={report} applied={recommendationApplied} verification={appliedVerification} onApply={applyRecommendation} onCopy={copyManifest} />
+
+    <ContextGuard
+      guard={guard}
+      check={guardCheck}
+      running={running}
+      legacyEndpoint={report.evaluationContract.legacyEndpoints[0]}
+      onCreate={createGuard}
+      onCheckRecommended={checkRecommendedPack}
+      onCheckOriginal={checkOriginalLibrary}
+      onDownload={downloadGuard}
+    />
 
     <footer className="provenance-bar">
       <div><BrandMark /><span>{report.mode === 'live' ? 'Fresh GPT-5.6 run' : 'Fixture replay'} · inspectable evidence</span><Info size={14} /></div>

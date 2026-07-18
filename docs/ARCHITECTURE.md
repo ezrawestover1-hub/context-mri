@@ -13,6 +13,8 @@ flowchart LR
   G --> H[Recommended context pack]
   H --> I[Three pack-verification runs]
   I --> J[Exportable evidence report]
+  J --> K[Portable Context Guard]
+  K --> L[Deterministic CI check]
 ```
 
 The server is the source of truth for scores, contributions, classifications, token reduction, recommended context IDs, pack verification, and provenance. The React client renders the returned `ExperimentReport`; input labels cannot declare themselves required or harmful.
@@ -84,6 +86,12 @@ When a user clicks **Apply recommended pack**, the client stages the measured co
 
 This is controlled evidence for the tested task distribution. It is not universal causal proof, and single-item experiments can miss interactions.
 
+## Context Guard
+
+A completed report can create a `ContextGuard` JSON artifact. It records the selected contract, report ID and provenance, expected endpoint, observed legacy terms, recommended context IDs, and an `80/100` minimum. `POST /api/guard/check` and `npm run guard:check -- --guard … --context …` independently rebuild the fixture report for the supplied bundle, flag every file containing a blocked term, and return a nonzero exit code if either condition fails.
+
+The guard is deliberately narrow: it protects against the stale instruction and threshold discovered by this diagnostic contract. It is not represented as a universal production guarantee. Teams should run a representative live evaluation suite alongside the deterministic check before relying on it as a release gate.
+
 ## Trace and export contract
 
 Every run records:
@@ -97,7 +105,7 @@ Every run records:
 - model output and recommended endpoint
 - complete rubric breakdown
 
-**Export evidence** downloads the input bundle, decision state, all discovery runs, pack-verification runs, derived classifications, diagnosis, and provenance as JSON.
+**Export evidence** downloads the input bundle, active-pack decision state, all discovery runs, pack-verification runs, derived classifications, diagnosis, and provenance as JSON. The CLI honors the active-pack IDs in an evidence export so a staged recommended pack can be tested directly in CI.
 
 ## Security and privacy
 

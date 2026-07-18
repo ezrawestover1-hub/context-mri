@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { contexts } from '../src/data.js';
 import { diagnosticProjects } from '../src/projects.js';
+import { createContextGuard } from './context-guard.js';
+import { fixtureReport } from './experiment-engine.js';
 import worker, { validContexts } from './site-worker.js';
 
 const noAssets = {
@@ -62,6 +64,22 @@ test('public deployment adapter selects a supported diagnostic contract and reje
     body: JSON.stringify({ contexts, projectId: 'unknown-project' }),
   }), noAssets);
   assert.equal(rejected.status, 400);
+});
+
+test('public deployment adapter checks a downloaded Context Guard without a secret', async () => {
+  const billing = diagnosticProjects.find(project => project.id === 'billing-api-migration')!;
+  const guard = createContextGuard(fixtureReport(billing.contexts, billing.id), '2026-07-18T20:00:00.000Z');
+  const response = await worker.fetch(new Request('https://context-mri.test/api/guard/check', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ guard, contexts: billing.contexts }),
+  }), noAssets);
+  const result = await response.json() as { status: string; score: number; flaggedFiles: Array<{ name: string }> };
+
+  assert.equal(response.status, 200);
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.score, 43);
+  assert.equal(result.flaggedFiles[0].name, 'charges-quickstart.md');
 });
 
 test('public deployment adapter writes an absolute social image URL into HTML', async () => {

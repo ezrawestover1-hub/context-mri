@@ -23,7 +23,8 @@ The hosted demo opens without an account, API key, install, or build step. It in
 3. Compare **Baseline** with **−Legacy API**, then click any matrix score to inspect its evaluation contract, run ID, prompt hash, rubric, tokens, latency, output, and provenance.
 4. Follow **What to do next** to apply the 1,602-token pack or preview a safe rewrite.
 5. Click **Apply recommended pack**, then **Run applied pack to verify**. The app submits only the reduced file set as a second experiment and records a separate verification report ID.
-6. Use **Export evidence** to download the complete JSON ledger.
+6. Create a **Context Guard**, then test the original library (it is blocked) and the recommended pack (it passes).
+7. Use **Download CI guard** and **Export evidence** to download the portable guard and complete JSON ledger.
 
 ### Local development and live GPT-5.6 mode
 
@@ -60,6 +61,28 @@ npm run build
 npm audit --audit-level=high
 curl http://localhost:8787/api/health
 ```
+
+## Stop the regression from returning
+
+After Context MRI identifies a harmful instruction, **Create regression guard** makes a small JSON policy from the report. The guard blocks the observed legacy term and requires the context bundle to score at least `80/100` against the selected task contract. In the hosted demo, **Test original library** visibly fails the guard and **Test recommended pack** passes it.
+
+For CI, download both the guard and an evidence export after applying the recommended pack, then commit them wherever your evaluation artifacts live:
+
+```bash
+npm run guard:check -- \
+  --guard .context-mri/support-agent.guard.json \
+  --context artifacts/context-mri-evidence.json
+```
+
+Try the committed passing artifact first:
+
+```bash
+npm run guard:check -- \
+  --guard samples/context-guard/support-api-migration.guard.json \
+  --context samples/context-guard/support-api-migration-repaired.evidence.json
+```
+
+The command prints an inspectable JSON result and exits `1` if the bundle includes a blocked instruction or falls below the threshold. Evidence exports preserve the active pack decision, so the runner checks the applied pack rather than an unstaged full library. This is a deterministic, task-specific safety rail; production teams should also run representative live evaluations with human-calibrated success criteria.
 
 Optionally, with funded quota, generate a judge-shareable authentic trace artifact:
 
@@ -114,10 +137,13 @@ Positive contribution means removing the file hurts the task. Negative contribut
 
 - `src/projects.ts` — bundled diagnostic-contract registry and source bundles
 - `server/experiment-engine.ts` — contract-aware live runner, fixture replay, evaluator, classification, and pack verification
+- `server/context-guard.ts` — portable regression-guard validation and deterministic CI check
+- `scripts/check-context-guard.ts` — zero-service CI runner for a downloaded guard and evidence export
 - `server/experiment-engine.test.ts` — evaluator, aggregation, classification, custom-context, and provenance invariants
 - `src/components/Matrix.tsx` — ablation matrix, contribution plot, and verification result
 - `src/components/Modals.tsx` — trace provenance, fixture explanation, and safe rewrite
 - `samples/support-agent/` — human-readable demo bundle
+- `samples/context-guard/` — runnable guard plus a repaired evidence export
 - `submission/` — Devpost copy, demo script, and judging checklist
 - `docs/ARCHITECTURE.md` — system design and trust boundaries
 
@@ -131,6 +157,7 @@ The browser app and Node server are platform-independent and have been verified 
 - Single-item ablation can miss interactions between context files.
 - Fixture results are deterministic replays of two bundled scenarios, not fresh GPT‑5.6 traces.
 - The included evaluator is intentionally task-specific; production use needs representative datasets and human-calibrated labels.
+- Context Guard catches the observed legacy terms and score regressions for one contract; it does not replace live production evaluation.
 - Uploaded context is held only in browser memory for the current session.
 
 Dependencies are pinned to exact versions and the committed lockfile is the reproducible installation source.
