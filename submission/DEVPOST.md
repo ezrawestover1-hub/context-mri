@@ -30,7 +30,7 @@ AI agents rarely fail because they lack context. They often fail because they ha
 
 ## What it does
 
-Context MRI takes an agent task and its context bundle, runs a full baseline, then removes one context item at a time. Every condition is repeated and evaluated against the same task-specific rubric. The result is an ablation matrix showing which context raises performance, does nothing, or actively suppresses it.
+Context MRI takes an agent task and its context bundle, runs a full baseline, then removes one context item at a time. Every condition is repeated and evaluated against the same task-specific rubric. The result is an ablation matrix showing which context raises performance, does nothing, or actively suppresses it. The public demo includes two independently configured contracts—Support API migration and Billing API migration—so the method is demonstrated beyond a single hard-coded endpoint story.
 
 In the included demo, an archived guide tells the agent to use `/v1/chat/completions` while the current tool schema says `/v1/responses`. The baseline scores 43. Removing the stale guide scores 92 and improves all three paired repeats. Context MRI identifies the conflict, derives every file classification from those runs, then independently verifies the recommended pack at 92 with 44% fewer context tokens.
 
@@ -38,7 +38,7 @@ In the included demo, an archived guide tells the agent to use `/v1/chat/complet
 
 The product is a React + TypeScript application with a Node/Express experiment server and a Cloudflare-compatible public fixture adapter. The live runner uses the OpenAI Responses API with GPT‑5.6 Sol, medium reasoning, and strict Structured Outputs. The subject returns only an endpoint and explanation; an independent deterministic application evaluator assigns every point for endpoint accuracy, recency reasoning, legacy handling, conflict explanation, and schema validity. The model cannot report its own grades.
 
-Each trace records its run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture simulation. All headline metrics are derived from those records. The default suite contains 18 discovery traces plus three pack-verification traces. Applying the recommended pack and rerunning submits only the reduced file set as a second experiment with its own report ID and traces.
+Each trace records its evaluation contract ID, run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture replay. All headline metrics are derived from those records. Each bundled contract contains 18 discovery traces plus three pack-verification traces, and the project picker swaps the task, context files, legacy/current endpoint assertions, report dataset, and trace ledger together. Public clicks always use the clearly labeled replay; fresh GPT-5.6 generation remains an intentional, separate live-runner action.
 
 Codex accelerated the project from critical idea selection through implementation: official-requirement research, architecture, UI concept generation, API integration, automated tests, mathematical consistency checks, and browser-based interaction and visual QA. In the final Build Week pass, GPT-5.6 Terra in Codex adversarially reviewed the evaluator, fixture claims, and judge flow; that audit removed a false paid-API submission gate and tightened the final evidence narrative.
 
@@ -50,6 +50,7 @@ The hardest problem was epistemic honesty. A beautiful dashboard can make weak e
 
 - A complete, runnable developer product rather than a static proof of concept
 - Twenty-one inspectable traces in the default experiment
+- A reusable evaluation-contract engine demonstrated with two isolated five-file scenarios
 - Mathematically derived contribution and token-reduction claims
 - Independent verification runs for the recommended pack
 - A real apply-and-rerun loop that tests the reduced pack as the new baseline

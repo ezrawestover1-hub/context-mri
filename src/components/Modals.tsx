@@ -27,7 +27,7 @@ export function TraceModal({ run, report, onClose }: { run: ExperimentRun; repor
   return <ModalShell label="Experiment trace" onClose={onClose}>
     <header><div><span>EXPERIMENT TRACE</span><h2>{run.variantLabel} · Run {String(run.repeat).padStart(2, '0')}</h2></div><button onClick={onClose} aria-label="Close trace"><X size={19} /></button></header>
     <div className="trace-summary"><strong className={run.passed ? 'good' : 'bad'}>{run.score}/100</strong><div><b>{run.passed ? 'PASS' : 'BELOW THRESHOLD'}</b><span>{report.provenance.passThreshold}-point pass threshold</span></div><span className={`run-mode ${run.source}`}>{run.source === 'live' ? 'LIVE' : 'FIXTURE REPLAY'}</span></div>
-    <div className="trace-meta"><span><b>Run ID</b><code>{run.id}</code></span><span><b>Prompt hash</b><code>{run.promptHash}</code></span><span><b>Latency</b><code>{run.durationMs} ms</code></span><span><b>Tokens</b><code>{run.inputTokens} in · {run.outputTokens} out</code></span></div>
+    <div className="trace-meta"><span><b>Evaluation contract</b><code>{report.evaluationContract.id}</code></span><span><b>Run ID</b><code>{run.id}</code></span><span><b>Prompt hash</b><code>{run.promptHash}</code></span><span><b>Latency</b><code>{run.durationMs} ms</code></span><span><b>Tokens</b><code>{run.inputTokens} in · {run.outputTokens} out</code></span></div>
     <h3>RUBRIC BREAKDOWN</h3>
     <div className="rubric">{Object.entries(run.breakdown).map(([key, value]) => <div className="rubric-row" key={key}><span>{criterionLabels[key]}</span><i><b style={{ width: `${value / criterionMax[key] * 100}%` }} /></i><code>{value}/{criterionMax[key]}</code></div>)}</div>
     <h3>MODEL OUTPUT</h3><pre className="model-output">{run.output}</pre>
@@ -35,11 +35,11 @@ export function TraceModal({ run, report, onClose }: { run: ExperimentRun; repor
   </ModalShell>;
 }
 
-export function RewriteModal({ fileName, onClose, onApply }: { fileName: string; onClose: () => void; onApply: () => void }) {
+export function RewriteModal({ fileName, legacyEndpoint, currentEndpoint, currentSourceLabel, onClose, onApply }: { fileName: string; legacyEndpoint: string; currentEndpoint: string; currentSourceLabel: string; onClose: () => void; onApply: () => void }) {
   return <ModalShell label="Suggested rewrite" onClose={onClose}>
     <header><div><span>SUGGESTED REWRITE</span><h2>Repair {fileName}</h2></div><button onClick={onClose} aria-label="Close rewrite"><X size={19} /></button></header>
     <p className="modal-intro">Preserve the useful migration note while replacing the stale endpoint and recording the current source.</p>
-    <div className="diff"><code className="removed">− Use POST /v1/chat/completions</code><code className="added">+ Use POST /v1/responses</code><code className="added">+ Source: current tool schema</code></div>
+    <div className="diff"><code className="removed">− Use POST {legacyEndpoint}</code><code className="added">+ Use POST {currentEndpoint}</code><code className="added">+ Source: {currentSourceLabel}</code></div>
     <footer><span>The rewrite must be re-tested before it is trusted.</span><button className="apply-rewrite" onClick={onApply}><Check size={15} /> Stage rewrite</button></footer>
   </ModalShell>;
 }
@@ -49,7 +49,7 @@ export function ProvenanceModal({ report, onClose }: { report: ExperimentReport;
     <header><div><span>EVIDENCE PROVENANCE</span><h2>What “fixture replay” means</h2></div><button onClick={onClose} aria-label="Close explanation"><X size={19} /></button></header>
     <div className="provenance-copy">
       <Info size={24} />
-      <p>This public screen intentionally uses a deterministic simulation of the bundled support-agent example. It exercises the same ablation, classification, trace, pack-verification, and export pipeline—but it is <strong>not presented as fresh GPT-5.6 evidence.</strong></p>
+      <p>This public screen intentionally uses a deterministic simulation of the bundled {report.evaluationContract.label} example. It exercises the same ablation, classification, trace, pack-verification, and export pipeline—but it is <strong>not presented as fresh GPT-5.6 evidence.</strong></p>
       <p>With API quota, Context MRI can replace these records with {report.totalRuns} inspectable model traces and keep the same independent evaluator. The subject model never supplies its own grading fields.</p>
     </div>
     <footer><span>{report.provenance.fixtureNote}</span><button className="apply-rewrite" onClick={onClose}>Understood</button></footer>

@@ -1,4 +1,5 @@
 import type { ContextItem } from '../src/types.js';
+import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
 import { fixtureReport } from './experiment-engine.js';
 
 type AssetsBinding = {
@@ -43,6 +44,10 @@ export function validContexts(value: unknown): value is ContextItem[] {
   });
 }
 
+function validProjectId(value: unknown): value is DiagnosticProjectId {
+  return Boolean(findDiagnosticProject(value));
+}
+
 const worker = {
   async fetch(request: Request, env: SiteEnvironment): Promise<Response> {
     const url = new URL(request.url);
@@ -68,9 +73,12 @@ const worker = {
       } catch {
         return json({ error: 'Request body must be valid JSON.' }, 400);
       }
-      const contexts = (body as { contexts?: unknown } | null)?.contexts;
+      const payload = body as { contexts?: unknown; projectId?: unknown } | null;
+      const contexts = payload?.contexts;
       if (!validContexts(contexts)) return json({ error: 'Supply 2–12 valid context items.' }, 400);
-      return json(fixtureReport(contexts));
+      const projectId = payload?.projectId ?? defaultDiagnosticProject.id;
+      if (!validProjectId(projectId)) return json({ error: 'Supply a supported diagnostic project id.' }, 400);
+      return json(fixtureReport(contexts, projectId));
     }
 
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found.' }, 404);

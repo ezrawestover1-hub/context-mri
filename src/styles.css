@@ -81,7 +81,10 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
   font-size: 13px;
   color: #ece8dc;
 }
-.project-select small { margin-right: 5px; color: #aebeb6; font-size: 11px; }
+.project-select small { color: #aebeb6; font-size: 11px; white-space: nowrap; }
+.project-select select { min-width: 176px; padding: 5px 22px 5px 0; color: #ece8dc; background: transparent; border: 0; outline: 0; font: inherit; font-weight: 650; cursor: pointer; }
+.project-select select:disabled { opacity: .7; cursor: progress; }
+.project-select option { color: var(--ink); background: var(--paper); }
 .top-actions { margin-left: auto; display: flex; gap: 12px; position: relative; z-index: 1; }
 .how-link {
   min-height: 42px;

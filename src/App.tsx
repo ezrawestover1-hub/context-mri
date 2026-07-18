@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
-import { CheckCircle2, ChevronDown, Download, Info, Play, Sparkles } from 'lucide-react';
+import { CheckCircle2, Download, Info, Play, Sparkles } from 'lucide-react';
 import { contexts as initialContexts, seedReport } from './data';
+import { defaultDiagnosticProject, diagnosticProjects, findDiagnosticProject } from './projects';
 import type { ContextItem, ExperimentReport, ExperimentRun } from './types';
 import { BrandMark } from './components/BrandMark';
 import { ContextPack } from './components/ContextPack';
@@ -25,6 +26,7 @@ function downloadJson(filename: string, value: unknown) {
 
 export default function App() {
   const [contexts, setContexts] = useState<ContextItem[]>(initialContexts);
+  const [projectId, setProjectId] = useState(defaultDiagnosticProject.id);
   const [report, setReport] = useState<ExperimentReport>(seedReport);
   const [selected, setSelected] = useState('legacy');
   const [running, setRunning] = useState(false);
@@ -43,7 +45,7 @@ export default function App() {
   );
   const selectedEvidence = report.contextEvidence.find(item => item.contextId === selectedItem?.id);
 
-  async function runMRI(scrollToResults = false) {
+  async function runMRI(scrollToResults = false, runContexts = contexts, runProjectId = projectId) {
     setRunning(true);
     setRecommendationApplied(false);
     setAppliedVerification(null);
@@ -56,16 +58,19 @@ export default function App() {
     }, 750);
 
     try {
-      const response = await fetch('/api/experiments', {
+      // The judge-facing workflow is always a deterministic replay. Fresh model
+      // evidence is generated deliberately through the separate live runner,
+      // never as a surprise side effect of a public-demo click.
+      const response = await fetch('/api/fixture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contexts }),
+        body: JSON.stringify({ contexts: runContexts, projectId: runProjectId }),
       });
       if (!response.ok) throw new Error((await response.json()).error || 'Experiment suite failed');
       const nextReport = await response.json() as ExperimentReport;
       const mostHarmful = [...nextReport.contextEvidence].sort((a, b) => a.contribution - b.contribution)[0];
       setReport(nextReport);
-      setSelected(mostHarmful?.contextId ?? contexts[0].id);
+      setSelected(mostHarmful?.contextId ?? runContexts[0].id);
       setStage(nextReport.mode === 'live' ? 'Complete · fresh GPT-5.6 evidence' : 'Complete · fixture replay');
       if (scrollToResults) window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
     } catch (error) {
@@ -74,6 +79,18 @@ export default function App() {
       window.clearInterval(timer);
       setRunning(false);
     }
+  }
+
+  function switchProject(nextProjectId: string) {
+    const project = findDiagnosticProject(nextProjectId);
+    if (!project || project.id === projectId) return;
+    setProjectId(project.id);
+    setContexts(project.contexts);
+    setSelected('legacy');
+    setRecommendationApplied(false);
+    setAppliedVerification(null);
+    setStage(`Loading ${project.shortLabel} contract…`);
+    void runMRI(false, project.contexts, project.id);
   }
 
   function exportEvidence() {
@@ -142,11 +159,13 @@ export default function App() {
   }
 
   function applyRewrite() {
+    const legacyEndpoint = report.evaluationContract.legacyEndpoints[0];
+    const currentEndpoint = report.evaluationContract.expectedEndpoint;
     setContexts(current => current.map(context => context.id === selected
       ? {
           ...context,
           content: context.content
-            .replaceAll('/v1/chat/completions', '/v1/responses')
+            .replaceAll(legacyEndpoint, currentEndpoint)
             .replace(/\(archived\)/gi, '(current)')
             .replace(/archived/gi, 'current'),
         }
@@ -180,10 +199,10 @@ export default function App() {
     setRunning(true);
     setStage('Rerunning with only the applied pack…');
     try {
-      const response = await fetch('/api/experiments', {
+      const response = await fetch('/api/fixture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contexts: packContexts }),
+        body: JSON.stringify({ contexts: packContexts, projectId }),
       });
       if (!response.ok) throw new Error((await response.json()).error || 'Applied-pack verification failed');
       const verification = await response.json() as ExperimentReport;
@@ -220,7 +239,9 @@ export default function App() {
 
     <header className="topbar">
       <div className="brand"><BrandMark /><strong>Context MRI</strong></div>
-      <div className="project-select"><span><small>Project:</small> Support Agent Diagnostic</span><ChevronDown size={15} /></div>
+      <label className="project-select"><small>Project:</small><select value={projectId} onChange={event => switchProject(event.target.value)} disabled={running} aria-label="Diagnostic project">
+        {diagnosticProjects.map(project => <option key={project.id} value={project.id}>{project.label}</option>)}
+      </select></label>
       <div className="top-actions">
         <a className="how-link" href="#before-run">How it works</a>
         <button className="export-action" onClick={exportEvidence}><Download size={16} /> Export evidence</button>
@@ -228,8 +249,8 @@ export default function App() {
       </div>
     </header>
 
-    <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} />
-    <BeforeRun />
+    <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} task={report.evaluationContract.task} />
+    <BeforeRun contract={report.evaluationContract} />
 
     <div className="results-anchor" ref={resultsRef}>
       <DiagnosisBand report={report} />
@@ -271,7 +292,7 @@ export default function App() {
 
     <div className="status-line" role="status" aria-live="polite">{stage}</div>
     {trace ? <TraceModal run={trace} report={report} onClose={() => setTrace(null)} /> : null}
-    {rewriteOpen && selectedItem ? <RewriteModal fileName={selectedItem.name} onClose={() => setRewriteOpen(false)} onApply={applyRewrite} /> : null}
+    {rewriteOpen && selectedItem ? <RewriteModal fileName={selectedItem.name} legacyEndpoint={report.evaluationContract.legacyEndpoints[0]} currentEndpoint={report.evaluationContract.expectedEndpoint} currentSourceLabel={report.evaluationContract.currentSourceLabel} onClose={() => setRewriteOpen(false)} onApply={applyRewrite} /> : null}
     {provenanceOpen ? <ProvenanceModal report={report} onClose={() => setProvenanceOpen(false)} /> : null}
   </main>;
 }

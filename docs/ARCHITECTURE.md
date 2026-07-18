@@ -17,6 +17,15 @@ flowchart LR
 
 The server is the source of truth for scores, contributions, classifications, token reduction, recommended context IDs, pack verification, and provenance. The React client renders the returned `ExperimentReport`; input labels cannot declare themselves required or harmful.
 
+## Diagnostic contracts
+
+`src/projects.ts` is a small contract registry, not a presentation-only scenario picker. A contract supplies the task, source bundle, expected endpoint, legacy endpoint set, source labels, and dataset ID used by the fixture generator and live evaluator. The shipped contracts are:
+
+- `support-api-migration`: `/v1/responses` versus archived `/v1/chat/completions`
+- `billing-api-migration`: `/v2/invoices` versus archived `/v1/charges`
+
+Every report embeds an `evaluationContract` summary. The trace inspector exposes that ID, and tests prove a billing answer that earns a perfect billing score fails the support endpoint rule. This prevents a scenario switch from being a cosmetic copy change.
+
 ## Live mode
 
 `POST /api/experiments` validates a bundle of 2–12 context items. For the bundled five-file example it creates six discovery conditions and runs each three times. It then derives a recommended pack and runs that pack three additional times: 21 calls total.
@@ -33,7 +42,7 @@ The probe prevents a missing-quota project from firing a full suite of doomed re
 
 ## Fixture-simulation mode
 
-If no key is configured or the API reports quota exhaustion, the server returns a deterministic and explicitly labeled simulation of the bundled support-agent scenario. The simulation responds to added or rewritten context content, but it is not a substitute for fresh model evidence on custom data.
+`POST /api/fixture` always returns a deterministic and explicitly labeled replay for the selected contract. The public React workflow uses this endpoint even if a local key happens to exist, so a judge click cannot silently consume API budget or change the public evidence claim. `POST /api/experiments` uses the live runner only when invoked deliberately with a configured key, falling back to the selected fixture contract on quota exhaustion. Fixture replay responds to added or rewritten context content, but it is not a substitute for fresh model evidence on custom data.
 
 Both modes use the same:
 
@@ -82,7 +91,7 @@ Every run records:
 - run and variant IDs
 - omitted or included context IDs
 - repeat number and pass/fail state
-- model or fixture provenance
+- model or fixture provenance and evaluation contract ID
 - prompt hash
 - input/output tokens and latency
 - model output and recommended endpoint

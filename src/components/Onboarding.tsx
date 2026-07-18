@@ -1,14 +1,15 @@
 import { ArrowDown, ArrowRight, Check, FileJson, FileText, Play, RefreshCw, Sparkles, Upload } from 'lucide-react';
-import type { ExperimentReport } from '../types';
+import type { EvaluationContractSummary, ExperimentReport } from '../types';
 
 type HeroIntroProps = {
   running: boolean;
   stage: string;
   onRun: () => void;
   onAddContext: () => void;
+  task: string;
 };
 
-export function HeroIntro({ running, stage, onRun, onAddContext }: HeroIntroProps) {
+export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroIntroProps) {
   return <section className="hero-intro" aria-labelledby="hero-title">
     <div className="hero-copy">
       <h1 id="hero-title">Find the one file making your agent worse.</h1>
@@ -25,7 +26,7 @@ export function HeroIntro({ running, stage, onRun, onAddContext }: HeroIntroProp
 
     <div className="workflow-preview" aria-label="Context MRI input, experiment, and output">
       <WorkflowPanel title="Task + context files">
-        <code className="workflow-task">Answer a support question<br />using the current API</code>
+        <code className="workflow-task">{task}</code>
         <div className="workflow-files">
           <span><FileText size={15} /> system-prompt.md</span>
           <span><FileJson size={15} /> tool-schema.json</span>
@@ -55,21 +56,21 @@ function WorkflowPanel({ title, children }: { title: string; children: React.Rea
   return <div className="workflow-panel"><h2>{title}</h2><div>{children}</div></div>;
 }
 
-export function BeforeRun() {
+export function BeforeRun({ contract }: { contract: EvaluationContractSummary }) {
   return <section className="before-run" id="before-run" aria-labelledby="before-run-title">
     <div className="section-heading">
       <h2 id="before-run-title">Before you run</h2>
       <p>The included experiment is already loaded. These are the three things every useful context test needs.</p>
     </div>
     <ol className="input-guide">
-      <li><span>1</span><div><h3>Define the task</h3><p>“Which API endpoint should a support agent recommend when the sources conflict?”</p></div></li>
+      <li><span>1</span><div><h3>Define the task</h3><p>“{contract.task}”</p></div></li>
       <li><span>2</span><div><h3>Add the context</h3><p>The <code>.md</code>, <code>.json</code>, or <code>.txt</code> files your agent reads before answering.</p></div></li>
-      <li><span>3</span><div><h3>Know what success means</h3><p>The independent evaluator checks the returned endpoint and explanation for source recency, legacy risk, conflict handling, and schema validity.</p></div></li>
+      <li><span>3</span><div><h3>Know what success means</h3><p>The independent <code>{contract.id}</code> evaluator checks the returned endpoint and explanation for source recency, legacy risk, conflict handling, and schema validity.</p></div></li>
     </ol>
     <div className="loaded-note"><Check size={18} /><span><strong>Ready now:</strong> a completed sample result is shown below. Run the example to watch Context MRI rebuild it from the loaded task, five files, and scoring rubric.</span></div>
     <div className="upload-guidance">
       <strong>Using your own files?</strong>
-      <span>Add up to seven <code>.md</code>, <code>.json</code>, or <code>.txt</code> files, each under 20,000 characters. They stay in this browser tab. The public demo measures them against the included support task so every comparison uses the same success criteria.</span>
+      <span>Add up to seven <code>.md</code>, <code>.json</code>, or <code>.txt</code> files, each under 20,000 characters. They stay in this browser tab. The public demo measures them against the selected bundled contract so every comparison uses the same success criteria.</span>
     </div>
   </section>;
 }

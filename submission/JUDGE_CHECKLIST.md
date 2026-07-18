@@ -27,6 +27,8 @@
 - Strict Structured Outputs
 - Concurrency-limited 18-run discovery suite with one-call quota probe
 - Three independent recommended-pack verification runs (21 traces total)
+- Reusable, contract-driven evaluator proven across isolated Support and Billing migrations
+- Public replay endpoint deliberately separated from the optional live runner, so judge clicks are deterministic and cannot consume a configured key
 - Evidence-derived file classifications and context pack
 - Independent deterministic evaluator over endpoint + explanation; no self-reported model grades
 - Unit-tested evaluator, aggregate, classification, and provenance invariants

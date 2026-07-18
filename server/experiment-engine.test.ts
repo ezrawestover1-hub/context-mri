@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { contexts } from '../src/data.js';
+import { diagnosticProjects } from '../src/projects.js';
 import { fixtureReport, scoreAnswer } from './experiment-engine.js';
 
 test('scores a fully correct structured answer at 100', () => {
@@ -115,4 +116,30 @@ test('every aggregate run remains inspectable with provenance and a rubric', () 
   assert.ok(runs.every(run => run.breakdown.recencyReasoning === 0 || run.breakdown.recencyReasoning === 20));
   assert.ok(runs.every(run => run.breakdown.legacyRejection === 0 || run.breakdown.legacyRejection === 15));
   assert.ok(runs.every(run => run.breakdown.conflictExplanation === 0 || run.breakdown.conflictExplanation === 10));
+});
+
+test('evaluates a second diagnostic contract without inheriting the support endpoint rules', () => {
+  const billing = diagnosticProjects.find(project => project.id === 'billing-api-migration')!;
+  const answer = {
+    recommendedEndpoint: '/v2/invoices',
+    explanation: 'The current machine-readable invoice schema specifies /v2/invoices. The archived /v1/charges guide conflicts with it and should not be used.',
+  };
+
+  assert.equal(scoreAnswer(answer, billing).score, 100);
+  assert.equal(scoreAnswer(answer).breakdown.endpointAccuracy, 0);
+});
+
+test('runs a complete, isolated billing diagnostic with its own evidence contract', () => {
+  const billing = diagnosticProjects.find(project => project.id === 'billing-api-migration')!;
+  const report = fixtureReport(billing.contexts, billing.id);
+  const harmful = report.contextEvidence.find(item => item.status === 'harmful')!;
+
+  assert.equal(report.evaluationContract.id, billing.id);
+  assert.equal(report.evaluationContract.expectedEndpoint, '/v2/invoices');
+  assert.equal(report.provenance.dataset, 'billing-api-migration-v1');
+  assert.equal(report.totalRuns, 21);
+  assert.equal(report.baselineScore, 43);
+  assert.equal(report.optimizedScore, 92);
+  assert.equal(harmful.name, 'charges-quickstart.md');
+  assert.equal(harmful.status, 'harmful');
 });

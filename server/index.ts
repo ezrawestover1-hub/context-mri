@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import type { ContextItem } from '../src/types.js';
+import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
 import { fixtureReport, runExperimentSuite } from './experiment-engine.js';
 
 dotenv.config({ path: '.env.local', override: false });
@@ -27,6 +28,10 @@ function validContexts(value: unknown): value is ContextItem[] {
   });
 }
 
+function validProjectId(value: unknown): value is DiagnosticProjectId {
+  return Boolean(findDiagnosticProject(value));
+}
+
 app.get('/api/health', (_req, res) => res.json({
   ok: true,
   model: 'gpt-5.6-sol',
@@ -36,8 +41,10 @@ app.get('/api/health', (_req, res) => res.json({
 
 app.post('/api/experiments', async (req, res) => {
   if (!validContexts(req.body?.contexts)) return res.status(400).json({ error: 'Supply 2–12 valid context items.' });
+  const projectId = req.body?.projectId ?? defaultDiagnosticProject.id;
+  if (!validProjectId(projectId)) return res.status(400).json({ error: 'Supply a supported diagnostic project id.' });
   try {
-    const report = await runExperimentSuite(req.body.contexts, process.env.OPENAI_API_KEY);
+    const report = await runExperimentSuite(req.body.contexts, process.env.OPENAI_API_KEY, projectId);
     res.json(report);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown experiment error';
@@ -48,7 +55,9 @@ app.post('/api/experiments', async (req, res) => {
 
 app.post('/api/fixture', (req, res) => {
   if (!validContexts(req.body?.contexts)) return res.status(400).json({ error: 'Supply 2–12 valid context items.' });
-  res.json(fixtureReport(req.body.contexts));
+  const projectId = req.body?.projectId ?? defaultDiagnosticProject.id;
+  if (!validProjectId(projectId)) return res.status(400).json({ error: 'Supply a supported diagnostic project id.' });
+  res.json(fixtureReport(req.body.contexts, projectId));
 });
 
 const port = Number(process.env.PORT || 8787);

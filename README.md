@@ -4,7 +4,7 @@
 
 Context MRI is an evidence-first profiler for agent context. It runs a baseline, removes one context item at a time, repeats each condition, classifies every file from the measured score change, and verifies the recommended context pack with a final independent run.
 
-The included Build Week example diagnoses an archived API guide that conflicts with the current tool schema. The baseline mean is **43/100**. Removing the stale guide scores **92/100**, and the recommended pack independently verifies at **92/100** with **44% fewer context tokens**.
+Context MRI ships with two selectable, bundled diagnostic contracts: a support-agent API migration and a billing-agent invoice migration. Each contract has its own task, source bundle, current endpoint, legacy endpoint, deterministic evaluator inputs, and 21-trace replay. The default support example diagnoses an archived API guide that conflicts with the current tool schema: its baseline mean is **43/100**; removing the stale guide scores **92/100**; and the recommended pack independently verifies at **92/100** with **44% fewer context tokens**.
 
 ![Context MRI guided pine-and-cream interface](./design/context-mri-guided-implementation.png)
 
@@ -18,9 +18,9 @@ The hosted demo opens without an account, API key, install, or build step. It in
 
 ### Fastest path: public demo
 
-1. Read the input → experiment → action preview, then click **Run the included example**.
+1. Choose **Support Agent Diagnostic** or **Billing Agent Diagnostic** in the project picker, then click **Run the included example**.
 2. The app automatically moves to the diagnosis and explains what each result label means.
-3. Compare **Baseline** with **−Legacy API**, then click any matrix score to inspect its run ID, prompt hash, rubric, tokens, latency, output, and provenance.
+3. Compare **Baseline** with **−Legacy API**, then click any matrix score to inspect its evaluation contract, run ID, prompt hash, rubric, tokens, latency, output, and provenance.
 4. Follow **What to do next** to apply the 1,602-token pack or preview a safe rewrite.
 5. Click **Apply recommended pack**, then **Run applied pack to verify**. The app submits only the reduced file set as a second experiment and records a separate verification report ID.
 6. Use **Export evidence** to download the complete JSON ledger.
@@ -44,13 +44,13 @@ Open [http://localhost:5173](http://localhost:5173), then:
 6. Run the applied pack as a new baseline. The second report proves which files were actually tested instead of treating a UI state change as verification.
 7. Use **Export evidence** to download the complete JSON ledger.
 
-No API quota is required to judge the complete interface and workflow. Without quota, the server uses a clearly labeled deterministic **fixture simulation** of the bundled support-agent example. It is never represented as fresh model evidence. With a funded `OPENAI_API_KEY` in `.env.local`, the same endpoint automatically generates fresh GPT‑5.6 Sol traces instead.
+No API quota is required to judge the complete interface and workflow. Every public-demo click intentionally uses a clearly labeled deterministic **fixture replay** of the selected bundled contract; it is never represented as fresh model evidence or allowed to consume a key by surprise. With a funded `OPENAI_API_KEY` in `.env.local`, the separate live runner can generate fresh GPT‑5.6 Sol traces for the same contract.
 
 ```dotenv
 OPENAI_API_KEY=your_key_here
 ```
 
-Up to seven additional `.md`, `.json`, and `.txt` files can be added at once from the interface (20,000 characters maximum per file). Files stay in browser memory and the public demo measures them against the included support task and fixed success criteria. Fixture mode exercises the dynamic variant, classification, trace, pack, and export pipeline; fresh claims about custom content require live API quota.
+Up to seven additional `.md`, `.json`, and `.txt` files can be added at once from the interface (20,000 characters maximum per file). Files stay in browser memory and the public demo measures them against the selected bundled contract and fixed success criteria. Fixture mode exercises the dynamic variant, classification, trace, pack, and export pipeline; fresh claims about custom content require live API quota.
 
 ## Verification
 
@@ -71,7 +71,7 @@ This optional command requires live GPT-5.6 Sol responses and writes `public/evi
 
 ## How the experiment works
 
-For the five-item demo, Context MRI creates six discovery conditions: the full baseline plus one condition omitting each item. It runs each condition three times for **18 ablation traces**. It then builds a recommended pack from measured contribution and runs that pack three more times, producing **21 inspectable traces** total.
+For either five-item bundled contract, Context MRI creates six discovery conditions: the full baseline plus one condition omitting each item. It runs each condition three times for **18 ablation traces**. It then builds a recommended pack from measured contribution and runs that pack three more times, producing **21 inspectable traces** total. Switching the project changes the task, sources, expected and legacy endpoints, evaluator contract ID, report dataset, and all 21 trace records.
 
 Each model output contains only a recommended endpoint and explanation. Independent application code—not model-reported grading fields—scores it from 0–100 using a fixed rubric:
 
@@ -112,7 +112,8 @@ Positive contribution means removing the file hurts the task. Negative contribut
 
 ## Repository map
 
-- `server/experiment-engine.ts` — live runner, fixture simulation, evaluator, classification, and pack verification
+- `src/projects.ts` — bundled diagnostic-contract registry and source bundles
+- `server/experiment-engine.ts` — contract-aware live runner, fixture replay, evaluator, classification, and pack verification
 - `server/experiment-engine.test.ts` — evaluator, aggregation, classification, custom-context, and provenance invariants
 - `src/components/Matrix.tsx` — ablation matrix, contribution plot, and verification result
 - `src/components/Modals.tsx` — trace provenance, fixture explanation, and safe rewrite
@@ -128,7 +129,7 @@ The browser app and Node server are platform-independent and have been verified 
 
 - Three repeats establish directional stability for this demo, not statistical certainty.
 - Single-item ablation can miss interactions between context files.
-- Fixture results are a deterministic simulation of the bundled scenario, not fresh GPT‑5.6 traces.
+- Fixture results are deterministic replays of two bundled scenarios, not fresh GPT‑5.6 traces.
 - The included evaluator is intentionally task-specific; production use needs representative datasets and human-calibrated labels.
 - Uploaded context is held only in browser memory for the current session.
 

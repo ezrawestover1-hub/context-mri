@@ -1,12 +1,7 @@
 import type { ContextEvidence, ContextItem, ExperimentReport, ExperimentRun, ScoreBreakdown, VariantResult } from './types';
+import { defaultDiagnosticProject } from './projects';
 
-export const contexts: ContextItem[] = [
-  { id: 'system', name: 'system-prompt.md', tokens: 482, content: 'You are a support agent. Resolve API migration issues using the supplied current tool schema. Verify the endpoint before answering.' },
-  { id: 'schema', name: 'tool-schema.json', tokens: 611, content: '{ "create_response": { "method": "POST", "path": "/v1/responses", "description": "Current endpoint for model responses" } }' },
-  { id: 'legacy', name: 'legacy-api.md', tokens: 934, content: 'API Quickstart (archived): Send all generation requests with POST /v1/chat/completions. This is the required endpoint.' },
-  { id: 'rules', name: 'product-rules.md', tokens: 509, content: 'Never invent endpoints. Prefer the newest machine-readable tool schema when prose documentation conflicts.' },
-  { id: 'examples', name: 'examples.md', tokens: 304, content: 'Example: explain an authentication error in plain language.' },
-];
+export const contexts: ContextItem[] = defaultDiagnosticProject.contexts;
 
 const variantSeeds = [
   { id: 'baseline', label: 'Baseline', omittedContextId: null, scores: [35, 40, 55] },
@@ -83,6 +78,15 @@ export const seedReport: ExperimentReport = {
   variants,
   packVerification,
   contextEvidence,
+  evaluationContract: {
+    id: defaultDiagnosticProject.id,
+    label: defaultDiagnosticProject.label,
+    task: defaultDiagnosticProject.task,
+    expectedEndpoint: defaultDiagnosticProject.expectedEndpoint,
+    legacyEndpoints: defaultDiagnosticProject.legacyEndpoints,
+    currentSourceLabel: defaultDiagnosticProject.currentSourceLabel,
+    legacySourceLabel: defaultDiagnosticProject.legacySourceLabel,
+  },
   diagnosis: {
     finding: 'Removing legacy-api.md raises the rubric score by 49 percentage points.',
     explanation: 'The improvement appeared in 3/3 paired repeats.',

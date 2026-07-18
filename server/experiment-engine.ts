@@ -9,10 +9,17 @@ import type {
   ScoreBreakdown,
   VariantResult,
 } from '../src/types.js';
+import {
+  defaultDiagnosticProject,
+  findDiagnosticProject,
+  type DiagnosticProjectId,
+  type EvaluationContract,
+} from '../src/projects.js';
 
 const MODEL = 'gpt-5.6-sol';
 const REPEATS = 3;
 const PASS_THRESHOLD = 80;
+const DEFAULT_CONTRACT = defaultDiagnosticProject;
 
 type AgentAnswer = {
   recommendedEndpoint: string;
@@ -69,10 +76,16 @@ function normalizeEvidenceText(value: string) {
   return value.toLowerCase().replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
 }
 
-function evaluateExplanation(explanation: string) {
+function includesAny(value: string, terms: string[]) {
+  return terms.some(term => value.includes(term.toLowerCase()));
+}
+
+function evaluateExplanation(explanation: string, contract: EvaluationContract) {
   const normalized = normalizeEvidenceText(explanation);
   const statements = normalized.split(/[.!?;]+/).map(statement => statement.trim()).filter(Boolean);
-  const mentionsCurrentAnywhere = normalized.includes('/v1/responses') || normalized.includes('responses api');
+  const expectedEndpoint = contract.expectedEndpoint.toLowerCase();
+  const legacyEndpoints = contract.legacyEndpoints.map(endpoint => endpoint.toLowerCase());
+  const mentionsCurrentAnywhere = normalized.includes(expectedEndpoint);
   const identifiesCurrentSource = statements.some(statement => {
     const hasRecency = /\b(current|latest|newest|source of truth)\b/.test(statement);
     const hasSchema = /\b(schema|machine-readable|tool definition|tool spec|tool specification)\b/.test(statement);
@@ -81,7 +94,7 @@ function evaluateExplanation(explanation: string) {
     return hasRecency && hasSchema && hasPositiveRelation && !negatesClaim;
   });
   const rejectsLegacySource = statements.some(statement => {
-    const mentionsLegacyEndpoint = statement.includes('/v1/chat/completions') || statement.includes('chat completions');
+    const mentionsLegacyEndpoint = includesAny(statement, legacyEndpoints);
     const labelsLegacy = /\b(?:is|was|appears|looks)\s+(?:like\s+|to\s+be\s+)?(?:an?\s+)?(?:archived|legacy|obsolete|stale|deprecated|outdated)\b/.test(statement) ||
       /\b(?:archived|legacy|obsolete|stale|deprecated|outdated)\s+[^.]*\b(?:guide|instruction|endpoint|source)\b/.test(statement);
     const rejectsUse = /\b(?:should not|do not|must not|cannot)\s+(?:be\s+)?used?\b/.test(statement) ||
@@ -90,8 +103,8 @@ function evaluateExplanation(explanation: string) {
     return mentionsLegacyEndpoint && (labelsLegacy || rejectsUse) && !negatesLegacy;
   });
   const explainsConflict = statements.some(statement => {
-    const mentionsCurrentEndpoint = statement.includes('/v1/responses') || statement.includes('responses api');
-    const mentionsLegacyEndpoint = statement.includes('/v1/chat/completions') || statement.includes('chat completions');
+    const mentionsCurrentEndpoint = statement.includes(expectedEndpoint);
+    const mentionsLegacyEndpoint = includesAny(statement, legacyEndpoints);
     const namesRelation = /\b(conflict|conflicts|contradict|contradicts|disagree|disagrees|instead of|rather than)\b/.test(statement);
     const relatesToPriorSource = mentionsCurrentAnywhere && /\b(?:conflict|conflicts|contradict|contradicts|disagree|disagrees)\s+with\s+(?:it|that)\b/.test(statement);
     const negatesRelation = /\b(?:do|does|did|are|is)\s+not\s+(?:conflict|conflicting|contradict|contradictory|disagree)\b/.test(statement);
@@ -101,11 +114,11 @@ function evaluateExplanation(explanation: string) {
   return { identifiesCurrentSource, rejectsLegacySource, explainsConflict };
 }
 
-export function scoreAnswer(answer: AgentAnswer): { score: number; breakdown: ScoreBreakdown } {
+export function scoreAnswer(answer: AgentAnswer, contract: EvaluationContract = DEFAULT_CONTRACT): { score: number; breakdown: ScoreBreakdown } {
   const normalized = answer.recommendedEndpoint.trim().replace(/\/$/, '').toLowerCase();
-  const evidence = evaluateExplanation(answer.explanation);
+  const evidence = evaluateExplanation(answer.explanation, contract);
   const breakdown: ScoreBreakdown = {
-    endpointAccuracy: normalized === '/v1/responses' || normalized.endsWith('/v1/responses') ? 50 : 0,
+    endpointAccuracy: normalized === contract.expectedEndpoint.toLowerCase() || normalized.endsWith(contract.expectedEndpoint.toLowerCase()) ? 50 : 0,
     recencyReasoning: evidence.identifiesCurrentSource ? 20 : 0,
     legacyRejection: evidence.rejectsLegacySource ? 15 : 0,
     conflictExplanation: evidence.explainsConflict ? 10 : 0,
@@ -129,25 +142,25 @@ function fixtureBreakdown(score: number): ScoreBreakdown {
   throw new Error(`Fixture score ${score} cannot be produced by the evaluator rubric.`);
 }
 
-function fixtureRole(item: ContextItem): ContextStatus {
+function fixtureRole(item: ContextItem, contract: EvaluationContract): ContextStatus {
   const value = `${item.name}\n${item.content}`.toLowerCase();
-  if (value.includes('/v1/chat/completions')) return 'harmful';
+  if (includesAny(value, contract.legacyEndpoints)) return 'harmful';
   if (item.id === 'legacy') return 'redundant';
-  if (value.includes('tool-schema') || value.includes('"path"') || value.includes('verify the endpoint') || value.includes('you are a support agent')) return 'required';
+  if (value.includes(contract.expectedEndpoint) || value.includes('"path"') || value.includes('verify the endpoint') || /you are a .+ agent/.test(value)) return 'required';
   if (value.includes('prefer the newest') || value.includes('never invent endpoints') || value.includes('machine-readable')) return 'useful';
   return 'redundant';
 }
 
-function fixtureScores(contexts: ContextItem[], variant: Variant): number[] {
-  const originalHasStale = contexts.some(item => item.content.toLowerCase().includes('/v1/chat/completions'));
+function fixtureScores(contexts: ContextItem[], variant: Variant, contract: EvaluationContract): number[] {
+  const originalHasStale = contexts.some(item => includesAny(item.content.toLowerCase(), contract.legacyEndpoints));
   const active = activeContexts(contexts, variant);
-  const activeHasStale = active.some(item => item.content.toLowerCase().includes('/v1/chat/completions'));
+  const activeHasStale = active.some(item => includesAny(item.content.toLowerCase(), contract.legacyEndpoints));
   const omitted = contexts.find(item => item.id === variant.omittedContextId);
 
   if (!activeHasStale) {
     if (originalHasStale) return [85, 90, 100];
     if (omitted) {
-      const role = fixtureRole(omitted);
+      const role = fixtureRole(omitted, contract);
       if (role === 'required') return omitted.id === 'schema' ? [5, 15, 15] : [5, 5, 15];
       if (role === 'useful') return [70, 70, 75];
     }
@@ -155,26 +168,26 @@ function fixtureScores(contexts: ContextItem[], variant: Variant): number[] {
   }
 
   if (!omitted) return [35, 40, 55];
-  const role = fixtureRole(omitted);
+  const role = fixtureRole(omitted, contract);
   if (role === 'required') return omitted.id === 'schema' ? [5, 15, 15] : [5, 5, 15];
   if (role === 'useful') return [30, 30, 35];
   return [35, 40, 55];
 }
 
-function fixtureRun(contexts: ContextItem[], variant: Variant, repeat: number, score: number): ExperimentRun {
+function fixtureRun(contexts: ContextItem[], variant: Variant, repeat: number, score: number, contract: EvaluationContract): ExperimentRun {
   const active = activeContexts(contexts, variant);
   const breakdown = fixtureBreakdown(score);
   const passed = score >= PASS_THRESHOLD;
   const correctEndpoint = breakdown.endpointAccuracy === 50;
-  const recommendedEndpoint = correctEndpoint ? '/v1/responses' : '/v1/chat/completions';
+  const recommendedEndpoint = correctEndpoint ? contract.expectedEndpoint : contract.legacyEndpoints[0];
   const explanationParts = [correctEndpoint
-    ? 'Recommend POST /v1/responses.'
-    : 'Recommend POST /v1/chat/completions.'];
-  if (breakdown.recencyReasoning) explanationParts.push('The current machine-readable tool schema is the source of truth.');
-  if (breakdown.legacyRejection) explanationParts.push('The /v1/chat/completions guide is archived and should not be used.');
-  if (breakdown.conflictExplanation) explanationParts.push('The /v1/responses and /v1/chat/completions instructions conflict.');
+    ? `Recommend POST ${contract.expectedEndpoint}.`
+    : `Recommend POST ${contract.legacyEndpoints[0]}.`];
+  if (breakdown.recencyReasoning) explanationParts.push(`The ${contract.currentSourceLabel} is the source of truth.`);
+  if (breakdown.legacyRejection) explanationParts.push(`The ${contract.legacyEndpoints[0]} guide is archived and should not be used.`);
+  if (breakdown.conflictExplanation) explanationParts.push(`The ${contract.expectedEndpoint} and ${contract.legacyEndpoints[0]} instructions conflict.`);
   const output = explanationParts.join(' ');
-  const independentlyScored = scoreAnswer({ recommendedEndpoint, explanation: output });
+  const independentlyScored = scoreAnswer({ recommendedEndpoint, explanation: output }, contract);
   if (independentlyScored.score !== score) {
     throw new Error(`Fixture output scored ${independentlyScored.score}, expected ${score}.`);
   }
@@ -199,8 +212,8 @@ function fixtureRun(contexts: ContextItem[], variant: Variant, repeat: number, s
   };
 }
 
-function fixtureVariant(contexts: ContextItem[], variant: Variant): VariantResult {
-  const runs = fixtureScores(contexts, variant).map((score, index) => fixtureRun(contexts, variant, index + 1, score));
+function fixtureVariant(contexts: ContextItem[], variant: Variant, contract: EvaluationContract): VariantResult {
+  const runs = fixtureScores(contexts, variant, contract).map((score, index) => fixtureRun(contexts, variant, index + 1, score, contract));
   return {
     ...variant,
     runs,
@@ -253,6 +266,7 @@ function buildReport(
   variants: VariantResult[],
   packVerification: VariantResult,
   mode: ExperimentMode,
+  contract: EvaluationContract,
 ): ExperimentReport {
   const baseline = variants[0];
   const contextEvidence = deriveContextEvidence(contexts, variants);
@@ -265,8 +279,9 @@ function buildReport(
   const originalTokens = contexts.reduce((sum, item) => sum + item.tokens, 0);
   const recommendedSet = new Set(recommendedContextIds);
   const optimizedTokens = contexts.filter(item => recommendedSet.has(item.id)).reduce((sum, item) => sum + item.tokens, 0);
-  const oldEndpoint = contexts.some(item => item.content.includes('/v1/chat/completions')) ? 'POST /v1/chat/completions' : '';
-  const currentEndpoint = contexts.some(item => item.content.includes('/v1/responses')) ? 'POST /v1/responses' : 'Current endpoint not present in the bundle';
+  const legacyEndpoint = contract.legacyEndpoints.find(endpoint => contexts.some(item => item.content.includes(endpoint)));
+  const oldEndpoint = legacyEndpoint ? `POST ${legacyEndpoint}` : '';
+  const currentEndpoint = contexts.some(item => item.content.includes(contract.expectedEndpoint)) ? `POST ${contract.expectedEndpoint}` : 'Current endpoint not present in the bundle';
   const repeatAgreement = harmfulDetected ? `${harmful.pairedWins}/${REPEATS} paired repeats` : `${REPEATS}/${REPEATS} pack verification runs`;
 
   return {
@@ -285,6 +300,15 @@ function buildReport(
     variants,
     packVerification,
     contextEvidence,
+    evaluationContract: {
+      id: contract.id,
+      label: contract.label,
+      task: contract.task,
+      expectedEndpoint: contract.expectedEndpoint,
+      legacyEndpoints: contract.legacyEndpoints,
+      currentSourceLabel: contract.currentSourceLabel,
+      legacySourceLabel: contract.legacySourceLabel,
+    },
     diagnosis: {
       finding: harmfulDetected
         ? `${harmful.name} is pulling the agent toward an obsolete instruction.`
@@ -300,18 +324,25 @@ function buildReport(
     recommendedContextIds,
     minimalContextIds: recommendedContextIds,
     provenance: {
-      dataset: contexts.some(item => item.id === 'legacy') ? 'support-api-migration-v1' : 'custom-context-bundle',
+      dataset: contract.dataset,
       evaluator: 'Independent deterministic assertions over the returned endpoint and explanation; no model-reported grading fields',
       passThreshold: PASS_THRESHOLD,
       ...(mode === 'fixture-replay'
-        ? { fixtureNote: 'Deterministic fixture simulation. A funded API project can generate fresh GPT-5.6 traces for custom context.' }
+        ? { fixtureNote: `Deterministic fixture simulation for the ${contract.label} contract. A funded API project can generate fresh GPT-5.6 traces for this same contract.` }
         : {}),
     },
   };
 }
 
-export function fixtureReport(contexts: ContextItem[]) {
-  const variants = variantsFor(contexts).map(variant => fixtureVariant(contexts, variant));
+function contractFor(id: DiagnosticProjectId = DEFAULT_CONTRACT.id) {
+  const contract = findDiagnosticProject(id);
+  if (!contract) throw new Error(`Unknown diagnostic project: ${id}`);
+  return contract;
+}
+
+export function fixtureReport(contexts: ContextItem[], contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id) {
+  const contract = contractFor(contractId);
+  const variants = variantsFor(contexts).map(variant => fixtureVariant(contexts, variant, contract));
   const evidence = deriveContextEvidence(contexts, variants);
   const recommendedContextIds = recommendedIdsFor(evidence);
   const packVariant: Variant = {
@@ -320,13 +351,13 @@ export function fixtureReport(contexts: ContextItem[]) {
     omittedContextId: null,
     includedContextIds: recommendedContextIds,
   };
-  return buildReport(contexts, variants, fixtureVariant(contexts, packVariant), 'fixture-replay');
+  return buildReport(contexts, variants, fixtureVariant(contexts, packVariant, contract), 'fixture-replay', contract);
 }
 
-async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Variant, repeat: number): Promise<ExperimentRun> {
+async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Variant, repeat: number, contract: EvaluationContract): Promise<ExperimentRun> {
   const active = activeContexts(contexts, variant);
   const bundle = active.map(item => `### ${item.name}\n${item.content}`).join('\n\n');
-  const prompt = `TASK\nA developer is migrating an integration. Recommend the single current endpoint they should call.\n\nCONTEXT BUNDLE\n${bundle}\n\nUse only the supplied context. Identify conflicts and prefer current machine-readable schemas over archived prose.`;
+  const prompt = `TASK\n${contract.task}\n\nCONTEXT BUNDLE\n${bundle}\n\nUse only the supplied context. Identify conflicts and prefer current machine-readable schemas over archived prose.`;
   const startedAt = Date.now();
   const response = await client.responses.create({
     model: MODEL,
@@ -355,7 +386,7 @@ async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Var
     max_output_tokens: 300,
   });
   const answer = JSON.parse(response.output_text) as AgentAnswer;
-  const { score, breakdown } = scoreAnswer(answer);
+  const { score, breakdown } = scoreAnswer(answer, contract);
   return {
     id: response.id,
     variantId: variant.id,
@@ -400,15 +431,15 @@ function groupRuns(variants: Variant[], runs: ExperimentRun[]): VariantResult[] 
   });
 }
 
-async function liveReport(contexts: ContextItem[], apiKey: string) {
+async function liveReport(contexts: ContextItem[], apiKey: string, contract: EvaluationContract) {
   const { default: OpenAI } = await import('openai');
   const client = new OpenAI({ apiKey });
   const variants = variantsFor(contexts);
   const jobs = variants.flatMap(variant => Array.from({ length: REPEATS }, (_, index) => ({ variant, repeat: index + 1 })));
 
   // Use one request as a quota probe before starting the concurrent suite.
-  const first = await runLiveCell(client, contexts, jobs[0].variant, jobs[0].repeat);
-  const remaining = await mapWithConcurrency(jobs.slice(1), 4, job => runLiveCell(client, contexts, job.variant, job.repeat));
+  const first = await runLiveCell(client, contexts, jobs[0].variant, jobs[0].repeat, contract);
+  const remaining = await mapWithConcurrency(jobs.slice(1), 4, job => runLiveCell(client, contexts, job.variant, job.repeat, contract));
   const variantResults = groupRuns(variants, [first, ...remaining]);
   const recommendedContextIds = recommendedIdsFor(deriveContextEvidence(contexts, variantResults));
   const packVariant: Variant = {
@@ -420,24 +451,25 @@ async function liveReport(contexts: ContextItem[], apiKey: string) {
   const packRuns = await mapWithConcurrency(
     Array.from({ length: REPEATS }, (_, index) => index + 1),
     3,
-    repeat => runLiveCell(client, contexts, packVariant, repeat),
+    repeat => runLiveCell(client, contexts, packVariant, repeat, contract),
   );
   const packVerification = groupRuns([packVariant], packRuns)[0];
-  return buildReport(contexts, variantResults, packVerification, 'live');
+  return buildReport(contexts, variantResults, packVerification, 'live', contract);
 }
 
-export async function runLiveExperimentSuite(contexts: ContextItem[], apiKey: string): Promise<ExperimentReport> {
+export async function runLiveExperimentSuite(contexts: ContextItem[], apiKey: string, contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id): Promise<ExperimentReport> {
   if (!apiKey) throw new Error('A usable OPENAI_API_KEY is required for live evidence generation.');
-  return liveReport(contexts, apiKey);
+  return liveReport(contexts, apiKey, contractFor(contractId));
 }
 
-export async function runExperimentSuite(contexts: ContextItem[], apiKey?: string): Promise<ExperimentReport> {
-  if (!apiKey) return fixtureReport(contexts);
+export async function runExperimentSuite(contexts: ContextItem[], apiKey?: string, contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id): Promise<ExperimentReport> {
+  const contract = contractFor(contractId);
+  if (!apiKey) return fixtureReport(contexts, contract.id);
   try {
-    return await liveReport(contexts, apiKey);
+    return await liveReport(contexts, apiKey, contract);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (message.includes('429') || message.toLowerCase().includes('quota')) return fixtureReport(contexts);
+    if (message.includes('429') || message.toLowerCase().includes('quota')) return fixtureReport(contexts, contract.id);
     throw error;
   }
 }

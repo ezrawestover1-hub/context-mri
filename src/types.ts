@@ -63,6 +63,16 @@ export interface Diagnosis {
   repeatAgreement: string;
 }
 
+export interface EvaluationContractSummary {
+  id: string;
+  label: string;
+  task: string;
+  expectedEndpoint: string;
+  legacyEndpoints: string[];
+  currentSourceLabel: string;
+  legacySourceLabel: string;
+}
+
 export interface ExperimentReport {
   id: string;
   createdAt: string;
@@ -80,6 +90,7 @@ export interface ExperimentReport {
   packVerification: VariantResult;
   contextEvidence: ContextEvidence[];
   diagnosis: Diagnosis;
+  evaluationContract: EvaluationContractSummary;
   recommendedContextIds: string[];
   /** Backwards-compatible alias for recommendedContextIds. */
   minimalContextIds: string[];
