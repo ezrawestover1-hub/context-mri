@@ -1,5 +1,4 @@
-import { createHash, randomUUID } from 'node:crypto';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import type {
   ContextEvidence,
   ContextItem,
@@ -31,7 +30,14 @@ type Variant = {
 };
 
 function hashPrompt(value: string) {
-  return createHash('sha256').update(value).digest('hex').slice(0, 12);
+  let primary = 0x811c9dc5;
+  let secondary = 0x9e3779b9;
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    primary = Math.imul(primary ^ code, 0x01000193);
+    secondary = Math.imul(secondary ^ code, 0x85ebca6b);
+  }
+  return `${(primary >>> 0).toString(16).padStart(8, '0')}${(secondary >>> 0).toString(16).padStart(8, '0')}`.slice(0, 12);
 }
 
 function titleFromContext(item: ContextItem) {
@@ -223,7 +229,7 @@ function buildReport(
   const repeatAgreement = harmfulDetected ? `${harmful.pairedWins}/${REPEATS} paired repeats` : `${REPEATS}/${REPEATS} pack verification runs`;
 
   return {
-    id: `${mode === 'live' ? 'mri' : 'fixture'}-${randomUUID().slice(0, 8)}`,
+    id: `${mode === 'live' ? 'mri' : 'fixture'}-${globalThis.crypto.randomUUID().slice(0, 8)}`,
     createdAt: new Date().toISOString(),
     mode,
     model: MODEL,
@@ -357,6 +363,7 @@ function groupRuns(variants: Variant[], runs: ExperimentRun[]): VariantResult[] 
 }
 
 async function liveReport(contexts: ContextItem[], apiKey: string) {
+  const { default: OpenAI } = await import('openai');
   const client = new OpenAI({ apiKey });
   const variants = variantsFor(contexts);
   const jobs = variants.flatMap(variant => Array.from({ length: REPEATS }, (_, index) => ({ variant, repeat: index + 1 })));
