@@ -93,7 +93,7 @@ const worker = {
       if (!validContexts(payload?.contexts)) return json({ error: 'Supply 2–12 valid context items.' }, 400);
       if (!isContextGuard(payload?.guard)) return json({ error: 'Supply a valid Context Guard created by Context MRI.' }, 400);
       try {
-        return json(checkContextGuard(payload.guard, payload.contexts));
+        return json(await checkContextGuard(payload.guard, payload.contexts));
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Context Guard check failed.';
         return json({ error: message }, 400);

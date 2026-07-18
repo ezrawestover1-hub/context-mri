@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { checkContextGuard, isContextGuard } from '../server/context-guard.js';
 import type { ContextItem } from '../src/types.js';
+import { fingerprintContextBundle, fingerprintReport } from '../src/provenance.js';
 
-type EvidenceExport = { inputContexts?: unknown; decision?: { activeContextIds?: unknown } };
+type EvidenceExport = { inputContexts?: unknown; decision?: { activeContextIds?: unknown }; report?: unknown };
 
 function valueAfter(flag: string) {
   const index = process.argv.indexOf(flag);
@@ -18,7 +19,10 @@ function asContexts(value: unknown): ContextItem[] | null {
   const inputContexts = Array.isArray(value) ? value : exportValue?.inputContexts;
   const activeIds = exportValue?.decision?.activeContextIds;
   const candidate = Array.isArray(inputContexts) && Array.isArray(activeIds) && activeIds.every(id => typeof id === 'string')
-    ? inputContexts.filter(item => item && typeof item === 'object' && activeIds.includes((item as Partial<ContextItem>).id))
+    ? inputContexts.filter(item => {
+      const id = item && typeof item === 'object' ? (item as Partial<ContextItem>).id : undefined;
+      return typeof id === 'string' && activeIds.includes(id);
+    })
     : inputContexts;
   if (!Array.isArray(candidate) || candidate.length < 2 || candidate.length > 12) return null;
   const ids = new Set<string>();
@@ -45,10 +49,18 @@ if (!guardPath || !contextPath) {
 } else {
   try {
     const guard = readJson(guardPath);
-    const contexts = asContexts(readJson(contextPath));
+    const evidence = readJson(contextPath);
+    const contexts = asContexts(evidence);
     if (!isContextGuard(guard)) throw new Error('The guard file is not a complete Context MRI Context Guard.');
     if (!contexts) throw new Error('The context file must be an evidence export with inputContexts or a JSON ContextItem array (2–12 items).');
-    const result = checkContextGuard(guard, contexts);
+    const exportValue = evidence as EvidenceExport;
+    if (Array.isArray(exportValue.inputContexts) && exportValue.report) {
+      const sourceContexts = asContexts({ inputContexts: exportValue.inputContexts });
+      if (!sourceContexts) throw new Error('The evidence export contains an invalid original context bundle.');
+      if (await fingerprintContextBundle(sourceContexts) !== guard.sourceContextFingerprint) throw new Error('Evidence export source bundle does not match the Context Guard provenance fingerprint.');
+      if (await fingerprintReport(exportValue.report as import('../src/types.js').ExperimentReport) !== guard.sourceReportFingerprint) throw new Error('Evidence export report does not match the Context Guard provenance fingerprint.');
+    }
+    const result = await checkContextGuard(guard, contexts);
     console.log(JSON.stringify({ guard: guard.id, projectId: guard.projectId, result }, null, 2));
     if (result.status === 'blocked') process.exitCode = 1;
   } catch (error) {

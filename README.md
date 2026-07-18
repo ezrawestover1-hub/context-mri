@@ -64,7 +64,7 @@ curl http://localhost:8787/api/health
 
 ## Stop the regression from returning
 
-After Context MRI identifies a harmful instruction, **Create regression guard** makes a small JSON policy from the report. The guard blocks the observed legacy term and requires the context bundle to score at least `80/100` against the selected task contract. In the hosted demo, **Test original library** visibly fails the guard and **Test recommended pack** passes it.
+After Context MRI identifies a harmful instruction, **Create regression guard** makes a small JSON policy from the report. The guard blocks the observed legacy term and requires the context bundle to score at least `80/100` against the selected task contract. It also carries SHA-256 fingerprints for the canonical contract, source report, full source library, recommended pack, and downloaded artifact. A changed endpoint, changed recommended file, missing required file, or altered guard blocks before release. In the hosted demo, **Test original library** visibly fails the guard and **Test recommended pack** passes it.
 
 For CI, download both the guard and an evidence export after applying the recommended pack, then commit them wherever your evaluation artifacts live:
 
@@ -82,7 +82,7 @@ npm run guard:check -- \
   --context samples/context-guard/support-api-migration-repaired.evidence.json
 ```
 
-The command prints an inspectable JSON result and exits `1` if the bundle includes a blocked instruction or falls below the threshold. Evidence exports preserve the active pack decision, so the runner checks the applied pack rather than an unstaged full library. This is a deterministic, task-specific safety rail; production teams should also run representative live evaluations with human-calibrated success criteria.
+The command prints an inspectable JSON result and exits `1` if the bundle includes a blocked instruction, falls below the threshold, or fails an integrity fingerprint. Evidence exports preserve the active pack decision, so the runner checks the applied pack rather than an unstaged full library. When supplied an export, it also verifies that the original report and source library match the guard provenance. These fingerprints are tamper-evident integrity checks, not authorization signatures; production teams should also run representative live evaluations with human-calibrated success criteria.
 
 Optionally, with funded quota, generate a judge-shareable authentic trace artifact:
 
@@ -90,7 +90,7 @@ Optionally, with funded quota, generate a judge-shareable authentic trace artifa
 npm run evidence:live
 ```
 
-This optional command requires live GPT-5.6 Sol responses and writes `public/evidence/live-gpt-5.6.json`. It fails rather than falling back to the fixture if the API project lacks quota, so the artifact cannot be mislabeled. It is not required to run, judge, or submit Context MRI.
+This optional command requires live GPT-5.6 Sol responses and writes `public/evidence/live-gpt-5.6.json`. It fails rather than falling back to the fixture if the API project lacks quota, so the artifact cannot be mislabeled. The published artifact includes the raw trace ledger, runner policy, report fingerprint, and source-library fingerprint; the app surfaces it only when the artifact is present. It is not required to run, judge, or submit Context MRI.
 
 ## How the experiment works
 
@@ -157,7 +157,7 @@ The browser app and Node server are platform-independent and have been verified 
 - Single-item ablation can miss interactions between context files.
 - Fixture results are deterministic replays of two bundled scenarios, not fresh GPT‑5.6 traces.
 - The included evaluator is intentionally task-specific; production use needs representative datasets and human-calibrated labels.
-- Context Guard catches the observed legacy terms and score regressions for one contract; it does not replace live production evaluation.
+- Context Guard catches the observed legacy terms, score regressions, and changed recommended files for one contract; its fingerprints are tamper-evident rather than signed authorization, and it does not replace live production evaluation.
 - Uploaded context is held only in browser memory for the current session.
 
 Dependencies are pinned to exact versions and the committed lockfile is the reproducible installation source.

@@ -68,7 +68,7 @@ test('public deployment adapter selects a supported diagnostic contract and reje
 
 test('public deployment adapter checks a downloaded Context Guard without a secret', async () => {
   const billing = diagnosticProjects.find(project => project.id === 'billing-api-migration')!;
-  const guard = createContextGuard(fixtureReport(billing.contexts, billing.id), '2026-07-18T20:00:00.000Z');
+  const guard = await createContextGuard(fixtureReport(billing.contexts, billing.id), billing.contexts, '2026-07-18T20:00:00.000Z');
   const response = await worker.fetch(new Request('https://context-mri.test/api/guard/check', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

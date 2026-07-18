@@ -88,7 +88,7 @@ This is controlled evidence for the tested task distribution. It is not universa
 
 ## Context Guard
 
-A completed report can create a `ContextGuard` JSON artifact. It records the selected contract, report ID and provenance, expected endpoint, observed legacy terms, recommended context IDs, and an `80/100` minimum. `POST /api/guard/check` and `npm run guard:check -- --guard … --context …` independently rebuild the fixture report for the supplied bundle, flag every file containing a blocked term, and return a nonzero exit code if either condition fails.
+A completed report can create a `ContextGuard` JSON artifact. It records the selected contract, report ID and provenance, expected endpoint, observed legacy terms, recommended context IDs, and an `80/100` minimum. Version 1.1 adds SHA-256 fingerprints for the canonical contract, source report, full library, recommended pack, and artifact payload. `POST /api/guard/check` and `npm run guard:check -- --guard … --context …` independently rebuild the fixture report for the supplied bundle, flag every file containing a blocked term, and return a nonzero exit code if the score, legacy policy, canonical contract, recommended source pack, or downloaded artifact differs.
 
 The guard is deliberately narrow: it protects against the stale instruction and threshold discovered by this diagnostic contract. It is not represented as a universal production guarantee. Teams should run a representative live evaluation suite alongside the deterministic check before relying on it as a release gate.
 
@@ -105,7 +105,7 @@ Every run records:
 - model output and recommended endpoint
 - complete rubric breakdown
 
-**Export evidence** downloads the input bundle, active-pack decision state, all discovery runs, pack-verification runs, derived classifications, diagnosis, and provenance as JSON. The CLI honors the active-pack IDs in an evidence export so a staged recommended pack can be tested directly in CI.
+**Export evidence** downloads the input bundle, active-pack decision state, all discovery runs, pack-verification runs, derived classifications, diagnosis, and provenance as JSON. The CLI honors the active-pack IDs in an evidence export so a staged recommended pack can be tested directly in CI; when an export is supplied alongside a guard, it verifies the guard's source report and source-library fingerprints too.
 
 ## Security and privacy
 

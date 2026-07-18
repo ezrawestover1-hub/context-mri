@@ -22,6 +22,14 @@ export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroInt
         <button className="hero-secondary" onClick={onAddContext}><Upload size={17} /> Add my context files</button>
       </div>
       <p className="hero-note">No account, API key, or setup required for the included example.</p>
+      <div className="judge-path" aria-label="Thirty-second judge path">
+        <strong>Try this in 30 seconds</strong>
+        <ol>
+          <li><span>1</span><a href="#results">Run the sample <small>See why removing one file reaches 92</small></a></li>
+          <li><span>2</span><a href="#next-steps">Apply and verify the smaller pack <small>Confirm the repair with a new run</small></a></li>
+          <li><span>3</span><a href="#context-guard">Create the guard <small>Block the same regression in CI</small></a></li>
+        </ol>
+      </div>
     </div>
 
     <div className="workflow-preview" aria-label="Context MRI input, experiment, and output">
@@ -105,7 +113,7 @@ type NextStepsProps = {
 export function NextSteps({ report, running, recommendationApplied, appliedVerification, onApply, onRewrite, onRun, onRestore }: NextStepsProps) {
   const harmfulFile = report.diagnosis.harmfulItem || 'the harmful file';
   const verified = Boolean(appliedVerification);
-  return <section className="next-steps" aria-labelledby="next-steps-title">
+  return <section className="next-steps" id="next-steps" aria-labelledby="next-steps-title">
     <div className="next-step-heading"><h2 id="next-steps-title">What to do next</h2><p>The result is useful only if it changes your context—and the change survives another test.</p></div>
     <ol>
       <li><span>1</span><p>Remove or rewrite <code>{harmfulFile}</code>.</p></li>

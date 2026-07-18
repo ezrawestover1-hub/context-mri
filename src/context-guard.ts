@@ -1,12 +1,19 @@
-import type { ContextGuard, ExperimentReport } from './types';
+import { findDiagnosticProject } from './projects';
+import { fingerprintContextBundle, fingerprintContract, fingerprintGuard, fingerprintReport } from './provenance';
+import type { ContextGuard, ContextItem, ExperimentReport } from './types';
 
-const GUARD_SCHEMA_VERSION = '1.0' as const;
+const GUARD_SCHEMA_VERSION = '1.1' as const;
 const MINIMUM_GUARD_SCORE = 80;
 
 /** Creates a portable, task-specific guard from an inspectable MRI report. */
-export function createContextGuard(report: ExperimentReport, createdAt = new Date().toISOString()): ContextGuard {
+export async function createContextGuard(report: ExperimentReport, sourceContexts: ContextItem[], createdAt = new Date().toISOString()): Promise<ContextGuard> {
   const contract = report.evaluationContract;
-  return {
+  const project = findDiagnosticProject(contract.id);
+  if (!project) throw new Error(`Cannot create a guard for an unknown contract: ${contract.id}`);
+  const recommended = sourceContexts.filter(context => report.recommendedContextIds.includes(context.id));
+  if (recommended.length !== report.recommendedContextIds.length) throw new Error('The source bundle is missing one or more recommended context files.');
+
+  const unsignedGuard: Omit<ContextGuard, 'guardFingerprint'> = {
     schemaVersion: GUARD_SCHEMA_VERSION,
     id: `context-mri-${contract.id}-guard`,
     label: `${contract.label} regression guard`,
@@ -19,5 +26,11 @@ export function createContextGuard(report: ExperimentReport, createdAt = new Dat
     minimumScore: MINIMUM_GUARD_SCORE,
     recommendedContextIds: [...report.recommendedContextIds],
     blockedTerms: [...contract.legacyEndpoints],
+    contractFingerprint: await fingerprintContract(project),
+    sourceReportFingerprint: await fingerprintReport(report),
+    sourceContextFingerprint: await fingerprintContextBundle(sourceContexts),
+    recommendedPackFingerprint: await fingerprintContextBundle(recommended),
   };
+
+  return { ...unsignedGuard, guardFingerprint: await fingerprintGuard(unsignedGuard) };
 }

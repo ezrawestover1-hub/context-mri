@@ -75,7 +75,7 @@ export interface EvaluationContractSummary {
 
 /** A portable, task-specific gate created from a completed Context MRI report. */
 export interface ContextGuard {
-  schemaVersion: '1.0';
+  schemaVersion: '1.1';
   id: string;
   label: string;
   createdAt: string;
@@ -87,6 +87,16 @@ export interface ContextGuard {
   minimumScore: number;
   recommendedContextIds: string[];
   blockedTerms: string[];
+  /** SHA-256 fingerprint of the canonical task contract. */
+  contractFingerprint: string;
+  /** SHA-256 fingerprint of the report that produced this gate. */
+  sourceReportFingerprint: string;
+  /** SHA-256 fingerprint of the complete source library. */
+  sourceContextFingerprint: string;
+  /** SHA-256 fingerprint of the recommended context files this guard expects. */
+  recommendedPackFingerprint: string;
+  /** SHA-256 fingerprint of this portable artifact, excluding this field. */
+  guardFingerprint: string;
 }
 
 export interface GuardFlaggedFile {
@@ -105,6 +115,11 @@ export interface ContextGuardCheck {
   expectedEndpoint: string;
   flaggedFiles: GuardFlaggedFile[];
   reasons: string[];
+  integrity: {
+    contract: boolean;
+    artifact: boolean;
+    recommendedPack: boolean;
+  };
 }
 
 export interface ExperimentReport {

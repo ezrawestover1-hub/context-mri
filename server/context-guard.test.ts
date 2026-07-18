@@ -4,10 +4,10 @@ import { diagnosticProjects } from '../src/projects.js';
 import { checkContextGuard, createContextGuard, isContextGuard } from './context-guard.js';
 import { fixtureReport } from './experiment-engine.js';
 
-test('creates a portable guard from evidence and blocks the original stale billing library', () => {
+test('creates a portable guard from evidence and blocks the original stale billing library', async () => {
   const billing = diagnosticProjects.find(project => project.id === 'billing-api-migration')!;
-  const guard = createContextGuard(fixtureReport(billing.contexts, billing.id), '2026-07-18T20:00:00.000Z');
-  const result = checkContextGuard(guard, billing.contexts, '2026-07-18T20:01:00.000Z');
+  const guard = await createContextGuard(fixtureReport(billing.contexts, billing.id), billing.contexts, '2026-07-18T20:00:00.000Z');
+  const result = await checkContextGuard(guard, billing.contexts, '2026-07-18T20:01:00.000Z');
 
   assert.equal(guard.projectId, billing.id);
   assert.equal(guard.minimumScore, 80);
@@ -18,12 +18,12 @@ test('creates a portable guard from evidence and blocks the original stale billi
   assert.match(result.reasons.join(' '), /below the required 80/);
 });
 
-test('allows the measured recommended pack to pass the matching regression guard', () => {
+test('allows the measured recommended pack to pass the matching regression guard', async () => {
   const support = diagnosticProjects.find(project => project.id === 'support-api-migration')!;
   const report = fixtureReport(support.contexts, support.id);
-  const guard = createContextGuard(report, '2026-07-18T20:00:00.000Z');
+  const guard = await createContextGuard(report, support.contexts, '2026-07-18T20:00:00.000Z');
   const recommended = support.contexts.filter(context => report.recommendedContextIds.includes(context.id));
-  const result = checkContextGuard(guard, recommended, '2026-07-18T20:01:00.000Z');
+  const result = await checkContextGuard(guard, recommended, '2026-07-18T20:01:00.000Z');
 
   assert.equal(result.status, 'pass');
   assert.equal(result.score, 92);
@@ -31,10 +31,26 @@ test('allows the measured recommended pack to pass the matching regression guard
   assert.match(result.reasons[0], /clears the 80\/100 threshold/);
 });
 
-test('accepts only a complete supported Context Guard payload', () => {
+test('accepts only a complete supported Context Guard payload', async () => {
   const report = fixtureReport(diagnosticProjects[0].contexts);
-  const guard = createContextGuard(report);
+  const guard = await createContextGuard(report, diagnosticProjects[0].contexts);
   assert.equal(isContextGuard(guard), true);
   assert.equal(isContextGuard({ ...guard, projectId: 'not-a-contract' }), false);
   assert.equal(isContextGuard({ ...guard, blockedTerms: [] }), false);
+});
+
+test('blocks a guard with a changed expected endpoint or changed recommended source file', async () => {
+  const support = diagnosticProjects[0];
+  const report = fixtureReport(support.contexts, support.id);
+  const guard = await createContextGuard(report, support.contexts, '2026-07-18T20:00:00.000Z');
+  const tamperedGuard = { ...guard, expectedEndpoint: '/v1/chat/completions' };
+  const tamperedGuardResult = await checkContextGuard(tamperedGuard, support.contexts, '2026-07-18T20:01:00.000Z');
+  assert.equal(tamperedGuardResult.status, 'blocked');
+  assert.equal(tamperedGuardResult.integrity.contract, false);
+  assert.equal(tamperedGuardResult.integrity.artifact, false);
+
+  const changedRecommended = support.contexts.map(context => context.id === 'schema' ? { ...context, content: `${context.content}\nChanged after guard creation.` } : context);
+  const changedPackResult = await checkContextGuard(guard, changedRecommended, '2026-07-18T20:01:00.000Z');
+  assert.equal(changedPackResult.status, 'blocked');
+  assert.equal(changedPackResult.integrity.recommendedPack, false);
 });

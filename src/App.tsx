@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Download, Info, Play, Sparkles } from 'lucide-react';
 import { contexts as initialContexts, seedReport } from './data';
 import { defaultDiagnosticProject, diagnosticProjects, findDiagnosticProject } from './projects';
@@ -13,6 +13,12 @@ import { Matrix } from './components/Matrix';
 import { ProvenanceModal, RewriteModal, TraceModal } from './components/Modals';
 import { BeforeRun, HeroIntro, NextSteps, ResultGuide } from './components/Onboarding';
 import { createContextGuard } from './context-guard';
+
+type LiveEvidenceSummary = {
+  generatedAt: string;
+  report: Pick<ExperimentReport, 'mode' | 'model' | 'totalRuns' | 'baselineScore' | 'optimizedScore' | 'evaluationContract'>;
+  reportFingerprint: string;
+};
 
 function downloadJson(filename: string, value: unknown) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }));
@@ -40,6 +46,7 @@ export default function App() {
   const [provenanceOpen, setProvenanceOpen] = useState(false);
   const [guard, setGuard] = useState<ContextGuardType | null>(null);
   const [guardCheck, setGuardCheck] = useState<ContextGuardCheck | null>(null);
+  const [liveEvidence, setLiveEvidence] = useState<LiveEvidenceSummary | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +55,17 @@ export default function App() {
     [contexts, selected],
   );
   const selectedEvidence = report.contextEvidence.find(item => item.contextId === selectedItem?.id);
+
+  useEffect(() => {
+    let active = true;
+    void fetch('/evidence/live-gpt-5.6.json', { cache: 'no-store' })
+      .then(async response => response.ok ? response.json() as Promise<LiveEvidenceSummary> : null)
+      .then(artifact => {
+        if (active && artifact?.report.mode === 'live' && typeof artifact.reportFingerprint === 'string') setLiveEvidence(artifact);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   async function runMRI(scrollToResults = false, runContexts = contexts, runProjectId = projectId) {
     setRunning(true);
@@ -223,11 +241,18 @@ export default function App() {
     }
   }
 
-  function createGuard() {
-    const nextGuard = createContextGuard(report);
-    setGuard(nextGuard);
-    setGuardCheck(null);
-    setStage(`Context Guard created · blocks ${nextGuard.blockedTerms.join(', ')} · requires ${nextGuard.minimumScore}/100`);
+  async function createGuard() {
+    setRunning(true);
+    try {
+      const nextGuard = await createContextGuard(report, contexts);
+      setGuard(nextGuard);
+      setGuardCheck(null);
+      setStage(`Context Guard created · blocks ${nextGuard.blockedTerms.join(', ')} · requires ${nextGuard.minimumScore}/100`);
+    } catch (error) {
+      setStage(error instanceof Error ? `Context Guard failed · ${error.message}` : 'Context Guard failed');
+    } finally {
+      setRunning(false);
+    }
   }
 
   async function runGuardCheck(bundle: ContextItem[], label: string) {
@@ -314,7 +339,7 @@ export default function App() {
     <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} task={report.evaluationContract.task} />
     <BeforeRun contract={report.evaluationContract} />
 
-    <div className="results-anchor" ref={resultsRef}>
+    <div className="results-anchor" id="results" ref={resultsRef}>
       <DiagnosisBand report={report} />
       <ResultGuide />
     </div>
@@ -355,6 +380,7 @@ export default function App() {
       onCheckRecommended={checkRecommendedPack}
       onCheckOriginal={checkOriginalLibrary}
       onDownload={downloadGuard}
+      liveEvidence={liveEvidence}
     />
 
     <footer className="provenance-bar">

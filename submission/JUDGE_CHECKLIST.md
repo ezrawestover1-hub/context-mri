@@ -33,7 +33,7 @@
 - Independent deterministic evaluator over endpoint + explanation; no self-reported model grades
 - Unit-tested evaluator, aggregate, classification, and provenance invariants
 - Applied-pack rerun submits the reduced bundle as a separate experiment and captures its report ID
-- Downloadable Context Guard blocks the original stale library, passes the repaired pack, and has a zero-service CI runner that exits nonzero on regression
+- Downloadable Context Guard blocks the original stale library, passes the repaired pack, fingerprints the task contract and recommended source files, and has a zero-service CI runner that exits nonzero on regression or provenance mismatch
 
 ### Design
 

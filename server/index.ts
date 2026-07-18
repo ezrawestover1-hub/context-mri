@@ -61,11 +61,11 @@ app.post('/api/fixture', (req, res) => {
   res.json(fixtureReport(req.body.contexts, projectId));
 });
 
-app.post('/api/guard/check', (req, res) => {
+app.post('/api/guard/check', async (req, res) => {
   if (!validContexts(req.body?.contexts)) return res.status(400).json({ error: 'Supply 2–12 valid context items.' });
   if (!isContextGuard(req.body?.guard)) return res.status(400).json({ error: 'Supply a valid Context Guard created by Context MRI.' });
   try {
-    res.json(checkContextGuard(req.body.guard, req.body.contexts));
+    res.json(await checkContextGuard(req.body.guard, req.body.contexts));
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Context Guard check failed.';
     res.status(400).json({ error: message });
