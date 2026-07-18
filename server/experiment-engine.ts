@@ -304,7 +304,7 @@ function buildReport(
       evaluator: 'Independent deterministic assertions over the returned endpoint and explanation; no model-reported grading fields',
       passThreshold: PASS_THRESHOLD,
       ...(mode === 'fixture-replay'
-        ? { fixtureNote: 'Deterministic fixture simulation. Add API quota to generate fresh GPT-5.6 traces for custom context.' }
+        ? { fixtureNote: 'Deterministic fixture simulation. A funded API project can generate fresh GPT-5.6 traces for custom context.' }
         : {}),
     },
   };

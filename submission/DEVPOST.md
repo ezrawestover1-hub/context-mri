@@ -22,7 +22,7 @@ Public no-login demo: https://context-mri.ezra-westover1.chatgpt.site
 
 Public source repository: https://github.com/ezrawestover1-hub/context-mri
 
-The hosted judge path is an explicitly labeled deterministic fixture replay, so it needs no account, API key, or external setup. The repository also includes the live GPT-5.6 Sol experiment path for funded OpenAI API projects.
+The hosted judge path is an explicitly labeled deterministic fixture replay, so it needs no account, API key, or external setup. The repository also includes an optional GPT-5.6 Sol Responses API runner for funded OpenAI API projects.
 
 ## Inspiration
 
@@ -40,7 +40,7 @@ The product is a React + TypeScript application with a Node/Express experiment s
 
 Each trace records its run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture simulation. All headline metrics are derived from those records. The default suite contains 18 discovery traces plus three pack-verification traces. Applying the recommended pack and rerunning submits only the reduced file set as a second experiment with its own report ID and traces.
 
-Codex accelerated the project from critical idea selection through implementation: official-requirement research, architecture, UI concept generation, API integration, automated tests, mathematical consistency checks, and browser-based interaction and visual QA.
+Codex accelerated the project from critical idea selection through implementation: official-requirement research, architecture, UI concept generation, API integration, automated tests, mathematical consistency checks, and browser-based interaction and visual QA. In the final Build Week pass, GPT-5.6 Terra in Codex adversarially reviewed the evaluator, fixture claims, and judge flow; that audit removed a false paid-API submission gate and tightened the final evidence narrative.
 
 ## Challenges
 
@@ -54,7 +54,7 @@ The hardest problem was epistemic honesty. A beautiful dashboard can make weak e
 - Independent verification runs for the recommended pack
 - A real apply-and-rerun loop that tests the reduced pack as the new baseline
 - Independent scoring that never trusts subject-model grading claims
-- Fresh GPT‑5.6 mode plus an honestly labeled no-secret fixture mode
+- GPT‑5.6 Terra adversarial audit plus an optional API runner and honestly labeled no-secret fixture mode
 - Trace export, manifest copy, context upload, and suggested rewrite flows
 - Unit tests protecting the evaluator, classifications, aggregate claims, and provenance
 
@@ -68,7 +68,7 @@ Next steps are multi-item interaction ablations, imported production trace sets,
 
 ## Built with
 
-Codex, GPT‑5.6 Sol, OpenAI Responses API, React, TypeScript, Vite, Express, and Node.js.
+Codex, GPT‑5.6 Terra, an optional GPT‑5.6 Sol Responses API runner, React, TypeScript, Vite, Express, and Node.js.
 
 ## Codex session
 

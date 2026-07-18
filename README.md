@@ -61,13 +61,13 @@ npm audit --audit-level=high
 curl http://localhost:8787/api/health
 ```
 
-With funded quota, generate a judge-shareable authentic trace artifact:
+Optionally, with funded quota, generate a judge-shareable authentic trace artifact:
 
 ```bash
 npm run evidence:live
 ```
 
-This command requires live GPT-5.6 Sol responses and writes `public/evidence/live-gpt-5.6.json`. It fails rather than falling back to the fixture if the API project lacks quota, so the artifact cannot be mislabeled.
+This optional command requires live GPT-5.6 Sol responses and writes `public/evidence/live-gpt-5.6.json`. It fails rather than falling back to the fixture if the API project lacks quota, so the artifact cannot be mislabeled. It is not required to run, judge, or submit Context MRI.
 
 ## How the experiment works
 
@@ -106,6 +106,7 @@ Positive contribution means removing the file hurts the task. Negative contribut
 - A one-call quota probe prevents the server from starting a full live suite when the project cannot run it.
 - The subject model cannot grade itself: it returns only the endpoint and explanation, while deterministic application assertions assign every rubric point.
 - Codex was used for idea selection, official-requirement research, architecture, API implementation, tests, interaction design, mathematical consistency checks, and browser QA.
+- GPT-5.6 Terra in Codex performed the final adversarial audit of the evaluator, fixture claims, and judge flow; see [`submission/GPT_5_6_TERRA_AUDIT.md`](./submission/GPT_5_6_TERRA_AUDIT.md).
 - GPT‑5.6 guidance shaped the product thesis: test leaner context by removing one instruction or tool group at a time and rerunning representative evals.
 - Codex task/session ID: `019f71e4-f746-7083-a465-1c84948bbd8c`.
 

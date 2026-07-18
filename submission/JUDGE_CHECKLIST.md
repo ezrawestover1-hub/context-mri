@@ -12,6 +12,7 @@
 - [x] Public repository: https://github.com/ezrawestover1-hub/context-mri
 - [x] README with setup, sample data, and judge test path
 - [x] Codex task/session ID captured: `019f71e4-f746-7083-a465-1c84948bbd8c`
+- [x] GPT-5.6 Terra Codex adversarial audit captured in `submission/GPT_5_6_TERRA_AUDIT.md`
 - [x] Installation instructions and supported platforms
 - [x] No-key fixture path for testing without rebuilding infrastructure
 - [x] Public no-login demo: https://context-mri.ezra-westover1.chatgpt.site
@@ -21,7 +22,8 @@
 
 ### Technological implementation
 
-- Live GPT‑5.6 Responses API experiment runner
+- GPT‑5.6 Terra Codex adversarial audit of evaluator, provenance, and judge flow
+- Optional GPT‑5.6 Responses API experiment runner for funded API projects
 - Strict Structured Outputs
 - Concurrency-limited 18-run discovery suite with one-call quota probe
 - Three independent recommended-pack verification runs (21 traces total)
@@ -53,11 +55,10 @@
 
 ## Final manual actions
 
-1. Record scene eight in the local recording booth and rebuild `submission/video/out/context-mri-demo.mp4` with explicit Codex audio coverage.
-2. Add API billing or credits, run `npm run evidence:live`, and verify the authentic GPT-5.6 artifact.
-3. Upload the final video publicly to YouTube and add the URL to Devpost.
-4. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
-5. Submit before **July 21, 2026 at 5:00 PM PDT**.
+1. Record scene eight in the local recording booth and rebuild `submission/video/out/context-mri-demo.mp4` with explicit Codex and GPT-5.6 Terra audio coverage.
+2. Upload the final video publicly to YouTube and add the URL to Devpost.
+3. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
+4. Submit before **July 21, 2026 at 5:00 PM PDT**.
 
 ## Verified public judge path
 

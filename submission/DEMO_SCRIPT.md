@@ -42,7 +42,7 @@ The current seven-scene render uses the real deployed interface, burned-in capti
 
 **Screen:** Final Context MRI card, public URL, and the Codex + GPT-5.6 build summary.
 
-“Why does this matter? Teams can spend hours blaming the prompt or buying a stronger model when one bad file is the real problem. Context MRI replaces that guesswork with evidence, helping agents become more accurate, less expensive, and easier to trust. Codex helped me choose the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies through browser quality checks.”
+“Why does this matter? Teams can spend hours blaming the prompt or buying a stronger model when one bad file is the real problem. Context MRI replaces that guesswork with evidence, helping agents become more accurate, less expensive, and easier to trust. Codex helped me choose the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies. Then I used GPT‑5.6 Terra in Codex for an adversarial audit of the evaluator, the fixture claims, and the final judge flow. It made the submission more honest and more defensible.”
 
 ## Render status
 

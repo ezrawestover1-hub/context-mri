@@ -49,8 +49,8 @@ export function ProvenanceModal({ report, onClose }: { report: ExperimentReport;
     <header><div><span>EVIDENCE PROVENANCE</span><h2>What “fixture replay” means</h2></div><button onClick={onClose} aria-label="Close explanation"><X size={19} /></button></header>
     <div className="provenance-copy">
       <Info size={24} />
-      <p>This screen is using a deterministic simulation of the bundled support-agent example because the connected API project has no model quota. It exercises the same ablation, classification, trace, pack-verification, and export pipeline—but it is <strong>not presented as fresh GPT-5.6 evidence.</strong></p>
-      <p>With API quota, Context MRI automatically replaces these records with {report.totalRuns} inspectable model traces and keeps the same independent evaluator. The subject model never supplies its own grading fields.</p>
+      <p>This public screen intentionally uses a deterministic simulation of the bundled support-agent example. It exercises the same ablation, classification, trace, pack-verification, and export pipeline—but it is <strong>not presented as fresh GPT-5.6 evidence.</strong></p>
+      <p>With API quota, Context MRI can replace these records with {report.totalRuns} inspectable model traces and keep the same independent evaluator. The subject model never supplies its own grading fields.</p>
     </div>
     <footer><span>{report.provenance.fixtureNote}</span><button className="apply-rewrite" onClick={onClose}>Understood</button></footer>
   </ModalShell>;

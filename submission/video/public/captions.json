@@ -196,23 +196,30 @@
     "confidence": null
   },
   {
-    "text": "Codex helped me choose the idea and research the official requirements.",
+    "text": "Codex helped me choose the idea, research the official requirements, and design the experiment.",
     "startMs": 114300,
-    "endMs": 119400,
+    "endMs": 120400,
     "timestampMs": null,
     "confidence": null
   },
   {
-    "text": "It helped design the experiment, build and test the engine, and refine the interface.",
-    "startMs": 119400,
-    "endMs": 125300,
+    "text": "It helped build and test the engine, refine the interface, and catch mathematical inconsistencies.",
+    "startMs": 120400,
+    "endMs": 126100,
     "timestampMs": null,
     "confidence": null
   },
   {
-    "text": "It also caught mathematical inconsistencies through browser quality checks.",
-    "startMs": 125300,
-    "endMs": 130900,
+    "text": "Then I used GPT-five-point-six Terra in Codex for an adversarial audit of the evaluator, fixture claims, and final judge flow.",
+    "startMs": 126100,
+    "endMs": 133600,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "It made the submission more honest and more defensible.",
+    "startMs": 133600,
+    "endMs": 138400,
     "timestampMs": null,
     "confidence": null
   }

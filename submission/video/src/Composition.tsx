@@ -12,9 +12,9 @@ import {
 import { CaptionOverlay } from "./CaptionOverlay";
 
 const FPS = 30;
-// Scene eight is pre-wired with a conservative timing estimate. Replace 17.0
+// Scene eight is pre-wired with a conservative timing estimate. Replace 25.0
 // with the measured pickup duration before the final render.
-const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24, 17.0];
+const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24, 25.0];
 const SCENE_FRAMES = AUDIO_DURATIONS.map((seconds) => Math.ceil((seconds + 0.9) * FPS));
 const SCENE_STARTS = SCENE_FRAMES.map((_, index) =>
   SCENE_FRAMES.slice(0, index).reduce((sum, duration) => sum + duration, 0),
@@ -175,11 +175,11 @@ const CodexScene = () => {
     ["01", "IDEA + RULES", "Selected the concept and checked the official requirements."],
     ["02", "EXPERIMENT", "Designed the ablation method and trust boundaries."],
     ["03", "BUILD + TEST", "Implemented the engine, evaluator, and automated checks."],
-    ["04", "UI + QA", "Refined the interface and caught mathematical inconsistencies."],
+    ["04", "GPT-5.6 TERRA AUDIT", "Stress-tested the evaluator, fixture claims, and final judge flow."],
   ];
   return <AbsoluteFill className="scene cream-scene codex-scene">
     <div className="codex-heading">
-      <div><Kicker>06 · HOW CODEX WAS USED</Kicker><h2>From idea to tested evidence.</h2></div>
+      <div><Kicker>06 · HOW CODEX + GPT-5.6 WERE USED</Kicker><h2>From idea to tested evidence.</h2></div>
       <Brand />
     </div>
     <div className="codex-steps">
@@ -190,7 +190,7 @@ const CodexScene = () => {
         <b>{number}</b><span><strong>{title}</strong><small>{copy}</small></span>
       </div>)}
     </div>
-    <p className="codex-close">Codex accelerated the work. Context MRI is the tested product.</p>
+    <p className="codex-close">Codex accelerated the work. GPT-5.6 Terra challenged its evidence.</p>
   </AbsoluteFill>;
 };
 
