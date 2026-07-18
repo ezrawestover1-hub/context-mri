@@ -20,6 +20,8 @@ Context MRI runs controlled context-ablation experiments against an AI agent, id
 
 Public no-login demo: https://context-mri.ezra-westover1.chatgpt.site
 
+Public source repository: https://github.com/ezrawestover1-hub/context-mri
+
 The hosted judge path is an explicitly labeled deterministic fixture replay, so it needs no account, API key, or external setup. The repository also includes the live GPT-5.6 Sol experiment path for funded OpenAI API projects.
 
 ## Inspiration

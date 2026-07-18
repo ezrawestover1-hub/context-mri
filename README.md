@@ -12,6 +12,8 @@ The included Build Week example diagnoses an archived API guide that conflicts w
 
 **Public judge demo:** [context-mri.ezra-westover1.chatgpt.site](https://context-mri.ezra-westover1.chatgpt.site)
 
+**Public source repository:** [github.com/ezrawestover1-hub/context-mri](https://github.com/ezrawestover1-hub/context-mri)
+
 The hosted demo opens without an account, API key, install, or build step. It intentionally uses the clearly labeled deterministic fixture replay so every judge gets the same complete, inspectable workflow. To generate fresh GPT-5.6 Sol traces instead, run the project locally with funded API quota as described below.
 
 ### Fastest path: public demo
