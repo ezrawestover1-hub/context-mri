@@ -27,7 +27,7 @@
 - Separate **Run fresh audit** endpoint that returns a clear no-quota error instead of substituting fixture output
 - Strict Structured Outputs
 - Concurrency-limited 18-run discovery suite with one-call quota probe
-- Three independent recommended-pack verification runs (21 traces total)
+- Three independent recommended-pack verification runs (21 deterministic fixture traces; 24 fresh bundled-live traces with the pre-registered pair check)
 - Reusable, contract-driven evaluator proven across Support, Billing, and a non-endpoint Security Release Safety contract
 - Public replay endpoint deliberately separated from the optional live runner, so judge clicks are deterministic and cannot consume a configured key
 - Evidence-derived file classifications and context pack

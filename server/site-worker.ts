@@ -1,7 +1,7 @@
 import type { ContextItem } from '../src/types.js';
 import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
 import { checkContextGuard, isContextGuard } from './context-guard.js';
-import { fixtureReport } from './experiment-engine.js';
+import { fixtureReport, liveSuiteRunCount } from './experiment-engine.js';
 
 type AssetsBinding = {
   fetch(request: Request): Promise<Response>;
@@ -62,7 +62,7 @@ const worker = {
         ok: true,
         model: 'gpt-5.6-sol',
         keyConfigured: false,
-        experimentEngine: 'v3',
+        experimentEngine: 'v4',
         deploymentMode: 'public-fixture',
       });
     }
@@ -71,13 +71,17 @@ const worker = {
       return json({
         available: false,
         model: 'gpt-5.6-sol',
-        suiteRuns: 21,
+        suiteRuns: liveSuiteRunCount(defaultDiagnosticProject.contexts, defaultDiagnosticProject),
         reason: 'This public no-login demo intentionally has no stored API key. Run a funded live audit from a self-hosted copy, then publish its raw artifact separately.',
       });
     }
 
     if (request.method === 'POST' && url.pathname === '/api/live/experiments') {
       return json({ error: 'Fresh live runs are unavailable on this public fixture host. No fixture replay was substituted.' }, 503);
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/judge-lab/experiments') {
+      return json({ error: 'Judge Lab is intentionally local and fresh-live only. This public fixture host stores no API key and never substitutes replay output.' }, 503);
     }
 
     if (request.method === 'POST' && (url.pathname === '/api/experiments' || url.pathname === '/api/fixture')) {

@@ -14,9 +14,10 @@ type EvidenceModesProps = {
   onFixture: () => void;
   onLive: () => void;
   onInspectContract: () => void;
+  onOpenJudgeLab: () => void;
 };
 
-export function EvidenceModes({ running, liveStatus, hasPublishedLiveEvidence, onFixture, onLive, onInspectContract }: EvidenceModesProps) {
+export function EvidenceModes({ running, liveStatus, hasPublishedLiveEvidence, onFixture, onLive, onInspectContract, onOpenJudgeLab }: EvidenceModesProps) {
   const liveNote = hasPublishedLiveEvidence
     ? 'A separate live artifact is published below. Inspect it before treating any result as general evidence.'
     : liveStatus?.available
@@ -26,7 +27,7 @@ export function EvidenceModes({ running, liveStatus, hasPublishedLiveEvidence, o
   return <section className="evidence-modes" aria-labelledby="evidence-modes-title">
     <div className="evidence-modes-heading">
       <div><h2 id="evidence-modes-title">Choose the evidence you are looking at.</h2><p>Replay is useful for inspecting the product. A live audit is the only path that can support a fresh model claim.</p></div>
-      <button className="inspect-contract" onClick={onInspectContract}><FileSearch size={16} /> Inspect evaluator</button>
+      <div className="evidence-mode-actions"><button className="inspect-contract" onClick={onInspectContract}><FileSearch size={16} /> Inspect evaluator</button><button className="inspect-contract" onClick={onOpenJudgeLab}><Radio size={16} /> Open Judge Lab</button></div>
     </div>
     <div className="evidence-mode-grid">
       <article className="evidence-mode fixture-mode">

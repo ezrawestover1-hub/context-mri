@@ -6,6 +6,7 @@ import type {
   ExperimentMode,
   ExperimentReport,
   ExperimentRun,
+  InteractionCheck,
   ScoreBreakdown,
   VariantResult,
 } from '../src/types.js';
@@ -62,6 +63,18 @@ function variantsFor(contexts: ContextItem[]): Variant[] {
     { id: 'baseline', label: 'Baseline', omittedContextId: null },
     ...contexts.map(item => ({ id: `omit-${item.id}`, label: `−${titleFromContext(item)}`, omittedContextId: item.id })),
   ];
+}
+
+function interactionVariantFor(contexts: ContextItem[], contract: EvaluationContract): Variant | null {
+  const spec = contract.interaction;
+  if (!spec || !spec.contextIds.every(id => contexts.some(item => item.id === id))) return null;
+  const omitted = new Set(spec.contextIds);
+  return {
+    id: `interaction-${spec.id}`,
+    label: `−${spec.label}`,
+    omittedContextId: null,
+    includedContextIds: contexts.filter(item => !omitted.has(item.id)).map(item => item.id),
+  };
 }
 
 function activeContexts(contexts: ContextItem[], variant: Variant) {
@@ -237,6 +250,35 @@ function fixtureVariant(contexts: ContextItem[], variant: Variant, contract: Eva
   };
 }
 
+function buildInteractionCheck(
+  contract: EvaluationContract,
+  contexts: ContextItem[],
+  variants: VariantResult[],
+  interactionVariant: Variant,
+  runs: ExperimentRun[],
+): InteractionCheck {
+  const spec = contract.interaction;
+  if (!spec) throw new Error('Cannot build an interaction check without a registered interaction spec.');
+  const baseline = variants.find(variant => variant.id === 'baseline');
+  const first = variants.find(variant => variant.omittedContextId === spec.contextIds[0]);
+  const second = variants.find(variant => variant.omittedContextId === spec.contextIds[1]);
+  if (!baseline || !first || !second || !runs.length) throw new Error('Interaction check requires baseline and both single-file conditions.');
+  const mean = Math.round(runs.reduce((sum, run) => sum + run.score, 0) / runs.length);
+  const individualLosses: [number, number] = [baseline.mean - first.mean, baseline.mean - second.mean];
+  const combinedLoss = baseline.mean - mean;
+  const additiveLoss = individualLosses[0] + individualLosses[1];
+  return {
+    ...spec,
+    includedContextIds: interactionVariant.includedContextIds ?? contexts.map(item => item.id),
+    runs,
+    mean,
+    individualLosses,
+    combinedLoss,
+    additiveLoss,
+    overlap: additiveLoss - combinedLoss,
+  };
+}
+
 function classifyContext(contribution: number): ContextStatus {
   if (contribution >= 20) return 'required';
   if (contribution >= 5) return 'useful';
@@ -283,6 +325,7 @@ function buildReport(
   packVerification: VariantResult,
   mode: ExperimentMode,
   contract: EvaluationContract,
+  interaction?: InteractionCheck,
 ): ExperimentReport {
   const baseline = variants[0];
   const contextEvidence = deriveContextEvidence(contexts, variants);
@@ -307,7 +350,7 @@ function buildReport(
     model: MODEL,
     reasoningEffort: 'medium',
     repeats: REPEATS,
-    totalRuns: variants.reduce((sum, variant) => sum + variant.runs.length, 0) + packVerification.runs.length,
+    totalRuns: variants.reduce((sum, variant) => sum + variant.runs.length, 0) + packVerification.runs.length + (interaction?.runs.length ?? 0),
     baselineScore: baseline.mean,
     optimizedScore: packVerification.mean,
     tokenReduction: originalTokens ? Math.round((1 - optimizedTokens / originalTokens) * 100) : 0,
@@ -316,6 +359,7 @@ function buildReport(
     variants,
     packVerification,
     contextEvidence,
+    ...(interaction ? { interaction } : {}),
     evaluationContract: {
       id: contract.id,
       label: contract.label,
@@ -326,6 +370,7 @@ function buildReport(
       currentSourceLabel: contract.currentSourceLabel,
       legacySourceLabel: contract.legacySourceLabel,
       rubric: contract.rubric,
+      ...(contract.interaction ? { interaction: contract.interaction } : {}),
     },
     diagnosis: {
       finding: harmfulDetected
@@ -360,6 +405,7 @@ function contractFor(id: DiagnosticProjectId = DEFAULT_CONTRACT.id) {
 
 export function fixtureReport(contexts: ContextItem[], contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id) {
   const contract = contractFor(contractId);
+  if (contract.fixtureProfile === 'judge-lab') throw new Error('Judge Lab contracts can only run as fresh live evaluations.');
   const variants = variantsFor(contexts).map(variant => fixtureVariant(contexts, variant, contract));
   const evidence = deriveContextEvidence(contexts, variants);
   const recommendedContextIds = recommendedIdsFor(evidence);
@@ -459,6 +505,10 @@ async function liveReport(contexts: ContextItem[], apiKey: string, contract: Eva
   const first = await runLiveCell(client, contexts, jobs[0].variant, jobs[0].repeat, contract);
   const remaining = await mapWithConcurrency(jobs.slice(1), 4, job => runLiveCell(client, contexts, job.variant, job.repeat, contract));
   const variantResults = groupRuns(variants, [first, ...remaining]);
+  const interactionVariant = interactionVariantFor(contexts, contract);
+  const interactionRuns = interactionVariant
+    ? await mapWithConcurrency(Array.from({ length: REPEATS }, (_, index) => index + 1), 3, repeat => runLiveCell(client, contexts, interactionVariant, repeat, contract))
+    : [];
   const recommendedContextIds = recommendedIdsFor(deriveContextEvidence(contexts, variantResults));
   const packVariant: Variant = {
     id: 'recommended-pack',
@@ -472,12 +522,24 @@ async function liveReport(contexts: ContextItem[], apiKey: string, contract: Eva
     repeat => runLiveCell(client, contexts, packVariant, repeat, contract),
   );
   const packVerification = groupRuns([packVariant], packRuns)[0];
-  return buildReport(contexts, variantResults, packVerification, 'live', contract);
+  const interaction = interactionVariant
+    ? buildInteractionCheck(contract, contexts, variantResults, interactionVariant, interactionRuns)
+    : undefined;
+  return buildReport(contexts, variantResults, packVerification, 'live', contract, interaction);
+}
+
+export function liveSuiteRunCount(contexts: ContextItem[], contract: EvaluationContract = DEFAULT_CONTRACT) {
+  return (variantsFor(contexts).length + 1 + (interactionVariantFor(contexts, contract) ? 1 : 0)) * REPEATS;
 }
 
 export async function runLiveExperimentSuite(contexts: ContextItem[], apiKey: string, contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id): Promise<ExperimentReport> {
   if (!apiKey) throw new Error('A usable OPENAI_API_KEY is required for live evidence generation.');
   return liveReport(contexts, apiKey, contractFor(contractId));
+}
+
+export async function runLiveContractExperimentSuite(contexts: ContextItem[], apiKey: string, contract: EvaluationContract): Promise<ExperimentReport> {
+  if (!apiKey) throw new Error('A usable OPENAI_API_KEY is required for live evidence generation.');
+  return liveReport(contexts, apiKey, contract);
 }
 
 export async function runExperimentSuite(contexts: ContextItem[], apiKey?: string, contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id): Promise<ExperimentReport> {

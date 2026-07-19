@@ -5,7 +5,8 @@ import cors from 'cors';
 import type { ContextItem } from '../src/types.js';
 import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
 import { checkContextGuard, isContextGuard } from './context-guard.js';
-import { fixtureReport, runExperimentSuite, runLiveExperimentSuite } from './experiment-engine.js';
+import { fixtureReport, liveSuiteRunCount, runExperimentSuite, runLiveContractExperimentSuite, runLiveExperimentSuite } from './experiment-engine.js';
+import { createJudgeLabContract, parseJudgeLabInput } from './judge-lab.js';
 
 dotenv.config({ path: '.env.local', override: false });
 
@@ -43,7 +44,7 @@ app.get('/api/health', (_req, res) => res.json({
 app.get('/api/live-status', (_req, res) => res.json({
   available: Boolean(process.env.OPENAI_API_KEY),
   model: 'gpt-5.6-sol',
-  suiteRuns: 21,
+  suiteRuns: liveSuiteRunCount(defaultDiagnosticProject.contexts, defaultDiagnosticProject),
   reason: process.env.OPENAI_API_KEY
     ? 'A server-side API key is configured. The first model call is a quota probe; a failed probe never becomes fixture output.'
     : 'No server-side API key is configured. Add funded API quota locally to run fresh traces.',
@@ -77,6 +78,24 @@ app.post('/api/live/experiments', async (req, res) => {
     console.error('Live experiment suite failed:', message);
     res.status(quotaError ? 402 : 500).json({ error: quotaError
       ? 'Fresh live evidence was not generated because this API project has no available quota. No fixture replay was substituted.'
+      : message });
+  }
+});
+
+app.post('/api/judge-lab/experiments', async (req, res) => {
+  if (!validContexts(req.body?.contexts)) return res.status(400).json({ error: 'Supply 2–12 valid context items.' });
+  const lab = parseJudgeLabInput(req.body?.lab);
+  if (!lab) return res.status(400).json({ error: 'Supply a task, success answer, conflicting instruction, and source labels within the stated limits.' });
+  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'Judge Lab runs only as a fresh local evaluation with a funded server-side API project. It never substitutes fixture output.' });
+  try {
+    const contract = createJudgeLabContract(lab, req.body.contexts);
+    res.json(await runLiveContractExperimentSuite(req.body.contexts, process.env.OPENAI_API_KEY, contract));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown Judge Lab error';
+    const quotaError = message.includes('429') || message.toLowerCase().includes('quota');
+    console.error('Judge Lab suite failed:', message);
+    res.status(quotaError ? 402 : 500).json({ error: quotaError
+      ? 'Judge Lab did not generate live evidence because this API project has no available quota. No fixture replay was substituted.'
       : message });
   }
 });

@@ -54,11 +54,27 @@ export function Matrix({ report, selectedContextId, running, onOpenTrace }: Matr
     </div>
 
     <Contribution evidence={report.contextEvidence} />
+    {report.interaction ? <InteractionPanel report={report} onOpenTrace={onOpenTrace} /> : null}
     <div className="pack-proof">
       <span>PACK VERIFICATION</span>
       <strong>{report.packVerification.mean}/100</strong>
       <small>{report.packVerification.runs.map(run => run.score).join(' · ')} across {report.repeats} {report.mode === 'live' ? 'fresh GPT-5.6 checks' : 'fixture checks'}</small>
     </div>
+  </section>;
+}
+
+function InteractionPanel({ report, onOpenTrace }: Pick<MatrixProps, 'report' | 'onOpenTrace'>) {
+  const interaction = report.interaction!;
+  const overlapWord = interaction.overlap > 0 ? 'overlap' : interaction.overlap < 0 ? 'amplify each other' : 'add independently';
+  return <section className="interaction-panel" aria-label="Pairwise interaction check">
+    <div className="interaction-heading"><span>PRE-REGISTERED PAIR CHECK</span><strong>{interaction.label}</strong><small>{interaction.question}</small></div>
+    <div className="interaction-metrics">
+      <div><small>Individual losses</small><strong>{interaction.individualLosses[0]} + {interaction.individualLosses[1]} pp</strong></div>
+      <div><small>Joint loss</small><strong>{interaction.combinedLoss} pp</strong></div>
+      <div><small>Interaction</small><strong>{Math.abs(interaction.overlap)} pp {overlapWord}</strong></div>
+    </div>
+    <p>The joint-removal result is compared with the sum of the two leave-one-out drops. This measures this registered pair only; it does not prove every file interaction.</p>
+    <div className="interaction-traces"><span>TRACE SCORES</span>{interaction.runs.map(run => <button key={run.id} className={`score-cell ${run.passed ? 'pass' : 'fail'}`} onClick={() => onOpenTrace(run)} aria-label={`Open ${interaction.label} run ${run.repeat} trace, score ${run.score}`}>{run.score}</button>)}</div>
   </section>;
 }
 

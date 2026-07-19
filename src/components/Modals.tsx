@@ -54,6 +54,7 @@ export function ContractModal({ report, onClose }: { report: ExperimentReport; o
       <div className="contract-values"><span><small>Correct {contract.answerLabel}</small><code>{contract.expectedAnswer}</code></span><span><small>Disallowed instruction</small><code>{contract.disallowedTerms.join(', ')}</code></span><span><small>Authoritative source</small><strong>{contract.currentSourceLabel}</strong></span></div>
       <h3>SCORING RUBRIC</h3>
       <ol className="contract-rubric">{contract.rubric.map(item => <li key={item.id}><span><strong>{item.label}</strong><small>{item.description}</small></span><b>{item.maximum}</b></li>)}</ol>
+      {contract.interaction ? <div className="contract-interaction"><strong>Fresh-live pair check: {contract.interaction.label}</strong><span>{contract.interaction.question}</span><small>It runs only in a fresh suite and is not substituted into fixture replay.</small></div> : null}
       <p className="contract-scope">A file is only “harmful” if removing it improves this specific task under this evaluator. The result is not a universal truth about the file.</p>
     </div>
     <footer><span>Contract <code>{contract.id}</code> · task-specific and inspectable</span><button className="apply-rewrite" onClick={onClose}>Understood</button></footer>

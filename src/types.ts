@@ -8,6 +8,15 @@ export interface ContextItem {
   content: string;
 }
 
+/** Inputs for a local-only, fresh-live Judge Lab evaluation. */
+export interface JudgeLabInput {
+  task: string;
+  expectedAnswer: string;
+  disallowedInstruction: string;
+  currentSourceLabel: string;
+  legacySourceLabel: string;
+}
+
 export interface ContextEvidence {
   contextId: string;
   name: string;
@@ -31,6 +40,14 @@ export interface RubricCriterion {
   label: string;
   maximum: number;
   description: string;
+}
+
+/** A fixed two-file comparison registered before a fresh live suite begins. */
+export interface InteractionSpec {
+  id: string;
+  label: string;
+  question: string;
+  contextIds: [string, string];
 }
 
 export interface ExperimentRun {
@@ -61,6 +78,17 @@ export interface VariantResult {
   runs: ExperimentRun[];
 }
 
+export interface InteractionCheck extends InteractionSpec {
+  includedContextIds: string[];
+  runs: ExperimentRun[];
+  mean: number;
+  individualLosses: [number, number];
+  combinedLoss: number;
+  additiveLoss: number;
+  /** Positive means the two individual losses overlap rather than add cleanly. */
+  overlap: number;
+}
+
 export interface Diagnosis {
   finding: string;
   explanation: string;
@@ -80,6 +108,7 @@ export interface EvaluationContractSummary {
   currentSourceLabel: string;
   legacySourceLabel: string;
   rubric: RubricCriterion[];
+  interaction?: InteractionSpec;
 }
 
 /** A portable, task-specific gate created from a completed Context MRI report. */
@@ -147,6 +176,8 @@ export interface ExperimentReport {
   variants: VariantResult[];
   packVerification: VariantResult;
   contextEvidence: ContextEvidence[];
+  /** Present only for a fresh suite whose contract pre-registers a pairwise check. */
+  interaction?: InteractionCheck;
   diagnosis: Diagnosis;
   evaluationContract: EvaluationContractSummary;
   recommendedContextIds: string[];

@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Download, Info, Play, Sparkles } from 'lucide-react';
 import { contexts as initialContexts, seedReport } from './data';
 import { defaultDiagnosticProject, diagnosticProjects, findDiagnosticProject } from './projects';
-import type { ContextGuard as ContextGuardType, ContextGuardCheck, ContextItem, ExperimentReport, ExperimentRun } from './types';
+import type { ContextGuard as ContextGuardType, ContextGuardCheck, ContextItem, ExperimentReport, ExperimentRun, JudgeLabInput } from './types';
 import { BrandMark } from './components/BrandMark';
 import { ContextGuard } from './components/ContextGuard';
+import { JudgeLabModal } from './components/JudgeLabModal';
 import { ContextPack } from './components/ContextPack';
 import { EvidenceModes, type LiveRunnerStatus } from './components/EvidenceModes';
 import { DiagnosisBand } from './components/Explainer';
@@ -57,6 +58,8 @@ export default function App() {
   const [liveEvidence, setLiveEvidence] = useState<LiveEvidenceSummary | null>(null);
   const [liveStatus, setLiveStatus] = useState<LiveRunnerStatus | null>(null);
   const [contractOpen, setContractOpen] = useState(false);
+  const [judgeLabOpen, setJudgeLabOpen] = useState(false);
+  const [judgeLab, setJudgeLab] = useState<JudgeLabInput | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +85,7 @@ export default function App() {
   }, []);
 
   async function runMRI(scrollToResults = false, runContexts = contexts, runProjectId = projectId) {
+    setJudgeLab(null);
     setRunning(true);
     setRecommendationApplied(false);
     setAppliedVerification(null);
@@ -120,6 +124,7 @@ export default function App() {
   }
 
   async function runFreshLiveAudit() {
+    setJudgeLab(null);
     setRunning(true);
     setRecommendationApplied(false);
     setAppliedVerification(null);
@@ -147,6 +152,36 @@ export default function App() {
     }
   }
 
+  async function runJudgeLab(lab: JudgeLabInput) {
+    setRunning(true);
+    setRecommendationApplied(false);
+    setAppliedVerification(null);
+    setGuard(null);
+    setGuardCheck(null);
+    setStage('Starting a fresh local Judge Lab audit…');
+    try {
+      const response = await fetch('/api/judge-lab/experiments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contexts, lab }),
+      });
+      const payload = await response.json() as ExperimentReport | { error?: string };
+      if (!response.ok || !('mode' in payload)) throw new Error('error' in payload ? payload.error : 'Judge Lab audit failed');
+      if (payload.mode !== 'live') throw new Error('Judge Lab returned non-live evidence; it was not accepted.');
+      const mostHarmful = [...payload.contextEvidence].sort((a, b) => a.contribution - b.contribution)[0];
+      setReport(payload);
+      setJudgeLab(lab);
+      setJudgeLabOpen(false);
+      setSelected(mostHarmful?.contextId ?? contexts[0].id);
+      setStage(`Judge Lab complete · ${payload.totalRuns} fresh GPT-5.6 traces captured`);
+      window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    } catch (error) {
+      setStage(error instanceof Error ? `Judge Lab unavailable · ${error.message}` : 'Judge Lab unavailable');
+    } finally {
+      setRunning(false);
+    }
+  }
+
   function switchProject(nextProjectId: string) {
     const project = findDiagnosticProject(nextProjectId);
     if (!project || project.id === projectId) return;
@@ -157,6 +192,7 @@ export default function App() {
     setAppliedVerification(null);
     setGuard(null);
     setGuardCheck(null);
+    setJudgeLab(null);
     setStage(`Loading ${project.shortLabel} contract…`);
     void runMRI(false, project.contexts, project.id);
   }
@@ -267,13 +303,14 @@ export default function App() {
     setRunning(true);
     setStage('Rerunning with only the applied pack…');
     try {
-      const response = await fetch('/api/fixture', {
+      const response = await fetch(judgeLab ? '/api/judge-lab/experiments' : '/api/fixture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contexts: packContexts, projectId }),
+        body: JSON.stringify(judgeLab ? { contexts: packContexts, lab: judgeLab } : { contexts: packContexts, projectId }),
       });
       if (!response.ok) throw new Error((await response.json()).error || 'Applied-pack verification failed');
       const verification = await response.json() as ExperimentReport;
+      if (judgeLab && verification.mode !== 'live') throw new Error('Judge Lab verification returned non-live evidence; it was not accepted.');
       setAppliedVerification(verification);
       setStage(`Applied pack verified as the tested baseline · ${verification.baselineScore}/100 · ${packContexts.length} files`);
     } catch (error) {
@@ -350,6 +387,8 @@ export default function App() {
     setRewriteOpen(true);
   }
 
+  const isJudgeLabReport = report.evaluationContract.id === 'judge-lab-local';
+
   return <main className="app-shell">
     <input
       ref={fileInput}
@@ -385,6 +424,7 @@ export default function App() {
       onFixture={() => runMRI(true)}
       onLive={() => void runFreshLiveAudit()}
       onInspectContract={() => setContractOpen(true)}
+      onOpenJudgeLab={() => setJudgeLabOpen(true)}
     />
     <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} task={report.evaluationContract.task} />
     <BeforeRun contract={report.evaluationContract} />
@@ -421,7 +461,7 @@ export default function App() {
 
     <ContextPack contexts={contexts} report={report} applied={recommendationApplied} verification={appliedVerification} onApply={applyRecommendation} onCopy={copyManifest} />
 
-    <ContextGuard
+    {isJudgeLabReport ? <section className="context-guard judge-lab-guard-note"><div className="guard-heading"><div><span>PORTABLE GUARD</span><h2>Lab result exported; package a guard after calibration.</h2></div></div><p>Judge Lab is intentionally a fresh, task-specific evaluation. Its evidence can be exported now; promote it into a CI gate only after you review representative live traces and calibrate the success contract with your team.</p></section> : <ContextGuard
       guard={guard}
       check={guardCheck}
       running={running}
@@ -432,7 +472,7 @@ export default function App() {
       onCheckOriginal={checkOriginalLibrary}
       onDownload={downloadGuard}
       liveEvidence={liveEvidence}
-    />
+    />}
 
     <footer className="provenance-bar">
       <div><BrandMark /><span>{report.mode === 'live' ? 'Fresh GPT-5.6 run' : 'Fixture replay'} · inspectable evidence</span><Info size={14} /></div>
@@ -445,5 +485,6 @@ export default function App() {
     {rewriteOpen && selectedItem ? <RewriteModal fileName={selectedItem.name} disallowedTerm={report.evaluationContract.disallowedTerms[0]} expectedAnswer={report.evaluationContract.expectedAnswer} currentSourceLabel={report.evaluationContract.currentSourceLabel} onClose={() => setRewriteOpen(false)} onApply={applyRewrite} /> : null}
     {provenanceOpen ? <ProvenanceModal report={report} onClose={() => setProvenanceOpen(false)} /> : null}
     {contractOpen ? <ContractModal report={report} onClose={() => setContractOpen(false)} /> : null}
+    {judgeLabOpen ? <JudgeLabModal available={Boolean(liveStatus?.available)} running={running} contextCount={contexts.length} onClose={() => setJudgeLabOpen(false)} onRun={input => void runJudgeLab(input)} /> : null}
   </main>;
 }

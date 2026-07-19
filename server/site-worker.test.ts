@@ -19,7 +19,7 @@ test('public deployment adapter exposes an honest fixture health response', asyn
     ok: true,
     model: 'gpt-5.6-sol',
     keyConfigured: false,
-    experimentEngine: 'v3',
+    experimentEngine: 'v4',
     deploymentMode: 'public-fixture',
   });
 });
@@ -30,7 +30,7 @@ test('public deployment adapter makes live-run availability and non-fallback beh
   assert.deepEqual(await status.json(), {
     available: false,
     model: 'gpt-5.6-sol',
-    suiteRuns: 21,
+    suiteRuns: 24,
     reason: 'This public no-login demo intentionally has no stored API key. Run a funded live audit from a self-hosted copy, then publish its raw artifact separately.',
   });
 
@@ -41,6 +41,14 @@ test('public deployment adapter makes live-run availability and non-fallback beh
   }), noAssets);
   assert.equal(live.status, 503);
   assert.deepEqual(await live.json(), { error: 'Fresh live runs are unavailable on this public fixture host. No fixture replay was substituted.' });
+
+  const judgeLab = await worker.fetch(new Request('https://context-mri.test/api/judge-lab/experiments', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ contexts }),
+  }), noAssets);
+  assert.equal(judgeLab.status, 503);
+  assert.deepEqual(await judgeLab.json(), { error: 'Judge Lab is intentionally local and fresh-live only. This public fixture host stores no API key and never substitutes replay output.' });
 });
 
 test('public deployment adapter runs the complete fixture experiment', async () => {

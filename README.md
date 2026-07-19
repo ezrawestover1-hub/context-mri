@@ -4,7 +4,7 @@
 
 Context MRI is an evidence-first profiler for agent context. It runs a baseline, removes one context item at a time, repeats each condition, classifies every file from the measured score change, and verifies the recommended context pack with a final independent run.
 
-Context MRI ships with three selectable, bundled diagnostic contracts: support API migration, billing API migration, and security release safety. Each contract has its own task, source bundle, expected answer, disallowed instruction, inspectable rubric, and 21-trace replay. The security case is deliberately different: it asks a release agent to choose a credential procedure, identifies an unsafe token-pasting runbook, and moves from **53/100** to **100/100** while preserving a useful deployment-control file.
+Context MRI ships with three selectable, bundled diagnostic contracts: support API migration, billing API migration, and security release safety. Each contract has its own task, source bundle, expected answer, disallowed instruction, inspectable rubric, and 21-trace replay. A funded fresh-live suite adds a pre-registered pairwise check for 24 traces. The security case is deliberately different: it asks a release agent to choose a credential procedure, identifies an unsafe token-pasting runbook, and moves from **53/100** to **100/100** while preserving a useful deployment-control file.
 
 ![Context MRI guided pine-and-cream interface](./design/context-mri-guided-implementation.png)
 
@@ -18,7 +18,7 @@ The hosted demo opens without an account, API key, install, or build step. It in
 
 ### Fastest path: public demo
 
-1. Start with the two evidence choices: **Explore replay** for deterministic product inspection, or **Run fresh audit** only when a funded local server is available. The public host refuses live runs instead of silently substituting replay output.
+1. Start with the two evidence choices: **Explore replay** for deterministic product inspection, **Run fresh audit** for a bundled fresh suite, or **Open Judge Lab** to define a new task and success contract locally. The public host refuses live runs instead of silently substituting replay output.
 2. Choose **Support Agent Diagnostic**, **Billing Agent Diagnostic**, or **Security Release Diagnostic** in the project picker, then click **Run the included example**.
 3. The app automatically moves to the diagnosis and explains what each result label means.
 4. Click **Inspect evaluator** to see the task, correct answer, disallowed instruction, and exact rubric before interpreting a score.
@@ -45,13 +45,13 @@ Open [http://localhost:5173](http://localhost:5173), then:
 6. Run the applied pack as a new baseline. The second report proves which files were actually tested instead of treating a UI state change as verification.
 7. Use **Export evidence** to download the complete JSON ledger.
 
-No API quota is required to judge the complete interface and workflow. Every public-demo replay intentionally uses a clearly labeled deterministic **fixture replay** of the selected bundled contract; it is never represented as fresh model evidence or allowed to consume a key by surprise. **Run fresh audit** calls `/api/live/experiments` only; it returns a clear error rather than fixture output when the server has no funded quota. With a funded `OPENAI_API_KEY` in `.env.local`, the separate live runner can generate fresh GPT‑5.6 Sol traces for the same contract.
+No API quota is required to judge the complete interface and workflow. Every public-demo replay intentionally uses a clearly labeled deterministic **fixture replay** of the selected bundled contract; it is never represented as fresh model evidence or allowed to consume a key by surprise. **Run fresh audit** calls `/api/live/experiments` only; it returns a clear error rather than fixture output when the server has no funded quota. With a funded `OPENAI_API_KEY` in `.env.local`, the separate live runner can generate fresh GPT‑5.6 Sol traces for the same contract, including a pre-registered pairwise check.
 
 ```dotenv
 OPENAI_API_KEY=your_key_here
 ```
 
-Up to seven additional `.md`, `.json`, and `.txt` files can be added at once from the interface (20,000 characters maximum per file). Files stay in browser memory and the public demo measures them against the selected bundled contract and fixed success criteria. Fixture mode exercises the dynamic variant, classification, trace, pack, and export pipeline; fresh claims about custom content require live API quota.
+Up to seven additional `.md`, `.json`, and `.txt` files can be added at once from the interface (20,000 characters maximum per file). Files stay in browser memory. Fixture mode measures them only against the selected bundled contract and fixed success criteria. **Judge Lab** is the separate local-only path for a new task, expected answer, conflicting instruction, and source labels; it requires fresh funded API traces and cannot create a custom fixture.
 
 ## Verification
 
@@ -96,7 +96,7 @@ This optional command requires live GPT-5.6 Sol responses and writes `public/evi
 
 ## How the experiment works
 
-For each five-item bundled contract, Context MRI creates six discovery conditions: the full baseline plus one condition omitting each item. It runs each condition three times for **18 ablation traces**. It then builds a recommended pack from measured contribution and runs that pack three more times, producing **21 inspectable traces** total. Switching the project changes the task, source bundle, expected answer, disallowed instruction, task-specific rubric, report dataset, and all 21 trace records.
+For each five-item bundled contract, Context MRI creates six discovery conditions: the full baseline plus one condition omitting each item. It runs each condition three times for **18 ablation traces**. It then builds a recommended pack from measured contribution and runs that pack three more times, producing **21 inspectable fixture traces** total. A fresh-live bundled suite adds three runs of one pairwise omission registered in the contract before it starts, producing **24 traces**. Switching the project changes the task, source bundle, expected answer, disallowed instruction, task-specific rubric, report dataset, and trace ledger together.
 
 Each model output contains only a recommended answer and explanation. Independent application code—not model-reported grading fields—scores it from 0–100 using the selected contract's inspectable rubric. The API contracts use endpoint labels; the security contract uses procedure and policy-risk labels:
 
@@ -124,6 +124,14 @@ Classification is derived—not supplied by the input:
 | `<= −5` | Harmful | Remove or rewrite |
 
 Positive contribution means removing the file hurts the task. Negative contribution means the task improves without it. The interface describes this as controlled, task-specific evidence rather than universal causal proof.
+
+The live pairwise check compares the joint drop from removing two named files with the sum of their two individual drops:
+
+```text
+overlap = (loss when A is removed) + (loss when B is removed) - loss when A and B are removed together
+```
+
+It is a bounded interaction measurement for that registered pair, not a claim that every combination has been tested.
 
 ## GPT‑5.6 and Codex
 
@@ -156,7 +164,7 @@ The browser app and Node server are platform-independent and have been verified 
 ## Honest limitations
 
 - Three repeats establish directional stability for this demo, not statistical certainty.
-- Single-item ablation can miss interactions between context files.
+- Fixture replay uses single-item ablation. Fresh bundled suites add one pre-registered pairwise check, but broader interactions can still be missed.
 - Fixture results are deterministic replays of three bundled scenarios, not fresh GPT‑5.6 traces.
 - The included evaluator is intentionally task-specific; production use needs representative datasets and human-calibrated labels.
 - Context Guard catches the observed disallowed terms, score regressions, and changed recommended files for one contract; its fingerprints are tamper-evident rather than signed authorization, and it does not replace live production evaluation.
