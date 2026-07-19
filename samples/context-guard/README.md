@@ -9,3 +9,5 @@ npm run guard:check -- \
 ```
 
 The example exits successfully at `92/100`. Remove the `decision.activeContextIds` field to demonstrate a nonzero failure against the stale full library.
+
+The repository's [GitHub Actions workflow](../../.github/workflows/context-guard.yml) runs this exact check on relevant pull requests and main-branch changes. In a production repository, replace these sample paths with the downloaded guard and evidence export for the task you want to protect.

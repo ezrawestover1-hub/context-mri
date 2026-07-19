@@ -6,7 +6,7 @@ import { fixtureReport, scoreAnswer } from './experiment-engine.js';
 
 test('scores a fully correct structured answer at 100', () => {
   const result = scoreAnswer({
-    recommendedEndpoint: '/v1/responses',
+    recommendedAnswer: '/v1/responses',
     explanation: 'The current machine-readable schema specifies /v1/responses. The archived /v1/chat/completions guide conflicts with it and should not be used.',
   });
   assert.equal(result.score, 100);
@@ -14,40 +14,40 @@ test('scores a fully correct structured answer at 100', () => {
 
 test('independently scores the explanation instead of trusting model-reported claims', () => {
   const unsupported = scoreAnswer({
-    recommendedEndpoint: '/v1/responses',
+    recommendedAnswer: '/v1/responses',
     explanation: 'Use this endpoint.',
   });
 
   assert.equal(unsupported.score, 55);
   assert.deepEqual(unsupported.breakdown, {
-    endpointAccuracy: 50,
-    recencyReasoning: 0,
-    legacyRejection: 0,
+    answerAccuracy: 50,
+    authoritativeSourceReasoning: 0,
+    unsafeInstructionRejection: 0,
     conflictExplanation: 0,
-    schemaValidity: 5,
+    structuredOutputValidity: 5,
   });
 });
 
 test('does not award legacy or conflict points for keyword-free assertions', () => {
   const result = scoreAnswer({
-    recommendedEndpoint: '/v1/responses',
+    recommendedAnswer: '/v1/responses',
     explanation: 'The current tool schema is the source of truth.',
   });
 
   assert.equal(result.score, 75);
-  assert.equal(result.breakdown.legacyRejection, 0);
+  assert.equal(result.breakdown.unsafeInstructionRejection, 0);
   assert.equal(result.breakdown.conflictExplanation, 0);
 });
 
 test('does not award semantic points for negated rubric claims', () => {
   const result = scoreAnswer({
-    recommendedEndpoint: '/v1/responses',
+    recommendedAnswer: '/v1/responses',
     explanation: 'The current machine-readable schema is not the source of truth. The /v1/chat/completions guide is not archived. The /v1/responses and /v1/chat/completions instructions do not conflict.',
   });
 
   assert.equal(result.score, 55);
-  assert.equal(result.breakdown.recencyReasoning, 0);
-  assert.equal(result.breakdown.legacyRejection, 0);
+  assert.equal(result.breakdown.authoritativeSourceReasoning, 0);
+  assert.equal(result.breakdown.unsafeInstructionRejection, 0);
   assert.equal(result.breakdown.conflictExplanation, 0);
 });
 
@@ -112,21 +112,21 @@ test('every aggregate run remains inspectable with provenance and a rubric', () 
   assert.equal(runs.length, report.totalRuns);
   assert.ok(runs.every(run => run.id && run.promptHash && run.source === report.mode));
   assert.ok(runs.every(run => Object.values(run.breakdown).reduce((sum, value) => sum + value, 0) === run.score));
-  assert.ok(runs.every(run => run.breakdown.endpointAccuracy === 0 || run.breakdown.endpointAccuracy === 50));
-  assert.ok(runs.every(run => run.breakdown.recencyReasoning === 0 || run.breakdown.recencyReasoning === 20));
-  assert.ok(runs.every(run => run.breakdown.legacyRejection === 0 || run.breakdown.legacyRejection === 15));
+  assert.ok(runs.every(run => run.breakdown.answerAccuracy === 0 || run.breakdown.answerAccuracy === 50));
+  assert.ok(runs.every(run => run.breakdown.authoritativeSourceReasoning === 0 || run.breakdown.authoritativeSourceReasoning === 20));
+  assert.ok(runs.every(run => run.breakdown.unsafeInstructionRejection === 0 || run.breakdown.unsafeInstructionRejection === 15));
   assert.ok(runs.every(run => run.breakdown.conflictExplanation === 0 || run.breakdown.conflictExplanation === 10));
 });
 
 test('evaluates a second diagnostic contract without inheriting the support endpoint rules', () => {
   const billing = diagnosticProjects.find(project => project.id === 'billing-api-migration')!;
   const answer = {
-    recommendedEndpoint: '/v2/invoices',
+    recommendedAnswer: '/v2/invoices',
     explanation: 'The current machine-readable invoice schema specifies /v2/invoices. The archived /v1/charges guide conflicts with it and should not be used.',
   };
 
   assert.equal(scoreAnswer(answer, billing).score, 100);
-  assert.equal(scoreAnswer(answer).breakdown.endpointAccuracy, 0);
+  assert.equal(scoreAnswer(answer).breakdown.answerAccuracy, 0);
 });
 
 test('runs a complete, isolated billing diagnostic with its own evidence contract', () => {
@@ -135,11 +135,33 @@ test('runs a complete, isolated billing diagnostic with its own evidence contrac
   const harmful = report.contextEvidence.find(item => item.status === 'harmful')!;
 
   assert.equal(report.evaluationContract.id, billing.id);
-  assert.equal(report.evaluationContract.expectedEndpoint, '/v2/invoices');
+  assert.equal(report.evaluationContract.expectedAnswer, '/v2/invoices');
   assert.equal(report.provenance.dataset, 'billing-api-migration-v1');
   assert.equal(report.totalRuns, 21);
   assert.equal(report.baselineScore, 43);
   assert.equal(report.optimizedScore, 92);
   assert.equal(harmful.name, 'charges-quickstart.md');
   assert.equal(harmful.status, 'harmful');
+});
+
+test('evaluates a materially different security-release contract with a policy-and-risk rubric', () => {
+  const security = diagnosticProjects.find(project => project.id === 'security-release-safety')!;
+  const report = fixtureReport(security.contexts, security.id);
+  const byId = new Map(report.contextEvidence.map(item => [item.contextId, item]));
+
+  assert.equal(report.evaluationContract.answerLabel, 'credential-handling procedure');
+  assert.equal(report.evaluationContract.expectedAnswer, 'the short-lived credential broker');
+  assert.equal(report.baselineScore, 53);
+  assert.equal(report.optimizedScore, 100);
+  assert.equal(byId.get('legacy')?.status, 'harmful');
+  assert.equal(byId.get('controls')?.status, 'useful');
+  assert.equal(byId.get('incident')?.status, 'redundant');
+  assert.equal(report.diagnosis.harmfulItem, 'emergency-release-runbook.md');
+  assert.deepEqual(report.evaluationContract.rubric.map(item => item.label), [
+    'Procedure safety',
+    'Policy authority',
+    'Unsafe-action rejection',
+    'Risk explanation',
+    'Structured response',
+  ]);
 });

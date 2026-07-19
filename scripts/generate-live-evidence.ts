@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { contexts } from '../src/data.js';
+import { defaultDiagnosticProject, findDiagnosticProject } from '../src/projects.js';
 import { runLiveExperimentSuite } from '../server/experiment-engine.js';
 import { fingerprintContextBundle, fingerprintReport } from '../src/provenance.js';
 import type { ExperimentReport } from '../src/types.js';
@@ -10,10 +10,13 @@ dotenv.config({ path: '.env.local', override: false });
 
 const apiKey = process.env.OPENAI_API_KEY;
 if (!apiKey) throw new Error('No usable OPENAI_API_KEY was found in .env.local or the process environment.');
+const projectId = process.env.CONTEXT_MRI_PROJECT_ID ?? defaultDiagnosticProject.id;
+const project = findDiagnosticProject(projectId);
+if (!project) throw new Error(`Unknown CONTEXT_MRI_PROJECT_ID: ${projectId}`);
 
 let report: ExperimentReport;
 try {
-  report = await runLiveExperimentSuite(contexts, apiKey);
+  report = await runLiveExperimentSuite(project.contexts, apiKey, project.id);
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   if (message.includes('429') || message.toLowerCase().includes('quota')) {
@@ -25,19 +28,19 @@ try {
 if (report.mode !== 'live') throw new Error(`Expected live evidence but received ${report.mode}.`);
 
 const artifact = {
-  schemaVersion: '1.1',
+  schemaVersion: '1.2',
   generatedAt: new Date().toISOString(),
-  claim: 'Live GPT-5.6 Sol Responses API evidence generated from the bundled support-agent context experiment.',
+  claim: `Live GPT-5.6 Sol Responses API evidence generated from the bundled ${project.label} context experiment.`,
   provenance: {
     runner: 'npm run evidence:live',
     noFixtureFallback: true,
     source: 'direct Responses API run from this repository',
   },
-  evaluatorPolicy: 'Scores are computed by independent deterministic assertions over the returned endpoint and explanation. The subject model does not report grading booleans.',
-  inputContexts: contexts,
+  evaluatorPolicy: 'Scores are computed by independent deterministic assertions over the returned answer and explanation. The subject model does not report grading booleans.',
+  inputContexts: project.contexts,
   report,
   reportFingerprint: await fingerprintReport(report),
-  sourceContextFingerprint: await fingerprintContextBundle(contexts),
+  sourceContextFingerprint: await fingerprintContextBundle(project.contexts),
 };
 
 const outputPath = resolve('public/evidence/live-gpt-5.6.json');

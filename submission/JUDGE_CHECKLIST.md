@@ -24,16 +24,18 @@
 
 - GPT‑5.6 Terra Codex adversarial audit of evaluator, provenance, and judge flow
 - Optional GPT‑5.6 Responses API experiment runner for funded API projects
+- Separate **Run fresh audit** endpoint that returns a clear no-quota error instead of substituting fixture output
 - Strict Structured Outputs
 - Concurrency-limited 18-run discovery suite with one-call quota probe
 - Three independent recommended-pack verification runs (21 traces total)
-- Reusable, contract-driven evaluator proven across isolated Support and Billing migrations
+- Reusable, contract-driven evaluator proven across Support, Billing, and a non-endpoint Security Release Safety contract
 - Public replay endpoint deliberately separated from the optional live runner, so judge clicks are deterministic and cannot consume a configured key
 - Evidence-derived file classifications and context pack
-- Independent deterministic evaluator over endpoint + explanation; no self-reported model grades
+- Independent deterministic evaluator over answer + explanation; no self-reported model grades
 - Unit-tested evaluator, aggregate, classification, and provenance invariants
 - Applied-pack rerun submits the reduced bundle as a separate experiment and captures its report ID
 - Downloadable Context Guard blocks the original stale library, passes the repaired pack, fingerprints the task contract and recommended source files, and has a zero-service CI runner that exits nonzero on regression or provenance mismatch
+- Committed GitHub Actions workflow runs the Context Guard check on relevant pull requests and main-branch changes
 
 ### Design
 
@@ -41,6 +43,7 @@
 - Editorial scientific-instrument visual system
 - Matrix-to-trace interaction
 - Honest live/fixture provenance
+- Top-level evidence-mode choice and inspectable task-specific evaluator contract
 - Working export, copy, upload, exclusion, and rewrite controls
 - Responsive narrow-screen layout
 

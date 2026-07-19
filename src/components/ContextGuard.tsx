@@ -11,7 +11,8 @@ type ContextGuardProps = {
   guard: ContextGuardType | null;
   check: ContextGuardCheck | null;
   running: boolean;
-  legacyEndpoint: string;
+  answerLabel: string;
+  disallowedTerm: string;
   onCreate: () => void;
   onCheckRecommended: () => void;
   onCheckOriginal: () => void;
@@ -19,7 +20,7 @@ type ContextGuardProps = {
   liveEvidence: LiveEvidenceSummary | null;
 };
 
-export function ContextGuard({ guard, check, running, legacyEndpoint, onCreate, onCheckRecommended, onCheckOriginal, onDownload, liveEvidence }: ContextGuardProps) {
+export function ContextGuard({ guard, check, running, answerLabel, disallowedTerm, onCreate, onCheckRecommended, onCheckOriginal, onDownload, liveEvidence }: ContextGuardProps) {
   return <section className="context-guard" id="context-guard" aria-labelledby="context-guard-title">
     <div className="guard-heading">
       <div className="guard-kicker"><ShieldCheck size={15} /> Regression handoff</div>
@@ -28,13 +29,13 @@ export function ContextGuard({ guard, check, running, legacyEndpoint, onCreate, 
     </div>
 
     {guard === null ? <div className="guard-empty">
-      <div><strong>Create a Context Guard from this report</strong><span>It will require at least 80/100 and block <code>{legacyEndpoint}</code>.</span></div>
+      <div><strong>Create a Context Guard from this report</strong><span>It will require at least 80/100 and block <code>{disallowedTerm}</code>.</span></div>
       <button className="guard-primary" onClick={onCreate}><ShieldCheck size={17} /> Create regression guard</button>
     </div> : <>
       <div className="guard-details">
         <div><small>Gate</small><strong>{guard.minimumScore}/100 minimum</strong></div>
         <div><small>Blocks</small><code>{guard.blockedTerms.join(', ')}</code></div>
-        <div><small>Protects</small><span>{guard.expectedEndpoint}</span></div>
+        <div><small>Protects</small><span>{answerLabel}: {guard.expectedAnswer}</span></div>
         <div><small>Source</small><span>{guard.sourceReportId}</span></div>
         <div><small>Integrity</small><span>SHA-256 contract + pack</span></div>
       </div>

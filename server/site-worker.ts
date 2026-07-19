@@ -67,6 +67,19 @@ const worker = {
       });
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/live-status') {
+      return json({
+        available: false,
+        model: 'gpt-5.6-sol',
+        suiteRuns: 21,
+        reason: 'This public no-login demo intentionally has no stored API key. Run a funded live audit from a self-hosted copy, then publish its raw artifact separately.',
+      });
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/live/experiments') {
+      return json({ error: 'Fresh live runs are unavailable on this public fixture host. No fixture replay was substituted.' }, 503);
+    }
+
     if (request.method === 'POST' && (url.pathname === '/api/experiments' || url.pathname === '/api/fixture')) {
       let body: unknown;
       try {

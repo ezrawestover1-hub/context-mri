@@ -13,7 +13,7 @@ export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroInt
   return <section className="hero-intro" aria-labelledby="hero-title">
     <div className="hero-copy">
       <h1 id="hero-title">Find the one file making your agent worse.</h1>
-      <p>Give Context MRI the task your agent must complete and the files it reads. It tests each file, shows what helps or hurts, and builds a smaller context pack you can verify.</p>
+      <p>Context MRI runs a task-specific ablation: it tests each context file, shows what helps or hurts under one stated evaluator, and builds a smaller pack you can verify.</p>
       <div className="hero-actions">
         <button className="hero-primary" onClick={onRun} disabled={running}>
           {running ? <Sparkles size={18} /> : <Play size={18} fill="currentColor" />}
@@ -21,7 +21,7 @@ export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroInt
         </button>
         <button className="hero-secondary" onClick={onAddContext}><Upload size={17} /> Add my context files</button>
       </div>
-      <p className="hero-note">No account, API key, or setup required for the included example.</p>
+      <p className="hero-note">No account, API key, or setup required to inspect the included replay.</p>
       <div className="judge-path" aria-label="Thirty-second judge path">
         <strong>Try this in 30 seconds</strong>
         <ol>
@@ -73,12 +73,12 @@ export function BeforeRun({ contract }: { contract: EvaluationContractSummary })
     <ol className="input-guide">
       <li><span>1</span><div><h3>Define the task</h3><p>“{contract.task}”</p></div></li>
       <li><span>2</span><div><h3>Add the context</h3><p>The <code>.md</code>, <code>.json</code>, or <code>.txt</code> files your agent reads before answering.</p></div></li>
-      <li><span>3</span><div><h3>Know what success means</h3><p>The independent <code>{contract.id}</code> evaluator checks the returned endpoint and explanation for source recency, legacy risk, conflict handling, and schema validity.</p></div></li>
+      <li><span>3</span><div><h3>Know what success means</h3><p>The independent <code>{contract.id}</code> evaluator checks the returned {contract.answerLabel} and explanation against an inspectable rubric for source authority, instruction risk, conflict handling, and response validity.</p></div></li>
     </ol>
     <div className="loaded-note"><Check size={18} /><span><strong>Ready now:</strong> a completed sample result is shown below. Run the example to watch Context MRI rebuild it from the loaded task, five files, and scoring rubric.</span></div>
     <div className="upload-guidance">
       <strong>Using your own files?</strong>
-      <span>Add up to seven <code>.md</code>, <code>.json</code>, or <code>.txt</code> files, each under 20,000 characters. They stay in this browser tab. The public demo measures them against the selected bundled contract so every comparison uses the same success criteria.</span>
+      <span>Add up to seven <code>.md</code>, <code>.json</code>, or <code>.txt</code> files, each under 20,000 characters. They stay in this browser tab. The public replay measures them only against the selected bundled contract; it does not claim to invent a new evaluator for arbitrary tasks.</span>
     </div>
   </section>;
 }
@@ -87,7 +87,7 @@ const resultDefinitions = [
   { status: 'required', title: 'Required', copy: 'Removing it makes the agent worse. Keep it.' },
   { status: 'useful', title: 'Useful', copy: 'It measurably helps the task. Keep it.' },
   { status: 'redundant', title: 'Redundant', copy: 'No measurable lift on this task. Optional.' },
-  { status: 'harmful', title: 'Harmful', copy: 'The agent improves without it. Remove or rewrite it.' },
+  { status: 'harmful', title: 'Harmful here', copy: 'The agent improves without it for this task and evaluator. Remove or rewrite it, then retest.' },
 ];
 
 export function ResultGuide() {

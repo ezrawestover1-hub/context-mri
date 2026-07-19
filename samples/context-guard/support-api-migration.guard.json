@@ -1,19 +1,19 @@
 {
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.2",
   "id": "context-mri-support-api-migration-guard",
   "label": "Support Agent Diagnostic regression guard",
   "createdAt": "2026-07-18T20:00:00.000Z",
-  "sourceReportId": "fixture-0f2d49b5",
+  "sourceReportId": "fixture-a52e8cc4",
   "sourceMode": "fixture-replay",
   "projectId": "support-api-migration",
   "task": "Which API endpoint should a support agent recommend when the supplied sources conflict?",
-  "expectedEndpoint": "/v1/responses",
+  "expectedAnswer": "/v1/responses",
   "minimumScore": 80,
   "recommendedContextIds": ["system", "schema", "rules"],
   "blockedTerms": ["/v1/chat/completions"],
-  "contractFingerprint": "60eb11e01d43e4fc60b4b9f29aee94d9a0ba388bc5963a45a336b6818eb48fb9",
-  "sourceReportFingerprint": "e347496acefc5c9eafff9d8b8dd69c51e5cc065b10bbaa0c9d04214db4dc5ecd",
+  "contractFingerprint": "a9886303d0851ce5342e616d91a686b29e07e0bebb4e1370446c4f7434d0ab78",
+  "sourceReportFingerprint": "2a8f08f07abe3ddc6774d1c2118d9d418fb0e5989dc05dc565bf85db864791f4",
   "sourceContextFingerprint": "fa4c821c24fc882a19adeed43c9d3d99294d6a31fa39de479cf1c48d134cdbb0",
   "recommendedPackFingerprint": "602bbd1db29da51f5176d96fddabe3e5c602bb50e67ca9c0dfb8af3a58d4d33f",
-  "guardFingerprint": "440d06073643587eaf162654050e4dc17e80ac04cfbbc98b67d0181d5b46aad9"
+  "guardFingerprint": "0062ecdd9eea0ffe1d93dcf2cb147c8941d3dcba8749bfd59d906778ca40bb2d"
 }

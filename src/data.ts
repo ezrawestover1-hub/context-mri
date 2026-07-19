@@ -13,9 +13,9 @@ const variantSeeds = [
 ] as const;
 
 function breakdown(score: number): ScoreBreakdown {
-  const entries: Array<[keyof ScoreBreakdown, number]> = [['endpointAccuracy', 50], ['recencyReasoning', 20], ['legacyRejection', 15], ['conflictExplanation', 10]];
+  const entries: Array<[keyof ScoreBreakdown, number]> = [['answerAccuracy', 50], ['authoritativeSourceReasoning', 20], ['unsafeInstructionRejection', 15], ['conflictExplanation', 10]];
   for (let mask = 0; mask < 2 ** entries.length; mask += 1) {
-    const value: ScoreBreakdown = { endpointAccuracy: 0, recencyReasoning: 0, legacyRejection: 0, conflictExplanation: 0, schemaValidity: 5 };
+    const value: ScoreBreakdown = { answerAccuracy: 0, authoritativeSourceReasoning: 0, unsafeInstructionRejection: 0, conflictExplanation: 0, structuredOutputValidity: 5 };
     entries.forEach(([key, points], index) => { if (mask & (1 << index)) value[key] = points; });
     if (Object.values(value).reduce((sum, points) => sum + points, 0) === score) return value;
   }
@@ -25,7 +25,7 @@ function breakdown(score: number): ScoreBreakdown {
 function makeRun(seed: { id: string; label: string; omittedContextId: string | null }, score: number, index: number): ExperimentRun {
   const passed = score >= 80;
   const scoreBreakdown = breakdown(score);
-  const correctEndpoint = scoreBreakdown.endpointAccuracy === 50;
+  const correctEndpoint = scoreBreakdown.answerAccuracy === 50;
   return {
     id: `fx-${seed.id}-r${index + 1}`,
     variantId: seed.id,
@@ -35,7 +35,7 @@ function makeRun(seed: { id: string; label: string; omittedContextId: string | n
     score,
     passed,
     output: passed ? 'Recommend POST /v1/responses. The chat completions note is archived.' : correctEndpoint ? 'Recommend POST /v1/responses, but source recency and the conflict are not fully explained.' : 'The schema appears newer, but the archived quickstart calls chat completions required, so I recommend the archived endpoint.',
-    recommendedEndpoint: correctEndpoint ? '/v1/responses' : '/v1/chat/completions',
+    recommendedAnswer: correctEndpoint ? '/v1/responses' : '/v1/chat/completions',
     durationMs: 824 + index * 71,
     inputTokens: 932 - (seed.omittedContextId ? 120 : 0),
     outputTokens: passed ? 46 : 31,
@@ -82,10 +82,12 @@ export const seedReport: ExperimentReport = {
     id: defaultDiagnosticProject.id,
     label: defaultDiagnosticProject.label,
     task: defaultDiagnosticProject.task,
-    expectedEndpoint: defaultDiagnosticProject.expectedEndpoint,
-    legacyEndpoints: defaultDiagnosticProject.legacyEndpoints,
+    answerLabel: defaultDiagnosticProject.answerLabel,
+    expectedAnswer: defaultDiagnosticProject.expectedAnswer,
+    disallowedTerms: defaultDiagnosticProject.disallowedTerms,
     currentSourceLabel: defaultDiagnosticProject.currentSourceLabel,
     legacySourceLabel: defaultDiagnosticProject.legacySourceLabel,
+    rubric: defaultDiagnosticProject.rubric,
   },
   diagnosis: {
     finding: 'Removing legacy-api.md raises the rubric score by 49 percentage points.',
@@ -99,7 +101,7 @@ export const seedReport: ExperimentReport = {
   minimalContextIds: ['system', 'schema', 'rules'],
   provenance: {
     dataset: 'support-api-migration-v1',
-    evaluator: 'Independent deterministic assertions over the returned endpoint and explanation; no model-reported grading fields',
+    evaluator: 'Independent deterministic assertions over the returned answer and explanation; no model-reported grading fields',
     passThreshold: 80,
     fixtureNote: 'Deterministic fixture simulation. Add API quota to generate fresh GPT-5.6 traces for custom context.',
   },

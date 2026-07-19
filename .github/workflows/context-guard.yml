@@ -1,0 +1,34 @@
+name: Context Guard
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'server/**'
+      - 'scripts/check-context-guard.ts'
+      - 'samples/context-guard/**'
+      - '.github/workflows/context-guard.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'server/**'
+      - 'scripts/check-context-guard.ts'
+      - 'samples/context-guard/**'
+      - '.github/workflows/context-guard.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  regression-guard:
+    name: Verify Context Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run guard:check -- --guard samples/context-guard/support-api-migration.guard.json --context samples/context-guard/support-api-migration-repaired.evidence.json

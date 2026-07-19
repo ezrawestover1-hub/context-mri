@@ -19,11 +19,18 @@ export interface ContextEvidence {
 }
 
 export interface ScoreBreakdown {
-  endpointAccuracy: number;
-  recencyReasoning: number;
-  legacyRejection: number;
+  answerAccuracy: number;
+  authoritativeSourceReasoning: number;
+  unsafeInstructionRejection: number;
   conflictExplanation: number;
-  schemaValidity: number;
+  structuredOutputValidity: number;
+}
+
+export interface RubricCriterion {
+  id: keyof ScoreBreakdown;
+  label: string;
+  maximum: number;
+  description: string;
 }
 
 export interface ExperimentRun {
@@ -36,7 +43,7 @@ export interface ExperimentRun {
   score: number;
   passed: boolean;
   output: string;
-  recommendedEndpoint: string;
+  recommendedAnswer: string;
   durationMs: number;
   inputTokens: number;
   outputTokens: number;
@@ -67,15 +74,17 @@ export interface EvaluationContractSummary {
   id: string;
   label: string;
   task: string;
-  expectedEndpoint: string;
-  legacyEndpoints: string[];
+  answerLabel: string;
+  expectedAnswer: string;
+  disallowedTerms: string[];
   currentSourceLabel: string;
   legacySourceLabel: string;
+  rubric: RubricCriterion[];
 }
 
 /** A portable, task-specific gate created from a completed Context MRI report. */
 export interface ContextGuard {
-  schemaVersion: '1.1';
+  schemaVersion: '1.2';
   id: string;
   label: string;
   createdAt: string;
@@ -83,7 +92,7 @@ export interface ContextGuard {
   sourceMode: ExperimentMode;
   projectId: string;
   task: string;
-  expectedEndpoint: string;
+  expectedAnswer: string;
   minimumScore: number;
   recommendedContextIds: string[];
   blockedTerms: string[];
@@ -112,7 +121,7 @@ export interface ContextGuardCheck {
   mode: ExperimentMode;
   score: number;
   minimumScore: number;
-  expectedEndpoint: string;
+  expectedAnswer: string;
   flaggedFiles: GuardFlaggedFile[];
   reasons: string[];
   integrity: {

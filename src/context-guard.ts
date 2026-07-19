@@ -2,7 +2,7 @@ import { findDiagnosticProject } from './projects';
 import { fingerprintContextBundle, fingerprintContract, fingerprintGuard, fingerprintReport } from './provenance';
 import type { ContextGuard, ContextItem, ExperimentReport } from './types';
 
-const GUARD_SCHEMA_VERSION = '1.1' as const;
+const GUARD_SCHEMA_VERSION = '1.2' as const;
 const MINIMUM_GUARD_SCORE = 80;
 
 /** Creates a portable, task-specific guard from an inspectable MRI report. */
@@ -22,10 +22,10 @@ export async function createContextGuard(report: ExperimentReport, sourceContext
     sourceMode: report.mode,
     projectId: contract.id,
     task: contract.task,
-    expectedEndpoint: contract.expectedEndpoint,
+    expectedAnswer: contract.expectedAnswer,
     minimumScore: MINIMUM_GUARD_SCORE,
     recommendedContextIds: [...report.recommendedContextIds],
-    blockedTerms: [...contract.legacyEndpoints],
+    blockedTerms: [...contract.disallowedTerms],
     contractFingerprint: await fingerprintContract(project),
     sourceReportFingerprint: await fingerprintReport(report),
     sourceContextFingerprint: await fingerprintContextBundle(sourceContexts),

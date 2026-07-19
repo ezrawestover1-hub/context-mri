@@ -23,10 +23,12 @@ function contractPayload(contract: EvaluationContractSummary) {
     id: contract.id,
     label: contract.label,
     task: contract.task,
-    expectedEndpoint: contract.expectedEndpoint,
-    legacyEndpoints: [...contract.legacyEndpoints].sort(),
+    answerLabel: contract.answerLabel,
+    expectedAnswer: contract.expectedAnswer,
+    disallowedTerms: [...contract.disallowedTerms].sort(),
     currentSourceLabel: contract.currentSourceLabel,
     legacySourceLabel: contract.legacySourceLabel,
+    rubric: contract.rubric.map(({ id, label, maximum, description }) => ({ id, label, maximum, description })),
   };
 }
 

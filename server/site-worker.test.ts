@@ -24,6 +24,25 @@ test('public deployment adapter exposes an honest fixture health response', asyn
   });
 });
 
+test('public deployment adapter makes live-run availability and non-fallback behavior explicit', async () => {
+  const status = await worker.fetch(new Request('https://context-mri.test/api/live-status'), noAssets);
+  assert.equal(status.status, 200);
+  assert.deepEqual(await status.json(), {
+    available: false,
+    model: 'gpt-5.6-sol',
+    suiteRuns: 21,
+    reason: 'This public no-login demo intentionally has no stored API key. Run a funded live audit from a self-hosted copy, then publish its raw artifact separately.',
+  });
+
+  const live = await worker.fetch(new Request('https://context-mri.test/api/live/experiments', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ contexts }),
+  }), noAssets);
+  assert.equal(live.status, 503);
+  assert.deepEqual(await live.json(), { error: 'Fresh live runs are unavailable on this public fixture host. No fixture replay was substituted.' });
+});
+
 test('public deployment adapter runs the complete fixture experiment', async () => {
   const response = await worker.fetch(new Request('https://context-mri.test/api/experiments', {
     method: 'POST',
@@ -53,10 +72,10 @@ test('public deployment adapter selects a supported diagnostic contract and reje
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ contexts: billing.contexts, projectId: billing.id }),
   }), noAssets);
-  const report = await supported.json() as { evaluationContract: { id: string; expectedEndpoint: string } };
+  const report = await supported.json() as { evaluationContract: { id: string; expectedAnswer: string } };
   assert.equal(supported.status, 200);
   assert.equal(report.evaluationContract.id, billing.id);
-  assert.equal(report.evaluationContract.expectedEndpoint, '/v2/invoices');
+  assert.equal(report.evaluationContract.expectedAnswer, '/v2/invoices');
 
   const rejected = await worker.fetch(new Request('https://context-mri.test/api/experiments', {
     method: 'POST',

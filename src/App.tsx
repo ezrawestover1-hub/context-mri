@@ -6,11 +6,12 @@ import type { ContextGuard as ContextGuardType, ContextGuardCheck, ContextItem, 
 import { BrandMark } from './components/BrandMark';
 import { ContextGuard } from './components/ContextGuard';
 import { ContextPack } from './components/ContextPack';
+import { EvidenceModes, type LiveRunnerStatus } from './components/EvidenceModes';
 import { DiagnosisBand } from './components/Explainer';
 import { Inspector } from './components/Inspector';
 import { Inventory } from './components/Inventory';
 import { Matrix } from './components/Matrix';
-import { ProvenanceModal, RewriteModal, TraceModal } from './components/Modals';
+import { ContractModal, ProvenanceModal, RewriteModal, TraceModal } from './components/Modals';
 import { BeforeRun, HeroIntro, NextSteps, ResultGuide } from './components/Onboarding';
 import { createContextGuard } from './context-guard';
 
@@ -32,6 +33,13 @@ function downloadJson(filename: string, value: unknown) {
   window.setTimeout(() => URL.revokeObjectURL(url), 500);
 }
 
+async function fetchJsonOrNull<T>(url: string): Promise<T | null> {
+  const response = await fetch(url, { cache: 'no-store' });
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!response.ok || !contentType.includes('application/json')) return null;
+  return response.json() as Promise<T>;
+}
+
 export default function App() {
   const [contexts, setContexts] = useState<ContextItem[]>(initialContexts);
   const [projectId, setProjectId] = useState(defaultDiagnosticProject.id);
@@ -47,6 +55,8 @@ export default function App() {
   const [guard, setGuard] = useState<ContextGuardType | null>(null);
   const [guardCheck, setGuardCheck] = useState<ContextGuardCheck | null>(null);
   const [liveEvidence, setLiveEvidence] = useState<LiveEvidenceSummary | null>(null);
+  const [liveStatus, setLiveStatus] = useState<LiveRunnerStatus | null>(null);
+  const [contractOpen, setContractOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -58,10 +68,14 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    void fetch('/evidence/live-gpt-5.6.json', { cache: 'no-store' })
-      .then(async response => response.ok ? response.json() as Promise<LiveEvidenceSummary> : null)
-      .then(artifact => {
-        if (active && artifact?.report.mode === 'live' && typeof artifact.reportFingerprint === 'string') setLiveEvidence(artifact);
+    void Promise.all([
+      fetchJsonOrNull<LiveEvidenceSummary>('/evidence/live-gpt-5.6.json'),
+      fetchJsonOrNull<LiveRunnerStatus>('/api/live-status'),
+    ])
+      .then(([artifact, status]) => {
+        if (!active) return;
+        if (artifact?.report.mode === 'live' && typeof artifact.reportFingerprint === 'string') setLiveEvidence(artifact);
+        if (status && typeof status.available === 'boolean') setLiveStatus(status);
       })
       .catch(() => undefined);
     return () => { active = false; };
@@ -101,6 +115,34 @@ export default function App() {
       setStage(error instanceof Error ? `Run failed · ${error.message}` : 'Run failed');
     } finally {
       window.clearInterval(timer);
+      setRunning(false);
+    }
+  }
+
+  async function runFreshLiveAudit() {
+    setRunning(true);
+    setRecommendationApplied(false);
+    setAppliedVerification(null);
+    setGuard(null);
+    setGuardCheck(null);
+    setStage('Starting fresh GPT-5.6 audit…');
+    try {
+      const response = await fetch('/api/live/experiments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contexts, projectId }),
+      });
+      const payload = await response.json() as ExperimentReport | { error?: string };
+      if (!response.ok || !('mode' in payload)) throw new Error('error' in payload ? payload.error : 'Fresh live audit failed');
+      if (payload.mode !== 'live') throw new Error('Fresh live audit returned non-live evidence; it was not accepted.');
+      const mostHarmful = [...payload.contextEvidence].sort((a, b) => a.contribution - b.contribution)[0];
+      setReport(payload);
+      setSelected(mostHarmful?.contextId ?? contexts[0].id);
+      setStage(`Complete · ${payload.totalRuns} fresh GPT-5.6 traces captured`);
+      window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    } catch (error) {
+      setStage(error instanceof Error ? `Fresh live audit unavailable · ${error.message}` : 'Fresh live audit unavailable');
+    } finally {
       setRunning(false);
     }
   }
@@ -185,13 +227,13 @@ export default function App() {
   }
 
   function applyRewrite() {
-    const legacyEndpoint = report.evaluationContract.legacyEndpoints[0];
-    const currentEndpoint = report.evaluationContract.expectedEndpoint;
+    const disallowedTerm = report.evaluationContract.disallowedTerms[0];
+    const expectedAnswer = report.evaluationContract.expectedAnswer;
     setContexts(current => current.map(context => context.id === selected
       ? {
           ...context,
           content: context.content
-            .replaceAll(legacyEndpoint, currentEndpoint)
+            .replaceAll(disallowedTerm, expectedAnswer)
             .replace(/\(archived\)/gi, '(current)')
             .replace(/archived/gi, 'current'),
         }
@@ -336,6 +378,14 @@ export default function App() {
       </div>
     </header>
 
+    <EvidenceModes
+      running={running}
+      liveStatus={liveStatus}
+      hasPublishedLiveEvidence={Boolean(liveEvidence)}
+      onFixture={() => runMRI(true)}
+      onLive={() => void runFreshLiveAudit()}
+      onInspectContract={() => setContractOpen(true)}
+    />
     <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} task={report.evaluationContract.task} />
     <BeforeRun contract={report.evaluationContract} />
 
@@ -375,7 +425,8 @@ export default function App() {
       guard={guard}
       check={guardCheck}
       running={running}
-      legacyEndpoint={report.evaluationContract.legacyEndpoints[0]}
+      answerLabel={report.evaluationContract.answerLabel}
+      disallowedTerm={report.evaluationContract.disallowedTerms[0]}
       onCreate={createGuard}
       onCheckRecommended={checkRecommendedPack}
       onCheckOriginal={checkOriginalLibrary}
@@ -391,7 +442,8 @@ export default function App() {
 
     <div className="status-line" role="status" aria-live="polite">{stage}</div>
     {trace ? <TraceModal run={trace} report={report} onClose={() => setTrace(null)} /> : null}
-    {rewriteOpen && selectedItem ? <RewriteModal fileName={selectedItem.name} legacyEndpoint={report.evaluationContract.legacyEndpoints[0]} currentEndpoint={report.evaluationContract.expectedEndpoint} currentSourceLabel={report.evaluationContract.currentSourceLabel} onClose={() => setRewriteOpen(false)} onApply={applyRewrite} /> : null}
+    {rewriteOpen && selectedItem ? <RewriteModal fileName={selectedItem.name} disallowedTerm={report.evaluationContract.disallowedTerms[0]} expectedAnswer={report.evaluationContract.expectedAnswer} currentSourceLabel={report.evaluationContract.currentSourceLabel} onClose={() => setRewriteOpen(false)} onApply={applyRewrite} /> : null}
     {provenanceOpen ? <ProvenanceModal report={report} onClose={() => setProvenanceOpen(false)} /> : null}
+    {contractOpen ? <ContractModal report={report} onClose={() => setContractOpen(false)} /> : null}
   </main>;
 }

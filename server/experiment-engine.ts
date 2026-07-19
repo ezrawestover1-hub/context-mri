@@ -22,7 +22,7 @@ const PASS_THRESHOLD = 80;
 const DEFAULT_CONTRACT = defaultDiagnosticProject;
 
 type AgentAnswer = {
-  recommendedEndpoint: string;
+  recommendedAnswer: string;
   explanation: string;
 };
 
@@ -83,28 +83,28 @@ function includesAny(value: string, terms: string[]) {
 function evaluateExplanation(explanation: string, contract: EvaluationContract) {
   const normalized = normalizeEvidenceText(explanation);
   const statements = normalized.split(/[.!?;]+/).map(statement => statement.trim()).filter(Boolean);
-  const expectedEndpoint = contract.expectedEndpoint.toLowerCase();
-  const legacyEndpoints = contract.legacyEndpoints.map(endpoint => endpoint.toLowerCase());
-  const mentionsCurrentAnywhere = normalized.includes(expectedEndpoint);
+  const expectedAnswer = contract.expectedAnswer.toLowerCase();
+  const disallowedTerms = contract.disallowedTerms.map(endpoint => endpoint.toLowerCase());
+  const mentionsCurrentAnywhere = normalized.includes(expectedAnswer);
   const identifiesCurrentSource = statements.some(statement => {
-    const hasRecency = /\b(current|latest|newest|source of truth)\b/.test(statement);
-    const hasSchema = /\b(schema|machine-readable|tool definition|tool spec|tool specification)\b/.test(statement);
+    const hasRecency = /\b(current|latest|newest|approved|source of truth)\b/.test(statement);
+    const hasSchema = /\b(schema|machine-readable|tool definition|tool spec|tool specification|policy|control|standard|procedure)\b/.test(statement);
     const hasPositiveRelation = /\b(is|specifies|defines|provides|requires|source of truth)\b/.test(statement);
     const negatesClaim = /\b(?:is|does|do)\s+not\b/.test(statement) || /\bnot\s+(?:the\s+)?(?:current|latest|newest)\b/.test(statement);
     return hasRecency && hasSchema && hasPositiveRelation && !negatesClaim;
   });
   const rejectsLegacySource = statements.some(statement => {
-    const mentionsLegacyEndpoint = includesAny(statement, legacyEndpoints);
+    const mentionsLegacyEndpoint = includesAny(statement, disallowedTerms);
     const labelsLegacy = /\b(?:is|was|appears|looks)\s+(?:like\s+|to\s+be\s+)?(?:an?\s+)?(?:archived|legacy|obsolete|stale|deprecated|outdated)\b/.test(statement) ||
-      /\b(?:archived|legacy|obsolete|stale|deprecated|outdated)\s+[^.]*\b(?:guide|instruction|endpoint|source)\b/.test(statement);
+      /\b(?:archived|legacy|obsolete|stale|deprecated|outdated|unsafe|prohibited)\s+[^.]*\b(?:guide|instruction|endpoint|source|procedure|shortcut)\b/.test(statement);
     const rejectsUse = /\b(?:should not|do not|must not|cannot)\s+(?:be\s+)?used?\b/.test(statement) ||
-      /\b(?:avoid|reject|ignore)\b/.test(statement);
-    const negatesLegacy = /\bnot\s+(?:archived|legacy|obsolete|stale|deprecated|outdated)\b/.test(statement);
+      /\b(?:avoid|reject|ignore|never)\b/.test(statement);
+    const negatesLegacy = /\bnot\s+(?:archived|legacy|obsolete|stale|deprecated|outdated|unsafe|prohibited)\b/.test(statement);
     return mentionsLegacyEndpoint && (labelsLegacy || rejectsUse) && !negatesLegacy;
   });
   const explainsConflict = statements.some(statement => {
-    const mentionsCurrentEndpoint = statement.includes(expectedEndpoint);
-    const mentionsLegacyEndpoint = includesAny(statement, legacyEndpoints);
+    const mentionsCurrentEndpoint = statement.includes(expectedAnswer);
+    const mentionsLegacyEndpoint = includesAny(statement, disallowedTerms);
     const namesRelation = /\b(conflict|conflicts|contradict|contradicts|disagree|disagrees|instead of|rather than)\b/.test(statement);
     const relatesToPriorSource = mentionsCurrentAnywhere && /\b(?:conflict|conflicts|contradict|contradicts|disagree|disagrees)\s+with\s+(?:it|that)\b/.test(statement);
     const negatesRelation = /\b(?:do|does|did|are|is)\s+not\s+(?:conflict|conflicting|contradict|contradictory|disagree)\b/.test(statement);
@@ -115,27 +115,27 @@ function evaluateExplanation(explanation: string, contract: EvaluationContract) 
 }
 
 export function scoreAnswer(answer: AgentAnswer, contract: EvaluationContract = DEFAULT_CONTRACT): { score: number; breakdown: ScoreBreakdown } {
-  const normalized = answer.recommendedEndpoint.trim().replace(/\/$/, '').toLowerCase();
+  const normalized = answer.recommendedAnswer.trim().replace(/\/$/, '').toLowerCase();
   const evidence = evaluateExplanation(answer.explanation, contract);
   const breakdown: ScoreBreakdown = {
-    endpointAccuracy: normalized === contract.expectedEndpoint.toLowerCase() || normalized.endsWith(contract.expectedEndpoint.toLowerCase()) ? 50 : 0,
-    recencyReasoning: evidence.identifiesCurrentSource ? 20 : 0,
-    legacyRejection: evidence.rejectsLegacySource ? 15 : 0,
+    answerAccuracy: normalized === contract.expectedAnswer.toLowerCase() || normalized.endsWith(contract.expectedAnswer.toLowerCase()) ? 50 : 0,
+    authoritativeSourceReasoning: evidence.identifiesCurrentSource ? 20 : 0,
+    unsafeInstructionRejection: evidence.rejectsLegacySource ? 15 : 0,
     conflictExplanation: evidence.explainsConflict ? 10 : 0,
-    schemaValidity: 5,
+    structuredOutputValidity: 5,
   };
   return { score: Object.values(breakdown).reduce((sum, value) => sum + value, 0), breakdown };
 }
 
 function fixtureBreakdown(score: number): ScoreBreakdown {
   const weighted: Array<[keyof ScoreBreakdown, number]> = [
-    ['endpointAccuracy', 50],
-    ['recencyReasoning', 20],
-    ['legacyRejection', 15],
+    ['answerAccuracy', 50],
+    ['authoritativeSourceReasoning', 20],
+    ['unsafeInstructionRejection', 15],
     ['conflictExplanation', 10],
   ];
   for (let mask = 0; mask < 2 ** weighted.length; mask += 1) {
-    const result: ScoreBreakdown = { endpointAccuracy: 0, recencyReasoning: 0, legacyRejection: 0, conflictExplanation: 0, schemaValidity: 5 };
+    const result: ScoreBreakdown = { answerAccuracy: 0, authoritativeSourceReasoning: 0, unsafeInstructionRejection: 0, conflictExplanation: 0, structuredOutputValidity: 5 };
     weighted.forEach(([key, points], index) => { if (mask & (1 << index)) result[key] = points; });
     if (Object.values(result).reduce((sum, value) => sum + value, 0) === score) return result;
   }
@@ -144,18 +144,27 @@ function fixtureBreakdown(score: number): ScoreBreakdown {
 
 function fixtureRole(item: ContextItem, contract: EvaluationContract): ContextStatus {
   const value = `${item.name}\n${item.content}`.toLowerCase();
-  if (includesAny(value, contract.legacyEndpoints)) return 'harmful';
+  if (includesAny(value, contract.disallowedTerms)) return 'harmful';
   if (item.id === 'legacy') return 'redundant';
-  if (value.includes(contract.expectedEndpoint) || value.includes('"path"') || value.includes('verify the endpoint') || /you are a .+ agent/.test(value)) return 'required';
-  if (value.includes('prefer the newest') || value.includes('never invent endpoints') || value.includes('machine-readable')) return 'useful';
+  if (value.includes(contract.expectedAnswer) || value.includes('"path"') || value.includes('verify the endpoint') || /you are a .+ agent/.test(value)) return 'required';
+  if (value.includes('prefer the newest') || value.includes('never invent endpoints') || value.includes('machine-readable') || value.includes('never place') || value.includes('ephemeral') || value.includes('scoped')) return 'useful';
   return 'redundant';
 }
 
 function fixtureScores(contexts: ContextItem[], variant: Variant, contract: EvaluationContract): number[] {
-  const originalHasStale = contexts.some(item => includesAny(item.content.toLowerCase(), contract.legacyEndpoints));
+  const originalHasStale = contexts.some(item => includesAny(item.content.toLowerCase(), contract.disallowedTerms));
   const active = activeContexts(contexts, variant);
-  const activeHasStale = active.some(item => includesAny(item.content.toLowerCase(), contract.legacyEndpoints));
+  const activeHasStale = active.some(item => includesAny(item.content.toLowerCase(), contract.disallowedTerms));
   const omitted = contexts.find(item => item.id === variant.omittedContextId);
+
+  if (contract.fixtureProfile === 'security-release') {
+    if (!activeHasStale) return [100, 100, 100];
+    if (!omitted) return [50, 55, 55];
+    const role = fixtureRole(omitted, contract);
+    if (role === 'required') return omitted.id === 'policy' ? [5, 15, 15] : [5, 5, 15];
+    if (role === 'useful') return [40, 40, 40];
+    return [50, 55, 55];
+  }
 
   if (!activeHasStale) {
     if (originalHasStale) return [85, 90, 100];
@@ -174,20 +183,27 @@ function fixtureScores(contexts: ContextItem[], variant: Variant, contract: Eval
   return [35, 40, 55];
 }
 
+function presentAnswer(contract: EvaluationContract, answer: string) {
+  if (contract.fixtureProfile === 'api-migration') return `POST ${answer}`;
+  return answer === contract.expectedAnswer ? `Use ${answer}` : answer;
+}
+
 function fixtureRun(contexts: ContextItem[], variant: Variant, repeat: number, score: number, contract: EvaluationContract): ExperimentRun {
   const active = activeContexts(contexts, variant);
   const breakdown = fixtureBreakdown(score);
   const passed = score >= PASS_THRESHOLD;
-  const correctEndpoint = breakdown.endpointAccuracy === 50;
-  const recommendedEndpoint = correctEndpoint ? contract.expectedEndpoint : contract.legacyEndpoints[0];
-  const explanationParts = [correctEndpoint
-    ? `Recommend POST ${contract.expectedEndpoint}.`
-    : `Recommend POST ${contract.legacyEndpoints[0]}.`];
-  if (breakdown.recencyReasoning) explanationParts.push(`The ${contract.currentSourceLabel} is the source of truth.`);
-  if (breakdown.legacyRejection) explanationParts.push(`The ${contract.legacyEndpoints[0]} guide is archived and should not be used.`);
-  if (breakdown.conflictExplanation) explanationParts.push(`The ${contract.expectedEndpoint} and ${contract.legacyEndpoints[0]} instructions conflict.`);
+  const correctAnswer = breakdown.answerAccuracy === 50;
+  const recommendedAnswer = correctAnswer ? contract.expectedAnswer : contract.disallowedTerms[0];
+  const explanationParts = [contract.fixtureProfile === 'api-migration'
+    ? `Recommend ${presentAnswer(contract, recommendedAnswer)}.`
+    : `${presentAnswer(contract, recommendedAnswer)}.`];
+  if (breakdown.authoritativeSourceReasoning) explanationParts.push(`The ${contract.currentSourceLabel} is the source of truth.`);
+  if (breakdown.unsafeInstructionRejection) explanationParts.push(contract.fixtureProfile === 'api-migration'
+    ? `The ${contract.disallowedTerms[0]} guide is archived and should not be used.`
+    : `The instruction to ${contract.disallowedTerms[0]} is unsafe and must not be used.`);
+  if (breakdown.conflictExplanation) explanationParts.push(`${presentAnswer(contract, contract.expectedAnswer)} and ${contract.disallowedTerms[0]} conflict.`);
   const output = explanationParts.join(' ');
-  const independentlyScored = scoreAnswer({ recommendedEndpoint, explanation: output }, contract);
+  const independentlyScored = scoreAnswer({ recommendedAnswer, explanation: output }, contract);
   if (independentlyScored.score !== score) {
     throw new Error(`Fixture output scored ${independentlyScored.score}, expected ${score}.`);
   }
@@ -202,7 +218,7 @@ function fixtureRun(contexts: ContextItem[], variant: Variant, repeat: number, s
     score,
     passed,
     output,
-    recommendedEndpoint,
+    recommendedAnswer,
     durationMs: 680 + repeat * 73 + variant.id.length * 13,
     inputTokens: active.reduce((sum, item) => sum + item.tokens, 0) + 180,
     outputTokens: passed ? 46 : 31,
@@ -279,9 +295,9 @@ function buildReport(
   const originalTokens = contexts.reduce((sum, item) => sum + item.tokens, 0);
   const recommendedSet = new Set(recommendedContextIds);
   const optimizedTokens = contexts.filter(item => recommendedSet.has(item.id)).reduce((sum, item) => sum + item.tokens, 0);
-  const legacyEndpoint = contract.legacyEndpoints.find(endpoint => contexts.some(item => item.content.includes(endpoint)));
-  const oldEndpoint = legacyEndpoint ? `POST ${legacyEndpoint}` : '';
-  const currentEndpoint = contexts.some(item => item.content.includes(contract.expectedEndpoint)) ? `POST ${contract.expectedEndpoint}` : 'Current endpoint not present in the bundle';
+  const disallowedTerm = contract.disallowedTerms.find(term => contexts.some(item => item.content.includes(term)));
+  const oldAnswer = disallowedTerm ? presentAnswer(contract, disallowedTerm) : '';
+  const expectedAnswer = contexts.some(item => item.content.includes(contract.expectedAnswer)) ? presentAnswer(contract, contract.expectedAnswer) : 'Expected answer not present in the bundle';
   const repeatAgreement = harmfulDetected ? `${harmful.pairedWins}/${REPEATS} paired repeats` : `${REPEATS}/${REPEATS} pack verification runs`;
 
   return {
@@ -304,28 +320,30 @@ function buildReport(
       id: contract.id,
       label: contract.label,
       task: contract.task,
-      expectedEndpoint: contract.expectedEndpoint,
-      legacyEndpoints: contract.legacyEndpoints,
+      answerLabel: contract.answerLabel,
+      expectedAnswer: contract.expectedAnswer,
+      disallowedTerms: contract.disallowedTerms,
       currentSourceLabel: contract.currentSourceLabel,
       legacySourceLabel: contract.legacySourceLabel,
+      rubric: contract.rubric,
     },
     diagnosis: {
       finding: harmfulDetected
-        ? `${harmful.name} is pulling the agent toward an obsolete instruction.`
+        ? `${harmful.name} is pulling the agent toward a conflicting or unsafe instruction.`
         : 'No harmful context remains in this bundle.',
       explanation: harmfulDetected
         ? `Removing it improved ${harmful.pairedWins}/${REPEATS} paired runs; the recommended pack then scored ${packVerification.mean}/100.`
         : `The recommended pack scored ${packVerification.mean}/100 across ${REPEATS} verification runs.`,
       harmfulItem: harmfulDetected ? harmful.name : '',
-      oldInstruction: harmfulDetected ? oldEndpoint : '',
-      currentInstruction: currentEndpoint,
+      oldInstruction: harmfulDetected ? oldAnswer : '',
+      currentInstruction: expectedAnswer,
       repeatAgreement,
     },
     recommendedContextIds,
     minimalContextIds: recommendedContextIds,
     provenance: {
       dataset: contract.dataset,
-      evaluator: 'Independent deterministic assertions over the returned endpoint and explanation; no model-reported grading fields',
+      evaluator: 'Independent deterministic assertions over the returned answer and explanation; no model-reported grading fields',
       passThreshold: PASS_THRESHOLD,
       ...(mode === 'fixture-replay'
         ? { fixtureNote: `Deterministic fixture simulation for the ${contract.label} contract. A funded API project can generate fresh GPT-5.6 traces for this same contract.` }
@@ -357,13 +375,13 @@ export function fixtureReport(contexts: ContextItem[], contractId: DiagnosticPro
 async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Variant, repeat: number, contract: EvaluationContract): Promise<ExperimentRun> {
   const active = activeContexts(contexts, variant);
   const bundle = active.map(item => `### ${item.name}\n${item.content}`).join('\n\n');
-  const prompt = `TASK\n${contract.task}\n\nCONTEXT BUNDLE\n${bundle}\n\nUse only the supplied context. Identify conflicts and prefer current machine-readable schemas over archived prose.`;
+  const prompt = `TASK\n${contract.task}\n\nCONTEXT BUNDLE\n${bundle}\n\nUse only the supplied context. Identify conflicts and prefer the current authoritative source over a stale or unsafe instruction.`;
   const startedAt = Date.now();
   const response = await client.responses.create({
     model: MODEL,
     reasoning: { effort: 'medium' },
     input: [
-      { role: 'developer', content: 'Act as the support agent under test. Follow the supplied context exactly. Do not use outside knowledge. Return a concise recommendation and explanation. When sources disagree, explicitly name the current source, the legacy risk, and the conflicting instructions.' },
+      { role: 'developer', content: 'Act as the agent under test. Follow the supplied context exactly. Do not use outside knowledge. Return a concise answer and explanation. When sources disagree, explicitly name the current source, the unsafe or stale risk, and the conflicting instructions.' },
       { role: 'user', content: prompt },
     ],
     text: {
@@ -376,10 +394,10 @@ async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Var
           type: 'object',
           additionalProperties: false,
           properties: {
-            recommendedEndpoint: { type: 'string' },
+            recommendedAnswer: { type: 'string' },
             explanation: { type: 'string' },
           },
-          required: ['recommendedEndpoint', 'explanation'],
+          required: ['recommendedAnswer', 'explanation'],
         },
       },
     },
@@ -397,7 +415,7 @@ async function runLiveCell(client: OpenAI, contexts: ContextItem[], variant: Var
     score,
     passed: score >= PASS_THRESHOLD,
     output: answer.explanation,
-    recommendedEndpoint: answer.recommendedEndpoint,
+    recommendedAnswer: answer.recommendedAnswer,
     durationMs: Date.now() - startedAt,
     inputTokens: response.usage?.input_tokens ?? 0,
     outputTokens: response.usage?.output_tokens ?? 0,

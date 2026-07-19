@@ -5,7 +5,7 @@ import cors from 'cors';
 import type { ContextItem } from '../src/types.js';
 import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
 import { checkContextGuard, isContextGuard } from './context-guard.js';
-import { fixtureReport, runExperimentSuite } from './experiment-engine.js';
+import { fixtureReport, runExperimentSuite, runLiveExperimentSuite } from './experiment-engine.js';
 
 dotenv.config({ path: '.env.local', override: false });
 
@@ -40,6 +40,15 @@ app.get('/api/health', (_req, res) => res.json({
   experimentEngine: 'v3',
 }));
 
+app.get('/api/live-status', (_req, res) => res.json({
+  available: Boolean(process.env.OPENAI_API_KEY),
+  model: 'gpt-5.6-sol',
+  suiteRuns: 21,
+  reason: process.env.OPENAI_API_KEY
+    ? 'A server-side API key is configured. The first model call is a quota probe; a failed probe never becomes fixture output.'
+    : 'No server-side API key is configured. Add funded API quota locally to run fresh traces.',
+}));
+
 app.post('/api/experiments', async (req, res) => {
   if (!validContexts(req.body?.contexts)) return res.status(400).json({ error: 'Supply 2–12 valid context items.' });
   const projectId = req.body?.projectId ?? defaultDiagnosticProject.id;
@@ -51,6 +60,24 @@ app.post('/api/experiments', async (req, res) => {
     const message = error instanceof Error ? error.message : 'Unknown experiment error';
     console.error('Experiment suite failed:', message);
     res.status(500).json({ error: message });
+  }
+});
+
+app.post('/api/live/experiments', async (req, res) => {
+  if (!validContexts(req.body?.contexts)) return res.status(400).json({ error: 'Supply 2–12 valid context items.' });
+  const projectId = req.body?.projectId ?? defaultDiagnosticProject.id;
+  if (!validProjectId(projectId)) return res.status(400).json({ error: 'Supply a supported diagnostic project id.' });
+  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'Fresh live runs require a funded server-side API project. This endpoint never substitutes fixture output.' });
+  try {
+    const report = await runLiveExperimentSuite(req.body.contexts, process.env.OPENAI_API_KEY, projectId);
+    res.json(report);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown live experiment error';
+    const quotaError = message.includes('429') || message.toLowerCase().includes('quota');
+    console.error('Live experiment suite failed:', message);
+    res.status(quotaError ? 402 : 500).json({ error: quotaError
+      ? 'Fresh live evidence was not generated because this API project has no available quota. No fixture replay was substituted.'
+      : message });
   }
 });
 

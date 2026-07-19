@@ -117,6 +117,31 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
 .run-action:hover { background: #fffdf6; transform: translateY(-1px); }
 .run-action:disabled { opacity: .78; }
 
+.evidence-modes {
+  padding: 22px clamp(28px, 4.2vw, 78px) 24px;
+  color: #e8eee7;
+  background: var(--pine-900);
+  border-bottom: 1px solid #49665b;
+}
+.evidence-modes-heading { max-width: 1420px; margin: 0 auto 16px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+.evidence-modes-heading h2 { margin: 0; color: #fffaf0; font: 500 clamp(25px, 2.2vw, 34px)/1.08 Georgia, serif; }
+.evidence-modes-heading p { max-width: 710px; margin: 8px 0 0; color: #bfd0c5; font-size: 12px; line-height: 1.5; }
+.inspect-contract { min-height: 35px; padding: 0 12px; display: inline-flex; align-items: center; gap: 7px; color: #e8eee7; background: transparent; border: 1px solid #789084; border-radius: 4px; font-size: 10px; font-weight: 750; white-space: nowrap; }
+.inspect-contract:hover { color: #fffaf0; border-color: #d3e0d1; background: #ffffff0c; }
+.evidence-mode-grid { max-width: 1420px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.evidence-mode { min-height: 152px; padding: 18px; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: start; gap: 12px; border: 1px solid #61796e; border-radius: 5px; background: #0b3026; }
+.evidence-mode > svg { margin-top: 2px; color: #b8cdbd; }
+.evidence-mode small { color: #b8cdbd; font-size: 8px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+.evidence-mode h3 { margin: 6px 0 0; color: #fffaf0; font: 500 19px/1.08 Georgia, serif; }
+.evidence-mode p { max-width: 470px; margin: 8px 0 0; color: #c9d7ce; font-size: 10px; line-height: 1.55; }
+.evidence-mode button { align-self: end; min-height: 34px; padding: 0 11px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: var(--pine-950); background: var(--paper); border: 1px solid var(--paper); border-radius: 4px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+.evidence-mode button:hover { background: #fffdf6; transform: translateY(-1px); }
+.evidence-mode.live-mode { background: #173f32; }
+.evidence-mode.live-mode.unavailable { border-color: #857f6b; background: #233f36; }
+.evidence-mode.live-mode.unavailable > svg, .evidence-mode.live-mode.unavailable small { color: #dccd9d; }
+.evidence-mode.live-mode.unavailable button { color: #e8eee7; background: transparent; border-color: #8fa398; }
+.evidence-mode.live-mode.unavailable button:hover { color: var(--pine-950); background: var(--paper); border-color: var(--paper); }
+
 .hero-intro {
   min-height: 585px;
   padding: clamp(62px, 6vw, 100px) clamp(28px, 4.2vw, 78px) 72px;
@@ -597,6 +622,20 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
 .provenance-copy { padding: 24px 25px; display: grid; grid-template-columns: 28px 1fr; column-gap: 14px; color: #40534b; }
 .provenance-copy p { margin: 0 0 14px; font-size: 12px; line-height: 1.6; }
 .provenance-copy p:last-child { grid-column: 2; }
+.contract-copy { padding: 20px 22px; color: #40534b; }
+.contract-copy > p { margin: 0 0 16px; font-size: 12px; line-height: 1.6; }
+.contract-values { display: grid; gap: 1px; border: 1px solid var(--line); background: var(--line); }
+.contract-values > span { min-height: 50px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; background: #f8f3e8; }
+.contract-values small { color: var(--pine-700); font-size: 8px; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
+.contract-values code, .contract-values strong { color: var(--ink); font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; }
+.contract-copy h3 { margin: 20px 0 8px; color: var(--pine-700); font-size: 8px; font-weight: 850; letter-spacing: .15em; }
+.contract-rubric { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.contract-rubric li { min-height: 47px; padding: 9px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
+.contract-rubric span { display: flex; flex-direction: column; gap: 3px; }
+.contract-rubric strong { color: var(--ink); font-size: 11px; }
+.contract-rubric small { color: var(--ink-soft); font-size: 9px; line-height: 1.4; }
+.contract-rubric b { min-width: 29px; min-height: 25px; display: grid; place-items: center; color: #fffaf0; background: var(--pine-800); border-radius: 3px; font-size: 10px; }
+.contract-scope { margin: 17px 0 0 !important; padding: 11px 12px; color: #345046; background: var(--sage); border-left: 3px solid var(--pine-700); }
 
 @media (max-width: 1280px) {
   .hero-intro { grid-template-columns: minmax(350px, .78fr) minmax(590px, 1.22fr); gap: 42px; padding-inline: 42px; }
@@ -640,6 +679,12 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
   .how-link { display: none; }
   .top-actions button { padding: 0 12px; }
   .run-action { min-width: 120px; }
+  .evidence-modes { padding: 18px 16px; }
+  .evidence-modes-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .evidence-modes-heading h2 { font-size: 26px; }
+  .evidence-mode-grid { grid-template-columns: 1fr; }
+  .evidence-mode { min-height: 0; grid-template-columns: 25px minmax(0, 1fr); }
+  .evidence-mode button { grid-column: 2; justify-self: start; margin-top: 4px; }
   .explainer { padding-inline: 20px; }
   .hero-intro { padding-inline: 24px; }
   .hero-copy h1 { font-size: clamp(45px, 8vw, 62px); }

@@ -4,7 +4,7 @@ import { createContextGuard } from '../src/context-guard.js';
 import { fixtureReport } from './experiment-engine.js';
 import { fingerprintContextBundle, fingerprintContract, fingerprintGuard } from '../src/provenance.js';
 
-const GUARD_SCHEMA_VERSION = '1.1' as const;
+const GUARD_SCHEMA_VERSION = '1.2' as const;
 
 export { createContextGuard } from '../src/context-guard.js';
 
@@ -39,7 +39,7 @@ export function isContextGuard(value: unknown): value is ContextGuard {
     (guard.sourceMode === 'live' || guard.sourceMode === 'fixture-replay') &&
     typeof guard.projectId === 'string' && Boolean(findDiagnosticProject(guard.projectId)) &&
     typeof guard.task === 'string' && guard.task.length > 0 &&
-    typeof guard.expectedEndpoint === 'string' && guard.expectedEndpoint.length > 0 &&
+    typeof guard.expectedAnswer === 'string' && guard.expectedAnswer.length > 0 &&
     typeof guard.minimumScore === 'number' && Number.isFinite(guard.minimumScore) && guard.minimumScore >= 0 && guard.minimumScore <= 100 &&
     Array.isArray(guard.recommendedContextIds) && guard.recommendedContextIds.every(id => typeof id === 'string') &&
     Array.isArray(guard.blockedTerms) && guard.blockedTerms.length > 0 && guard.blockedTerms.every(term => typeof term === 'string' && term.length > 0) &&
@@ -60,9 +60,9 @@ export async function checkContextGuard(guard: ContextGuard, contexts: ContextIt
     : '';
   const integrity = {
     contract: guard.contractFingerprint === expectedContractFingerprint &&
-      guard.expectedEndpoint === project.expectedEndpoint &&
+      guard.expectedAnswer === project.expectedAnswer &&
       guard.task === project.task &&
-      sameValues(guard.blockedTerms, project.legacyEndpoints),
+      sameValues(guard.blockedTerms, project.disallowedTerms),
     artifact: guard.guardFingerprint === expectedGuardFingerprint,
     recommendedPack: recommendedPackFingerprint === guard.recommendedPackFingerprint,
   };
@@ -90,7 +90,7 @@ export async function checkContextGuard(guard: ContextGuard, contexts: ContextIt
     mode: report.mode,
     score: report.baselineScore,
     minimumScore: guard.minimumScore,
-    expectedEndpoint: guard.expectedEndpoint,
+    expectedAnswer: guard.expectedAnswer,
     flaggedFiles,
     reasons,
     integrity,

@@ -21,16 +21,17 @@ The server is the source of truth for scores, contributions, classifications, to
 
 ## Diagnostic contracts
 
-`src/projects.ts` is a small contract registry, not a presentation-only scenario picker. A contract supplies the task, source bundle, expected endpoint, legacy endpoint set, source labels, and dataset ID used by the fixture generator and live evaluator. The shipped contracts are:
+`src/projects.ts` is a small contract registry, not a presentation-only scenario picker. A contract supplies the task, source bundle, expected answer, disallowed instruction set, source labels, inspectable rubric, and dataset ID used by the fixture generator and live evaluator. The shipped contracts are:
 
 - `support-api-migration`: `/v1/responses` versus archived `/v1/chat/completions`
 - `billing-api-migration`: `/v2/invoices` versus archived `/v1/charges`
+- `security-release-safety`: short-lived credential broker versus an unsafe token-pasting runbook
 
-Every report embeds an `evaluationContract` summary. The trace inspector exposes that ID, and tests prove a billing answer that earns a perfect billing score fails the support endpoint rule. This prevents a scenario switch from being a cosmetic copy change.
+Every report embeds an `evaluationContract` summary, including the exact rubric. The trace inspector and **Inspect evaluator** modal expose it before a score is interpreted. Tests prove a billing answer that earns a perfect billing score fails the support rule, while the security contract uses procedure-safety and policy-authority labels. This prevents a scenario switch from being a cosmetic copy change.
 
 ## Live mode
 
-`POST /api/experiments` validates a bundle of 2–12 context items. For the bundled five-file example it creates six discovery conditions and runs each three times. It then derives a recommended pack and runs that pack three additional times: 21 calls total.
+`POST /api/live/experiments` validates a bundle of 2–12 context items and is the only endpoint used by **Run fresh audit**. For the bundled five-file example it creates six discovery conditions and runs each three times. It then derives a recommended pack and runs that pack three additional times: 21 calls total.
 
 The first discovery call is a quota probe. If it succeeds, the remaining discovery jobs run with a concurrency limit of four. Pack checks run only after contribution analysis because their included IDs depend on the discovery result. Each Responses API call uses:
 
@@ -40,11 +41,11 @@ The first discovery call is a quota probe. If it succeeds, the remaining discove
 - an instruction to use only the supplied context bundle
 - a 300-token output cap
 
-The probe prevents a missing-quota project from firing a full suite of doomed requests.
+The probe prevents a missing-quota project from firing a full suite of doomed requests. A missing key returns `503`; an exhausted quota returns a clear error; neither condition returns fixture data from the live endpoint.
 
 ## Fixture-simulation mode
 
-`POST /api/fixture` always returns a deterministic and explicitly labeled replay for the selected contract. The public React workflow uses this endpoint even if a local key happens to exist, so a judge click cannot silently consume API budget or change the public evidence claim. `POST /api/experiments` uses the live runner only when invoked deliberately with a configured key, falling back to the selected fixture contract on quota exhaustion. Fixture replay responds to added or rewritten context content, but it is not a substitute for fresh model evidence on custom data.
+`POST /api/fixture` always returns a deterministic and explicitly labeled replay for the selected contract. The public React workflow uses this endpoint when a judge chooses **Explore replay**, so a judge click cannot silently consume API budget or change the public evidence claim. The public worker returns `503` for `/api/live/experiments` and explains that it has no stored key; it does not substitute fixture data. Fixture replay responds to added or rewritten context content, but it is not a substitute for fresh model evidence on custom data.
 
 Both modes use the same:
 
@@ -59,14 +60,14 @@ The fixture uses only rubric totals that the binary five-part evaluator can actu
 
 ## Evaluator
 
-The model returns only a recommended endpoint and a natural-language explanation. Application code independently inspects those two outputs for the expected endpoint, current-source reasoning, explicit rejection of the legacy instruction, and explanation of the conflict. The subject model does not return grading booleans or assign itself points. The pass threshold is 80.
+The model returns only a recommended answer and a natural-language explanation. Application code independently inspects those two outputs for the expected answer, authoritative-source reasoning, explicit rejection of the disallowed instruction, and explanation of the conflict. The subject model does not return grading booleans or assign itself points. The pass threshold is 80.
 
 ```text
-endpoint accuracy    50
-recency reasoning    20
-legacy handling      15
+answer accuracy      50
+source authority     20
+instruction safety   15
 conflict explanation 10
-schema validity       5
+structured response   5
 ```
 
 ## Measurement semantics
@@ -88,7 +89,7 @@ This is controlled evidence for the tested task distribution. It is not universa
 
 ## Context Guard
 
-A completed report can create a `ContextGuard` JSON artifact. It records the selected contract, report ID and provenance, expected endpoint, observed legacy terms, recommended context IDs, and an `80/100` minimum. Version 1.1 adds SHA-256 fingerprints for the canonical contract, source report, full library, recommended pack, and artifact payload. `POST /api/guard/check` and `npm run guard:check -- --guard … --context …` independently rebuild the fixture report for the supplied bundle, flag every file containing a blocked term, and return a nonzero exit code if the score, legacy policy, canonical contract, recommended source pack, or downloaded artifact differs.
+A completed report can create a `ContextGuard` JSON artifact. It records the selected contract, report ID and provenance, expected answer, observed disallowed terms, recommended context IDs, and an `80/100` minimum. Version 1.2 uses task-neutral answer fields and adds SHA-256 fingerprints for the canonical contract, source report, full library, recommended pack, and artifact payload. `POST /api/guard/check` and `npm run guard:check -- --guard … --context …` independently rebuild the fixture report for the supplied bundle, flag every file containing a blocked term, and return a nonzero exit code if the score, instruction policy, canonical contract, recommended source pack, or downloaded artifact differs.
 
 The guard is deliberately narrow: it protects against the stale instruction and threshold discovered by this diagnostic contract. It is not represented as a universal production guarantee. Teams should run a representative live evaluation suite alongside the deterministic check before relying on it as a release gate.
 
@@ -102,7 +103,7 @@ Every run records:
 - model or fixture provenance and evaluation contract ID
 - prompt hash
 - input/output tokens and latency
-- model output and recommended endpoint
+- model output and recommended answer
 - complete rubric breakdown
 
 **Export evidence** downloads the input bundle, active-pack decision state, all discovery runs, pack-verification runs, derived classifications, diagnosis, and provenance as JSON. The CLI honors the active-pack IDs in an evidence export so a staged recommended pack can be tested directly in CI; when an export is supplied alongside a guard, it verifies the guard's source report and source-library fingerprints too.
