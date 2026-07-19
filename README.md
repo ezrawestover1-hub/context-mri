@@ -34,7 +34,7 @@ The hosted demo opens without an account, API key, install, or build step. It in
 
 ### Local development and live GPT-5.6 mode
 
-Requirements: macOS, Windows, or Linux; Node.js 20+; npm.
+Requirements: macOS, Windows, or Linux; Node.js 22+; npm.
 
 ```bash
 npm install
