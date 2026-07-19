@@ -270,7 +270,7 @@ const CodexScene = () => {
         <b>{number}</b><span><strong>{title}</strong><small>{copy}</small></span>
       </div>)}
     </div>
-    <p className="codex-close"><strong>26 automated tests</strong> · independent evaluator · SHA-256 provenance · Context Guard CI</p>
+    <p className="codex-close"><strong>34 automated tests</strong> · native Codex workflow · SHA-256 provenance · Context Guard CI</p>
   </AbsoluteFill>;
 };
 
