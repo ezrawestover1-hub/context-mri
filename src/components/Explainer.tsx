@@ -19,7 +19,7 @@ export function DiagnosisBand({ report }: { report: ExperimentReport }) {
   const improvement = report.optimizedScore - report.baselineScore;
   const hasHarm = Boolean(report.diagnosis.harmfulItem);
   return <section className={`diagnosis-band ${hasHarm ? 'has-harm' : 'verified'}`}>
-    <div className="diagnosis-copy"><span>HERE IS WHAT CONTEXT MRI FOUND</span><h2>{hasHarm ? <><em>{report.diagnosis.harmfulItem}</em> is pulling the agent toward a conflicting or unsafe instruction.</> : <>The recommended context pack is <em>clean and verified.</em></>}</h2></div>
+    <div className="diagnosis-copy"><span>HERE IS WHAT CONTEXT MRI FOUND</span><h2>{hasHarm ? <><em>{report.diagnosis.harmfulItem}</em> has the largest observed negative single-file effect for this task.</> : <>The recommended context pack is <em>clean and verified.</em></>}</h2></div>
     <div className="diagnosis-metrics">
       <div className="score-pair"><span><small>BASELINE</small><strong className={report.baselineScore >= report.provenance.passThreshold ? 'good' : 'bad'}>{report.baselineScore}<i>/100</i></strong></span><b>→</b><span><small>RECOMMENDED PACK</small><strong className="good">{report.optimizedScore}<i>/100</i></strong></span></div>
       <Metric label="IMPROVEMENT" value={`${improvement >= 0 ? '+' : ''}${improvement}`} detail="points" accent={improvement > 0} />

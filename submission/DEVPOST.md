@@ -14,7 +14,7 @@ Developer Tools
 
 ## Short description
 
-Most evaluations tell you that an agent failed. Context MRI finds which context file changed the result, helps Codex stage the smallest evidence-backed repair, verifies the repaired pack, and exports a CI guard so the regression cannot return.
+Most evaluations tell you that an agent failed. Context MRI tests which supplied context changed the result for a stated task, helps Codex stage the smallest evidence-backed repair, verifies the repaired pack, and exports a CI guard so the regression cannot return.
 
 ## Try it
 
@@ -28,9 +28,15 @@ Reproducible self-audit: https://github.com/ezrawestover1-hub/context-mri/blob/m
 
 Installable Codex plugin: https://github.com/ezrawestover1-hub/context-mri/tree/main/plugins/context-mri
 
+Five fresh Codex task proof: https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/FRESH_CODEX_TASK_PROOF.md
+
+Robustness boundary: https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/ROBUSTNESS_BOUNDARY.md
+
 The complete hosted judge path is free: no account, API key, payment, or external setup. Its deterministic fixture replay demonstrates the entire diagnosis → trace inspection → repair → pack verification → Context Guard workflow and is explicitly labeled as replay evidence.
 
-The free local Codex plugin brings that loop into the coding conversation. Its three read-only MCP tools diagnose only the task and files explicitly supplied, propose evidence for a normal user-approved repair, and verify the repaired pack. It makes zero network requests, retains no files, and never edits a repository itself.
+The free local Codex plugin brings that loop into the coding conversation. Its three read-only MCP tools diagnose only the task and files explicitly supplied, return evidence for a normal user-approved repair, and verify both the original and repaired packs. It makes zero network requests, retains no files, and never edits a repository itself. These are plugin boundaries; Codex and model execution follow the user's configured OpenAI services.
+
+Tracing tools show what an agent did. Context MRI experimentally tests which supplied context changes the result, then verifies the repair.
 
 ## 60-second judge path
 
@@ -41,7 +47,7 @@ The free local Codex plugin brings that loop into the coding conversation. Its t
 
 For independent verification, open the public CI proof. The same zero-secret command must block the committed original bundle at 43/100 and pass the repaired pack at 92/100 with all integrity fingerprints verified.
 
-For the native workflow, install `plugins/context-mri`, start a fresh Codex task, and ask: “Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, and verify the recommended pack.” The result should identify `emergency-release-runbook.md`, improve 53→100, pass the repaired pack, and keep the original blocked.
+For the native workflow, install `plugins/context-mri`, start a fresh Codex task, and ask: “Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, verify that the original pack remains blocked, and verify that the recommended pack passes.” The result should identify `emergency-release-runbook.md` as the largest observed negative single-file effect for this task, improve 53→100, pass the repaired pack, and keep the original blocked.
 
 Fresh API evaluation is an optional local/funded path, not a judging prerequisite. When no funded runner is configured, the public host disables those controls instead of silently substituting fixture output.
 
@@ -51,7 +57,7 @@ AI agents rarely fail only because they lack context. They often fail because th
 
 ## What it does
 
-Most evaluation tools stop at pass/fail. Context MRI takes an agent task and its context bundle, runs a full baseline, then removes one context item at a time. Every condition is repeated and evaluated against the same task-specific rubric. The result is an ablation matrix showing which context raises performance, does nothing, or actively suppresses it—and a tested action plan for what happens next. The public demo includes three independently configured contracts—Support API migration, Billing API migration, and Security Release Safety—so the engine is demonstrated beyond a single hard-coded endpoint story. The security scenario evaluates an unsafe credential-handling runbook against a policy-and-risk rubric and reaches a different 53→100 result pattern. A funded bundled live suite also runs one pre-registered pairwise check, so it can distinguish a simple additive story from overlapping protection for that named pair.
+Most evaluation tools stop at pass/fail. Context MRI takes an agent task and its context bundle, runs a full baseline, then removes one context item at a time. Every condition is repeated and evaluated against the same task-specific rubric. The result is an ablation matrix showing which context raises performance, does nothing, or has the largest observed negative effect under that evaluator—and a tested action plan for what happens next. The public demo includes three independently configured contracts—Support API migration, Billing API migration, and Security Release Safety—so the engine is demonstrated beyond a single hard-coded endpoint story. The security scenario evaluates an unsafe credential-handling runbook against a policy-and-risk rubric and reaches a different 53→100 result pattern. A funded bundled live suite also runs one pre-registered pairwise check, so it can distinguish a simple additive story from overlapping protection for that named pair.
 
 Context MRI also ships as a native Codex workflow instead of requiring developers to leave their task for another dashboard. Codex calls a local MCP server to inspect the available evaluators, diagnose an explicitly supplied context pack, and verify the recommended pack against the same fingerprinted guard. The plugin is read-only by design: Codex can explain or stage a repair through its normal approval flow, but Context MRI cannot silently change source files or instructions.
 
@@ -61,11 +67,13 @@ In the included demo, an archived guide tells the agent to use `/v1/chat/complet
 
 ## How we built it
 
-The product is a React + TypeScript application with a Node/Express experiment server, a Cloudflare-compatible public fixture adapter, and a transport-neutral diagnostic service shared by the web product and local Codex plugin. The plugin exposes three narrowly scoped MCP tools over local stdio. Every tool is explicitly read-only, idempotent, closed-world, and non-destructive; filenames and file contents are treated as untrusted data rather than instructions. The optional live runner uses the OpenAI Responses API with GPT‑5.6 Sol, medium reasoning, and strict Structured Outputs. The subject returns only an answer and explanation; an independent deterministic application evaluator assigns every point for task-specific answer accuracy, source authority, instruction safety, conflict explanation, and structured-output validity. The model cannot report its own grades.
+The product is a React + TypeScript application with a Node/Express experiment server, a Cloudflare-compatible public fixture adapter, and a transport-neutral diagnostic service shared by the web product and local Codex plugin. The plugin exposes three narrowly scoped MCP tools over local stdio. Every tool is explicitly read-only, idempotent, closed-world, and non-destructive; filenames and file contents are treated as untrusted data rather than instructions. Diagnosis returns a short-lived `guardRef` for reliable same-session verification while preserving the full fingerprinted guard for portable export. The optional live runner uses the OpenAI Responses API with GPT‑5.6 Sol, medium reasoning, and strict Structured Outputs. The subject returns only an answer and explanation; an independent deterministic application evaluator assigns every point for task-specific answer accuracy, source authority, instruction safety, conflict explanation, and structured-output validity. The model cannot report its own grades.
 
-We also dogfooded Context MRI's release discipline against its own repository context. A deterministic self-audit found two real inconsistencies: the upload checklist still named an older video after the preferred render changed, and the CI workflow proved only that the repair passed—not that the original was blocked. The repaired workflow now asserts both outcomes, fingerprints the audited release files, reruns all 34 automated tests, validates the installable plugin over real MCP stdio, and publishes inspectable JSON artifacts without an API key or paid service. The audit is explicitly scoped as repository consistency proof, not a fresh model-generalization claim.
+We also dogfooded Context MRI's release discipline against its own repository context. A deterministic self-audit found two real inconsistencies: the upload checklist still named an older video after the preferred render changed, and the CI workflow proved only that the repair passed—not that the original was blocked. The repaired workflow now asserts both outcomes, fingerprints the audited release files, reruns all 35 automated tests, validates the installable plugin over real MCP stdio, and publishes inspectable JSON artifacts without an API key or paid service. Five additional fresh Codex tasks then tested installed-plugin discovery and the complete tool sequence; all five diagnosed once, verified the original as blocked, and verified the repair as passed. Their public proof contains only sanitized tool names, outcomes, timestamps, and hashes, enforced by an allowlist test that also checks the documented SHA-256. The audit and five-run record prove repository consistency and orchestration reliability, not fresh model generalization.
 
-Each trace records its evaluation contract ID, run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture replay. All headline metrics are derived from those records. Each bundled fixture contract contains 18 discovery traces plus three pack-verification traces; fresh bundled mode adds three traces for its declared pairwise check. The project picker swaps the task, context files, expected answer, disallowed instruction, report dataset, rubric, and trace ledger together. Public replay clicks always use the clearly labeled replay; the fresh-live and Judge Lab endpoints return an error instead of a fixture result when they have no funded quota. The shipped `guard:check` command consumes a downloaded Context Guard and evidence export, returns inspectable JSON, and fails CI on an observed blocked term, a score below threshold, or a SHA-256 contract, source-pack, or artifact-integrity mismatch. Thirty-four automated tests protect the evaluator, classifications, aggregate claims, provenance, experiment endpoints, guard behavior, shared diagnostic service, and real MCP transport.
+Each trace records its evaluation contract ID, run ID, condition, repeat, prompt hash, latency, token usage, model output, rubric breakdown, and whether it came from a live call or fixture replay. All headline metrics are derived from those records. Each bundled fixture contract contains 18 discovery traces plus three pack-verification traces; fresh bundled mode adds three traces for its declared pairwise check. The project picker swaps the task, context files, expected answer, disallowed instruction, report dataset, rubric, and trace ledger together. Public replay clicks always use the clearly labeled replay; the fresh-live and Judge Lab endpoints return an error instead of a fixture result when they have no funded quota. The shipped `guard:check` command consumes a downloaded Context Guard and evidence export, returns inspectable JSON, and fails CI on an observed blocked term, a score below threshold, or a SHA-256 contract, source-pack, or artifact-integrity mismatch. Thirty-five automated tests protect the evaluator, classifications, aggregate claims, provenance, experiment endpoints, guard behavior, shared diagnostic service, sanitized proof contract, and real MCP transport.
+
+The public robustness proof draws a bright boundary around those claims. A **lexical robustness check** changes the file ID, filename, and surrounding prose while retaining the contract's configured blocked phrase; Context MRI still finds the 53→100 effect. A **semantic-paraphrase negative control** removes that phrase and is not detected by the deterministic fixture. We publish that miss as a limitation instead of presenting it as a semantic holdout success. The correct description is controlled, task-specific ablation evidence.
 
 Codex accelerated the project from critical idea selection through implementation: official-requirement research, architecture, UI concept generation, API integration, automated tests, mathematical consistency checks, browser-based interaction and visual QA, and the complete native plugin package. In the final Build Week pass, GPT-5.6 Terra in Codex adversarially reviewed the evaluator, fixture claims, privacy boundary, and judge flow; that audit removed a false paid-API submission gate and tightened the final evidence narrative.
 
@@ -73,10 +81,14 @@ Codex accelerated the project from critical idea selection through implementatio
 
 The hardest problem was epistemic honesty. A beautiful dashboard can make weak evidence look stronger than it is. We removed an early “94% confidence” claim because three repeats cannot justify it, corrected inconsistent percentages, and exposed fixture/live provenance directly in the UI. The result is less theatrical and more trustworthy.
 
+The same honesty applies to robustness: renaming and rewording around a configured phrase works; a full semantic paraphrase is an explicit negative control that the current fixture does not catch.
+
 ## Accomplishments
 
 - A complete diagnosis → repair → verification → prevention loop rather than a static dashboard
 - A free, installable Codex plugin that completes that loop inside the coding conversation with three read-only local tools, zero network requests, and zero retained context
+- Five of five fresh Codex tasks completing plugin discovery, one diagnosis, and two-sided guard verification, documented with sanitized metadata only
+- A public lexical robustness check and an explicit semantic-paraphrase negative control that defines the fixture's current limit
 - A reusable evaluation-contract engine demonstrated with three isolated five-file scenarios, including a non-endpoint security procedure
 - Twenty-one inspectable traces in each public deterministic replay; twenty-four in each funded bundled live suite
 - Independent scoring that never trusts subject-model grading claims
@@ -89,7 +101,7 @@ The hardest problem was epistemic honesty. A beautiful dashboard can make weak e
 - One inspectable pre-registered pairwise live check per bundled contract
 - GPT‑5.6 Terra adversarial audit plus an optional API runner and honestly labeled no-secret fixture mode
 - Trace export, manifest copy, context upload, and suggested rewrite flows
-- Thirty-four automated tests protecting the evaluator, classifications, aggregate claims, provenance, endpoints, guard behavior, shared diagnostic service, and real MCP transport
+- Thirty-five automated tests protecting the evaluator, classifications, aggregate claims, provenance, endpoints, guard behavior, shared diagnostic service, sanitized proof contract, and real MCP transport
 
 ## What we learned
 

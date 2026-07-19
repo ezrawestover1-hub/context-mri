@@ -6,6 +6,8 @@
 
 Context MRI is an evidence-first profiler for agent context. It runs a baseline, removes one context item at a time, repeats each condition, classifies every file from the measured score change, and verifies the recommended context pack with a final independent run.
 
+**Tracing tools show what an agent did. Context MRI experimentally tests which supplied context changes the result, then verifies the repair.** Its output is controlled, task-specific ablation evidence—not a universal claim about a file or model.
+
 Context MRI ships with three selectable, bundled diagnostic contracts: support API migration, billing API migration, and security release safety. Each contract has its own task, source bundle, expected answer, disallowed instruction, inspectable rubric, and 21-trace replay. A funded fresh-live suite adds a pre-registered pairwise check for 24 traces. The security case is deliberately different: it asks a release agent to choose a credential procedure, identifies an unsafe token-pasting runbook, and moves from **53/100** to **100/100** while preserving a useful deployment-control file.
 
 ![Context MRI guided pine-and-cream interface](./design/context-mri-guided-implementation.png)
@@ -19,6 +21,10 @@ Context MRI ships with three selectable, bundled diagnostic contracts: support A
 **Public CI proof:** [original blocked, repaired pack passed](https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml)
 
 **Dogfooding audit:** [two real release-context inconsistencies found and repaired](./submission/SELF_AUDIT.md)
+
+**Fresh Codex task proof:** [five of five sanitized orchestration runs passed](./submission/FRESH_CODEX_TASK_PROOF.md)
+
+**Robustness boundary:** [lexical check passed; semantic paraphrase disclosed as a negative control](./submission/ROBUSTNESS_BOUNDARY.md)
 
 The hosted demo opens without an account, API key, install, or build step. It intentionally uses the clearly labeled deterministic fixture replay so every judge gets the same complete, inspectable workflow. To generate fresh GPT-5.6 Sol traces instead, run the project locally with funded API quota as described below.
 
@@ -47,9 +53,9 @@ codex plugin add context-mri@personal
 
 Open a new Codex task and ask:
 
-> Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, and verify the recommended pack.
+> Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, verify that the original pack remains blocked, and verify that the recommended pack passes.
 
-The plugin exposes three read-only tools, runs as a local stdio process, makes no network requests, retains no context, and cannot crawl a repository or chat history. Only content explicitly supplied to a tool is processed. The bundled result is clearly labeled deterministic fixture evidence, and unsupported task contracts fail explicitly instead of being forced through an unrelated evaluator. See the [plugin package](./plugins/context-mri/README.md), [privacy policy](./public/privacy.html), and [terms](./public/terms.html).
+The plugin exposes three read-only tools, runs as a local stdio process, makes no network requests, retains no context, and cannot crawl a repository or chat history. Only content explicitly supplied to a tool is processed. Diagnosis returns a short-lived `guardRef` for reliable same-session verification; the complete fingerprinted guard remains available as a portable fallback after a restart or export. These are boundaries of the Context MRI plugin, not a claim that Codex or model execution is entirely local. The bundled result is clearly labeled deterministic fixture evidence, and unsupported task contracts fail explicitly instead of being forced through an unrelated evaluator. See the [plugin package](./plugins/context-mri/README.md), [privacy policy](./public/privacy.html), and [terms](./public/terms.html).
 
 ### Local development and live GPT-5.6 mode
 
@@ -85,6 +91,7 @@ Up to seven additional `.md`, `.json`, and `.txt` files can be added at once fro
 ```bash
 npm test
 npm run build
+npm run robustness:prove
 npm audit --audit-level=high
 curl http://localhost:8787/api/health
 ```
@@ -111,7 +118,7 @@ npm run guard:check -- \
 
 The command prints an inspectable JSON result and exits `1` if the bundle includes a blocked instruction, falls below the threshold, or fails an integrity fingerprint. Evidence exports preserve the active pack decision, so the runner checks the applied pack rather than an unstaged full library. When supplied an export, it also verifies that the original report and source library match the guard provenance. These fingerprints are tamper-evident integrity checks, not authorization signatures; production teams should also run representative live evaluations with human-calibrated success criteria.
 
-The repository includes a ready-to-run [GitHub Actions workflow](./.github/workflows/context-guard.yml). It audits production dependencies, runs the complete test suite and production build, validates and smoke-tests the installable Codex plugin over real MCP stdio, audits Context MRI's own release context, proves that the committed original bundle is blocked at 43/100, proves that the repaired pack passes at 92/100, and uploads both JSON proof artifacts. No API key or paid service is involved. Copy the guard and evidence paths into your project, then keep the same command in CI so a changed context bundle fails before release.
+The repository includes a ready-to-run [GitHub Actions workflow](./.github/workflows/context-guard.yml). It audits production dependencies, runs the complete test suite and production build, validates and smoke-tests the installable Codex plugin over real MCP stdio, audits Context MRI's own release context, proves that the committed original bundle is blocked at 43/100, proves that the repaired pack passes at 92/100, runs the lexical robustness check plus semantic negative control, and uploads all three JSON proof artifacts. No API key or paid service is involved. Copy the guard and evidence paths into your project, then keep the same command in CI so a changed context bundle fails before release.
 
 The [dogfooding audit](./submission/SELF_AUDIT.md) is intentionally narrower than a model evaluation. It caught an outdated video handoff and a one-sided CI claim in this repository, fixed both, and now fingerprints the release files and reruns the assertions on every relevant pull request.
 
@@ -152,7 +159,7 @@ Classification is derived—not supplied by the input:
 | `−4` to `+4` | Redundant | Optional/remove |
 | `<= −5` | Harmful | Remove or rewrite |
 
-Positive contribution means removing the file hurts the task. Negative contribution means the task improves without it. The interface describes this as controlled, task-specific evidence rather than universal causal proof.
+Positive contribution means removing the file hurts the task. Negative contribution means the task improves without it. The interface describes this as controlled, task-specific ablation evidence rather than universal causal proof.
 
 The live pairwise check compares the joint drop from removing two named files with the sum of their two individual drops:
 
@@ -184,6 +191,7 @@ It is a bounded interaction measurement for that registered pair, not a claim th
 - `scripts/smoke-plugin.mjs` — real stdio MCP diagnose-and-verify acceptance test
 - `scripts/check-context-guard.ts` — zero-service CI runner for a downloaded guard and evidence export
 - `scripts/prove-context-guard.ts` — dual-sided CI assertion for the measured original and repaired bundles
+- `scripts/prove-context-robustness.ts` — lexical robustness check plus explicit semantic-paraphrase negative control
 - `scripts/audit-release-context.ts` — reproducible self-audit of submission and release-context consistency
 - `server/experiment-engine.test.ts` — evaluator, aggregation, classification, custom-context, and provenance invariants
 - `src/components/Matrix.tsx` — ablation matrix, contribution plot, and verification result
@@ -202,6 +210,7 @@ The browser app and Node server are platform-independent and have been verified 
 - Three repeats establish directional stability for this demo, not statistical certainty.
 - Fixture replay uses single-item ablation. Fresh bundled suites add one pre-registered pairwise check, but broader interactions can still be missed.
 - Fixture results are deterministic replays of three bundled scenarios, not fresh GPT‑5.6 traces.
+- The lexical robustness check changes the file ID, filename, and surrounding prose while retaining the evaluator's configured blocked phrase. A semantic paraphrase without that phrase is an explicit negative control and is not detected by the fixture engine.
 - The included evaluator is intentionally task-specific; production use needs representative datasets and human-calibrated labels.
 - Context Guard catches the observed disallowed terms, score regressions, and changed recommended files for one contract; its fingerprints are tamper-evident rather than signed authorization, and it does not replace live production evaluation.
 - Uploaded context is held only in browser memory for the current session.

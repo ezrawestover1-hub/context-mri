@@ -93,7 +93,7 @@ export function JudgeProof() {
     <div className="judge-proof-copy">
       <span>WHY THIS IS DIFFERENT</span>
       <h2 id="judge-proof-title">A complete context-debugging loop—not another pass/fail score.</h2>
-      <p>Diagnose the harmful file, inspect the evidence, verify the smaller pack, and export a guard that prevents the same failure from returning.</p>
+      <p>Tracing tools show what an agent did. Context MRI experimentally tests which supplied context changes the result, then verifies the repair.</p>
     </div>
     <dl>{proofPoints.map(point => <div key={point.value}>
       <dt>{point.value}</dt>
@@ -110,8 +110,18 @@ export function JudgeProof() {
         <span><strong>Read the dogfooding audit</strong><small>Two real release-context inconsistencies found and repaired</small></span>
         <ExternalLink size={15} />
       </a>
+      <a href="https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/FRESH_CODEX_TASK_PROOF.md" target="_blank" rel="noreferrer">
+        <GitPullRequest size={18} />
+        <span><strong>Inspect five fresh Codex tasks</strong><small>5/5 install-and-orchestrate runs passed · sanitized metadata only</small></span>
+        <ExternalLink size={15} />
+      </a>
+      <a href="https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/ROBUSTNESS_BOUNDARY.md" target="_blank" rel="noreferrer">
+        <FileCheck2 size={18} />
+        <span><strong>See the robustness boundary</strong><small>Lexical check passed · semantic paraphrase is a disclosed negative control</small></span>
+        <ExternalLink size={15} />
+      </a>
     </div>
-    <p className="engineering-proof">Independent evaluator · run IDs + prompt hashes · SHA-256 pack provenance · 34 automated tests · zero-secret CI</p>
+    <p className="engineering-proof">Independent evaluator · 5/5 fresh Codex tasks · lexical boundary tested · SHA-256 provenance · 35 automated tests · zero-secret CI</p>
   </section>;
 }
 

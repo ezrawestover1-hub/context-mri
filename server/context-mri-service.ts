@@ -24,7 +24,7 @@ export const CONTEXT_LIMITS = {
 
 const PASS_THRESHOLD = 80;
 const EVIDENCE_MODE = 'deterministic-fixture' as const;
-const CLAIM_SCOPE = 'Evidence applies to this task, supplied context pack, and evaluator only.';
+const CLAIM_SCOPE = 'Controlled, task-specific single-file ablation evidence applies only to this supplied context pack and evaluator.';
 
 export type ContextInputSource = 'bundled-example' | 'explicit-user-input';
 export type VerificationInputSource = 'bundled-original' | 'bundled-recommended' | 'explicit-user-input';
@@ -59,6 +59,7 @@ const privacy: ContextMriPrivacy = {
 const limitations = [
   'This free beta uses deterministic, task-specific fixture evidence rather than a fresh model evaluation.',
   'A finding does not establish that a file is universally harmful across tasks, models, prompts, or evaluators.',
+  'The deterministic fixture recognizes configured disallowed terms; a semantic paraphrase outside that contract may not be detected.',
   'Use representative live evaluations and human-calibrated criteria before enforcing a production gate.',
 ] as const;
 

@@ -53,7 +53,7 @@ export function Inspector({ item, evidence, report, recommendationApplied, onApp
     <div className="inspector-actions">
       {isRecommended ? <div className="keep-decision"><Check size={17} /><span>Included in the recommended pack</span></div> : recommendationApplied ? <button className="secondary-action" onClick={onRestore}><RotateCcw size={16} /> Restore all context</button> : <button className="danger-action" onClick={onApplyRecommendation}><Trash2 size={16} /> Remove harmful file</button>}
       {isHarmful ? <button className="secondary-action" onClick={onRewrite}><Sparkles size={16} /> Preview safe rewrite</button> : null}
-      <p>Controlled single-item evidence—not a claim of universal causality.</p>
+      <p>Controlled, task-specific ablation evidence—not a claim of universal causality.</p>
     </div>
   </aside>;
 }

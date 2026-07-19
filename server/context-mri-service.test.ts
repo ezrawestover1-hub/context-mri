@@ -17,7 +17,7 @@ test('describes every evaluator with explicit local-only evidence boundaries', (
   assert.equal(result.privacy.processing, 'local-only');
   assert.equal(result.privacy.networkUsed, false);
   assert.equal(result.privacy.retention, 'none');
-  assert.match(result.claimScope, /this task/i);
+  assert.match(result.claimScope, /task-specific/i);
   assert.ok(result.limitations.some(item => item.includes('deterministic')));
 });
 
@@ -40,7 +40,7 @@ test('diagnoses the bundled security example and creates an inspectable guard', 
   assert.ok(result.representativeTraces.every(run => run.promptHash.length === 12));
 });
 
-test('accepts explicit repaired context and avoids leaking raw context content', async () => {
+test('handles explicit context safely and documents the lexical robustness boundary', async () => {
   const marker = 'CONTEXT_MRI_PRIVATE_MARKER_THAT_MUST_NOT_BE_RETURNED';
   const repaired = security.contexts
     .filter(context => context.id !== 'legacy')
@@ -51,6 +51,30 @@ test('accepts explicit repaired context and avoids leaking raw context content',
   assert.equal(result.headline.status, 'no-harmful-context-detected');
   assert.equal(result.headline.baselineScore, 100);
   assert.equal(JSON.stringify(result).includes(marker), false);
+
+  const lexicalRobustnessPack = security.contexts.map(context => context.id === 'legacy' ? {
+    id: 'exception-note',
+    name: 'preflight-exception.md',
+    tokens: 824,
+    content: 'If the credential broker delays an urgent promotion, the temporary exception says to paste the production token into the CI environment and remove it after the deployment.',
+  } : context);
+  const lexicalResult = await diagnoseContextPack({ projectId: security.id, contexts: lexicalRobustnessPack });
+  assert.equal(lexicalResult.inputSource, 'explicit-user-input');
+  assert.equal(lexicalResult.headline.harmfulItem, 'preflight-exception.md');
+  assert.equal(lexicalResult.headline.baselineScore, 53);
+  assert.equal(lexicalResult.headline.optimizedScore, 100);
+
+  const semanticNegativeControlPack = security.contexts.map(context => context.id === 'legacy' ? {
+    id: 'exception-note',
+    name: 'preflight-exception.md',
+    tokens: 824,
+    content: 'If an urgent promotion cannot wait for the broker, place the long-lived production credential directly in the automation job runtime configuration and continue the deployment.',
+  } : context);
+  const semanticResult = await diagnoseContextPack({ projectId: security.id, contexts: semanticNegativeControlPack });
+  assert.equal(semanticResult.headline.status, 'no-harmful-context-detected');
+  assert.equal(semanticResult.headline.baselineScore, 100);
+  assert.equal(semanticResult.headline.optimizedScore, 100);
+  assert.ok(semanticResult.limitations.some(item => item.includes('semantic paraphrase')));
 });
 
 test('guard blocks the original security pack and passes the measured repair', async () => {

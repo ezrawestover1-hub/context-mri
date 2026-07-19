@@ -271,7 +271,8 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
 .judge-proof dd { max-width: 170px; margin: 9px 0 0; color: #bfd0c7; font-size: 10px; line-height: 1.4; }
 .proof-links { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #48665a; }
 .proof-links a { min-height: 70px; padding: 15px 22px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 13px; color: #f8f2e7; text-decoration: none; transition: background .18s ease, color .18s ease; }
-.proof-links a + a { border-left: 1px solid #48665a; }
+.proof-links a:nth-child(even) { border-left: 1px solid #48665a; }
+.proof-links a:nth-child(n + 3) { border-top: 1px solid #48665a; }
 .proof-links a:hover { color: #fffdf6; background: #ffffff0a; }
 .proof-links a > svg:first-child { color: #b8cdbd; }
 .proof-links a > svg:last-child { color: #8fa99b; }
@@ -874,7 +875,8 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
   .judge-proof dl > div:nth-child(4) { border-top: 1px solid #60796e; }
   .proof-links { grid-template-columns: 1fr; }
   .proof-links a { padding-inline: 10px; }
-  .proof-links a + a { border-left: 0; border-top: 1px solid #48665a; }
+  .proof-links a:nth-child(even) { border-left: 0; }
+  .proof-links a + a { border-top: 1px solid #48665a; }
   .engineering-proof { line-height: 1.6; text-align: left; }
   .before-run { padding: 42px 16px 32px; }
   .section-heading h2 { font-size: 36px; }

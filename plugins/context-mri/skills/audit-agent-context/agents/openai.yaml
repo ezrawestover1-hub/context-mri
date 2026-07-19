@@ -2,7 +2,7 @@ interface:
   display_name: "Audit Agent Context"
   short_description: "Diagnose agent context failures with evidence"
   brand_color: "#173F35"
-  default_prompt: "Use $audit-agent-context to find which supplied context file caused this agent failure and verify the repair."
+  default_prompt: "Use $audit-agent-context to find which supplied context file has the largest observed negative single-file ablation effect for this task, then verify the repair."
 dependencies:
   tools:
     - type: "mcp"

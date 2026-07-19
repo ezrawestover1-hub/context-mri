@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "1.0",
+  "proofType": "context-mri/five-fresh-codex-task-orchestration",
+  "recordedAt": "2026-07-19",
+  "pluginVersion": "0.1.0+codex.20260719055454",
+  "model": "gpt-5.6-terra",
+  "sandbox": "read-only",
+  "claim": "These five fresh tasks prove installed-plugin discovery and orchestration reliability for the bundled Security Release workflow. They do not prove broad model causation or semantic generalization.",
+  "acceptanceContract": {
+    "freshEphemeralTaskPerRun": true,
+    "oneDiagnosis": true,
+    "twoGuardVerifications": true,
+    "guardHandoff": "ephemeral-guard-ref",
+    "originalExpected": "blocked",
+    "repairedExpected": "pass",
+    "intactFingerprintsRequired": true,
+    "pluginNetworkRequestsExpected": 0
+  },
+  "sanitization": {
+    "fullPromptsPublished": false,
+    "fullTranscriptsPublished": false,
+    "rawContextPublished": false,
+    "sourceFilesPublished": false,
+    "accountDataPublished": false,
+    "usageMetadataPublished": false,
+    "includedFields": [
+      "tool names",
+      "outcomes",
+      "timestamps",
+      "report IDs",
+      "prompt hashes",
+      "guard fingerprints",
+      "integrity booleans"
+    ]
+  },
+  "runs": [
+    {
+      "run": 1,
+      "outcome": "pass",
+      "startedAt": "2026-07-19T05:56:33.473Z",
+      "completedAt": "2026-07-19T05:56:40.135Z",
+      "reportId": "fixture-4327f4fb",
+      "tools": [
+        "describe_evaluators",
+        "diagnose_context_pack",
+        "verify_context_pack",
+        "verify_context_pack"
+      ],
+      "diagnoseCalls": 1,
+      "verifyCalls": 2,
+      "guardHandoff": "ephemeral-guard-ref",
+      "evidenceMode": "deterministic-fixture",
+      "baselineScore": 53,
+      "optimizedScore": 100,
+      "harmfulItem": "emergency-release-runbook.md",
+      "representativePromptHashes": [
+        "d615a8cea68e",
+        "1daab69fe5b1",
+        "7d72aa50a9fa"
+      ],
+      "guardFingerprint": "94b96ae6a49a739688e3d34e19df82da8d8ab98541bb742eb950e294d01a007a",
+      "pluginNetworkUsed": false,
+      "original": {
+        "status": "blocked",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      },
+      "repaired": {
+        "status": "pass",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      }
+    },
+    {
+      "run": 2,
+      "outcome": "pass",
+      "startedAt": "2026-07-19T05:57:09.225Z",
+      "completedAt": "2026-07-19T05:57:13.759Z",
+      "reportId": "fixture-f6e59eb5",
+      "tools": [
+        "describe_evaluators",
+        "diagnose_context_pack",
+        "verify_context_pack",
+        "verify_context_pack"
+      ],
+      "diagnoseCalls": 1,
+      "verifyCalls": 2,
+      "guardHandoff": "ephemeral-guard-ref",
+      "evidenceMode": "deterministic-fixture",
+      "baselineScore": 53,
+      "optimizedScore": 100,
+      "harmfulItem": "emergency-release-runbook.md",
+      "representativePromptHashes": [
+        "d615a8cea68e",
+        "1daab69fe5b1",
+        "7d72aa50a9fa"
+      ],
+      "guardFingerprint": "4faca81091a4d1d7a62a9efac3053132fc8c09c142d474503318284c42c6af9d",
+      "pluginNetworkUsed": false,
+      "original": {
+        "status": "blocked",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      },
+      "repaired": {
+        "status": "pass",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      }
+    },
+    {
+      "run": 3,
+      "outcome": "pass",
+      "startedAt": "2026-07-19T05:57:44.982Z",
+      "completedAt": "2026-07-19T05:57:49.606Z",
+      "reportId": "fixture-c175f022",
+      "tools": [
+        "describe_evaluators",
+        "diagnose_context_pack",
+        "verify_context_pack",
+        "verify_context_pack"
+      ],
+      "diagnoseCalls": 1,
+      "verifyCalls": 2,
+      "guardHandoff": "ephemeral-guard-ref",
+      "evidenceMode": "deterministic-fixture",
+      "baselineScore": 53,
+      "optimizedScore": 100,
+      "harmfulItem": "emergency-release-runbook.md",
+      "representativePromptHashes": [
+        "d615a8cea68e",
+        "1daab69fe5b1",
+        "7d72aa50a9fa"
+      ],
+      "guardFingerprint": "ca52c6d6cca146cd99c50a908da96aa5537b5cb895404e88c3a793192707f75f",
+      "pluginNetworkUsed": false,
+      "original": {
+        "status": "blocked",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      },
+      "repaired": {
+        "status": "pass",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      }
+    },
+    {
+      "run": 4,
+      "outcome": "pass",
+      "startedAt": "2026-07-19T05:58:21.785Z",
+      "completedAt": "2026-07-19T05:58:21.838Z",
+      "reportId": "fixture-a7e2349a",
+      "tools": [
+        "diagnose_context_pack",
+        "verify_context_pack",
+        "verify_context_pack"
+      ],
+      "diagnoseCalls": 1,
+      "verifyCalls": 2,
+      "guardHandoff": "ephemeral-guard-ref",
+      "evidenceMode": "deterministic-fixture",
+      "baselineScore": 53,
+      "optimizedScore": 100,
+      "harmfulItem": "emergency-release-runbook.md",
+      "representativePromptHashes": [
+        "d615a8cea68e",
+        "1daab69fe5b1",
+        "7d72aa50a9fa"
+      ],
+      "guardFingerprint": "47a5d43a1c22991faf8c4a77113b3cc2a5c1a21706a39e27877570ea9984ad0d",
+      "pluginNetworkUsed": false,
+      "original": {
+        "status": "blocked",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      },
+      "repaired": {
+        "status": "pass",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      }
+    },
+    {
+      "run": 5,
+      "outcome": "pass",
+      "startedAt": "2026-07-19T05:58:57.495Z",
+      "completedAt": "2026-07-19T05:59:03.844Z",
+      "reportId": "fixture-ce440020",
+      "tools": [
+        "describe_evaluators",
+        "diagnose_context_pack",
+        "verify_context_pack",
+        "verify_context_pack"
+      ],
+      "diagnoseCalls": 1,
+      "verifyCalls": 2,
+      "guardHandoff": "ephemeral-guard-ref",
+      "evidenceMode": "deterministic-fixture",
+      "baselineScore": 53,
+      "optimizedScore": 100,
+      "harmfulItem": "emergency-release-runbook.md",
+      "representativePromptHashes": [
+        "d615a8cea68e",
+        "1daab69fe5b1",
+        "7d72aa50a9fa"
+      ],
+      "guardFingerprint": "33952c9fdb1da4ddb5dded3207828d1df89ce8ac7d149c631923c6c2e9d06856",
+      "pluginNetworkUsed": false,
+      "original": {
+        "status": "blocked",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      },
+      "repaired": {
+        "status": "pass",
+        "integrity": {
+          "contract": true,
+          "artifact": true,
+          "recommendedPack": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  }
+}
+

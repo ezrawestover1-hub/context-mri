@@ -29,14 +29,14 @@ The final cut must show real interactions, use Ezra's voice, contain no copyrigh
 **Screen**
 
 - Record a real fresh Codex task with the installed plugin.
-- Use this exact prompt: `Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, and verify the recommended pack.`
+- Use this exact prompt: `Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, verify that the original pack remains blocked, and verify that the recommended pack passes.`
 - Show the tool call, not a recreated transcript.
 
 ### Scene 3 · 0:34–0:56 · Diagnosis with evidence
 
 **Narration**
 
-“It isolates the emergency release runbook. With the full pack, the agent scores fifty-three. Remove that one instruction, and the same task-specific evaluator reaches one hundred. Context MRI returns representative traces, the scoring contract, pack fingerprints, and its limits—not just a confident label.”
+“For this task under this evaluator, the emergency release runbook has the largest observed negative single-file effect. With the full pack, the agent scores fifty-three. Remove that instruction, and it reaches one hundred. Context MRI returns representative traces, the scoring contract, pack fingerprints, and its limits—not just a confident label.”
 
 **Screen**
 
@@ -54,7 +54,7 @@ The final cut must show real interactions, use Ezra's voice, contain no copyrigh
 
 - Show Codex's concise repair proposal.
 - Show the approval boundary visually; do not pretend an edit occurred if no edit was made.
-- Overlay: `READ-ONLY · LOCAL STDIO · ZERO NETWORK · ZERO RETENTION`.
+- Overlay: `PLUGIN: READ-ONLY · LOCAL STDIO · ZERO NETWORK · ZERO RETENTION`.
 
 ### Scene 5 · 1:17–1:37 · Verify before trust
 
@@ -72,7 +72,7 @@ The final cut must show real interactions, use Ezra's voice, contain no copyrigh
 
 **Narration**
 
-“The web product exposes the full experiment: remove one file at a time, repeat each condition, inspect the exact rubric and trace, compare context interactions, stage a smaller pack, and export its guard. Every label means harmful or useful for this task under this evaluator—not universally.”
+“Tracing tools show what an agent did. Context MRI experimentally tests which supplied context changes the result, then verifies the repair. The web product exposes every ablation, repeat, rubric, trace, interaction check, smaller pack, and guard. Every label applies only to this task under this evaluator.”
 
 **Screen**
 
@@ -88,14 +88,15 @@ The final cut must show real interactions, use Ezra's voice, contain no copyrigh
 
 **Narration**
 
-“The public demo is free deterministic replay, clearly labeled—not a fake live call. The exact release commit passes thirty-four automated tests, a production dependency audit, plugin validation over real M-C-P transport, a self-audit, and public two-sided C-I proof.”
+“I also ran five fresh Codex tasks. Five out of five discovered the installed plugin and completed the full loop. A renamed and reworded file passed a lexical robustness check. A semantic paraphrase is published as a negative control and current limitation. The public demo remains clearly labeled deterministic replay.”
 
 **Screen**
 
-- Show the deployed replay label.
-- Show GitHub Actions run `29674509608` with the green checks.
-- Show the self-audit and public repository briefly.
-- On-screen: `34 TESTS · 0 PRODUCTION ADVISORIES · REAL MCP STDIO · PUBLIC PROOF`.
+- Show the sanitized five-run artifact: tool names, outcomes, timestamps, and hashes only.
+- Show the robustness proof with two explicit cards: `LEXICAL CHECK · PASSED` and `SEMANTIC PARAPHRASE · NEGATIVE CONTROL / LIMITATION`.
+- Show the deployed replay label, current green GitHub Actions run, self-audit, and public repository briefly.
+- On-screen: `5/5 FRESH CODEX TASKS · 35 TESTS · REAL MCP STDIO · PUBLIC PROOF`.
+- Do not show a private prompt, source file, account identifier, usage record, or full Codex transcript.
 
 ### Scene 8 · 2:20–2:47 · Codex, GPT-5.6, and close
 
@@ -134,6 +135,9 @@ Capture footage in this order so a failed take cannot derail the edit:
 - Show `Codex` and `GPT-5.6 Terra` in both audio and visible text.
 - Say M—R—I as three letters in every take.
 - Do not claim broad generalization, autonomous repair, fresh hosted inference, or production safety certification.
+- Call the renamed/reworded experiment a **lexical robustness check**, never a semantic holdout.
+- Label the semantic paraphrase as a **negative control / limitation**.
+- Describe the result as **controlled, task-specific ablation evidence**, not causal proof.
 
 ## Final judge gate
 
@@ -143,6 +147,8 @@ Before upload, verify all of the following:
 - The first 20 seconds communicate the problem, product, and native Codex advantage.
 - The Security diagnostic, repair boundary, and two-sided verification are visible.
 - The deterministic replay label is readable.
+- The five-run proof is visibly sanitized and presented only as installation/orchestration reliability.
+- The lexical check and semantic negative control are both visible and accurately labeled.
 - Codex and GPT-5.6 contributions are explained, not merely named.
 - Public URL, repository, and green CI run are correct.
 - Captions match Ezra's final audio exactly.

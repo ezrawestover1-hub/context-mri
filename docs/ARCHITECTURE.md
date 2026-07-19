@@ -88,7 +88,7 @@ Positive contribution means removal hurt performance. Negative contribution mean
 
 When a user clicks **Apply recommended pack**, the client stages the measured context IDs. **Run applied pack to verify** then submits only those files as a second complete experiment. Its reduced bundle becomes the new baseline and produces a separate report ID and trace set; the UI does not treat a local state toggle as verification.
 
-This is controlled evidence for the tested task distribution. It is not universal causal proof, and single-item experiments can miss interactions.
+This is controlled, task-specific ablation evidence for the tested task distribution. It is not universal causal proof, and single-item experiments can miss interactions.
 
 ## Context Guard
 
@@ -101,10 +101,12 @@ The guard is deliberately narrow: it protects against the stale instruction and 
 `plugins/context-mri/` packages the diagnostic workflow for native use inside Codex. The plugin starts a local stdio MCP process and bundles an audit skill that routes a conversation through three read-only tools:
 
 1. `describe_evaluators` exposes supported task contracts, rubrics, input limits, privacy boundaries, and evidence limitations.
-2. `diagnose_context_pack` runs one task-specific ablation and returns compact findings, three representative traces, the full trace index, provenance, and a reusable Context Guard.
-3. `verify_context_pack` checks an explicitly supplied pack or the bundled original/recommended pack against that guard.
+2. `diagnose_context_pack` runs one task-specific ablation and returns compact findings, three representative traces, the full trace index, provenance, a reusable Context Guard, and a short-lived `guardRef`.
+3. `verify_context_pack` checks an explicitly supplied pack or the bundled original/recommended pack against the same-session `guardRef`; the full guard remains a portable fallback after a restart or export.
 
-The MCP adapter is intentionally thin. `server/context-mri-service.ts` owns validation and domain behavior, so the browser/API and plugin do not maintain two conflicting diagnostic engines. The tools cannot write files, edit a repository, access chat history, or call the network. Codex may propose a repair, but any edit still uses Codex's normal permission model; Context MRI only diagnoses and verifies. The bundled skill instructs Codex to diagnose once per unchanged pack and reuse the returned guard for before/after verification.
+The MCP adapter is intentionally thin. `server/context-mri-service.ts` owns validation and domain behavior, so the browser/API and plugin do not maintain two conflicting diagnostic engines. The tools cannot write files, edit a repository, access chat history, or call the network. Codex may propose a repair, but any edit still uses Codex's normal permission model; Context MRI only diagnoses and verifies. The bundled skill instructs Codex to diagnose once per unchanged pack and reuse its short reference for before/after verification, avoiding error-prone transcription of the long guard. The process registry stores only guard metadata, never raw context.
+
+The fixture's lexical robustness check changes the context ID, filename, and surrounding prose while retaining the configured blocked phrase. The semantic negative control replaces that phrase with a meaning-preserving paraphrase; the fixture does not detect it. That result is disclosed as a limitation, not a semantic holdout success.
 
 The repository marketplace entry lives at `.agents/plugins/marketplace.json`. `npm run check:plugin` validates package invariants, and `npm run smoke:plugin` launches the bundled server over the real MCP stdio transport, confirms all three tools, diagnoses the Security Release example, proves the original is blocked, and proves the recommended pack passes.
 
@@ -131,6 +133,7 @@ Every run records:
 - The demo does not persist uploaded context or model outputs.
 - The local Codex plugin makes no network requests and retains no supplied context after the tool call.
 - Plugin tools receive only explicitly supplied content; they do not crawl a repository or read chat history.
+- These plugin boundaries do not imply that Codex or model execution is entirely local; those follow the user's configured Codex/OpenAI services.
 - Context file names reject control characters, and the MCP instructions explicitly treat every supplied name and body as untrusted data rather than commands.
 - The optional live Express runner binds to loopback by default and allows browser requests only from loopback or `CONTEXT_MRI_ALLOWED_ORIGINS`.
 - The public worker adds a same-origin script CSP, clickjacking protection, `nosniff`, a restrictive permissions policy, and no-store API responses.

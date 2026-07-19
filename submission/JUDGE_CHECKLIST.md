@@ -12,6 +12,8 @@
 - [x] Public repository: https://github.com/ezrawestover1-hub/context-mri
 - [x] Public CI proof: https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml
 - [x] Reproducible dogfooding audit: https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/SELF_AUDIT.md
+- [x] Five fresh Codex task proof: https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/FRESH_CODEX_TASK_PROOF.md
+- [x] Lexical robustness and semantic negative-control boundary: https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/ROBUSTNESS_BOUNDARY.md
 - [x] README with setup, sample data, and judge test path
 - [x] Codex task/session ID captured: `019f71e4-f746-7083-a465-1c84948bbd8c`
 - [x] GPT-5.6 Terra Codex adversarial audit captured in `submission/GPT_5_6_TERRA_AUDIT.md`
@@ -39,6 +41,9 @@
 - Downloadable Context Guard blocks the original stale library, passes the repaired pack, fingerprints the task contract and recommended source files, and has a zero-service CI runner that exits nonzero on regression or provenance mismatch
 - Committed GitHub Actions workflow proves both sides of the claim: the original five-file bundle is blocked at 43 and the repaired three-file pack passes at 92, with integrity verified for both
 - Deterministic self-audit caught and repaired two real release-context inconsistencies, fingerprints its inputs, and reruns in CI without an API key
+- Five of five fresh Codex tasks discovered the installed plugin and completed one diagnosis plus original-blocked/repaired-passed verification using a short-lived guard reference
+- Public proof publishes only tool names, outcomes, timestamps, and hashes—never prompts, transcripts, raw context, source files, account data, or usage metadata
+- Lexical robustness check detects a renamed/reworded file when the configured phrase remains; semantic paraphrase is an explicit negative control and limitation
 
 ### Design
 
@@ -65,10 +70,11 @@
 
 ## Final manual actions
 
-1. Upload `submission/video/out/context-mri-demo-winner-pass.mp4` publicly or unlisted to YouTube and add the URL to Devpost. Keep `context-mri-demo.mp4` as the preserved prior cut.
-2. Open the YouTube link in a private window to confirm it is viewable without your account.
-3. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
-4. Submit before **July 21, 2026 at 5:00 PM PDT**.
+1. Record and render the V2 native Codex cut from `submission/DEMO_VIDEO_V2_PLAN.md`. Keep `submission/video/out/context-mri-demo-winner-pass.mp4` as the proven fallback until V2 has been watched end to end.
+2. Upload the best verified cut publicly or unlisted to YouTube and add the URL to Devpost.
+3. Open the YouTube link in a private window to confirm it is viewable without your account.
+4. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
+5. Submit before **July 21, 2026 at 5:00 PM PDT**.
 
 ## Verified public judge path
 

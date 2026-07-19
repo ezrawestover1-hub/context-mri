@@ -15,7 +15,8 @@
     "evidence:live": "tsx scripts/generate-live-evidence.ts",
     "guard:check": "tsx scripts/check-context-guard.ts",
     "guard:prove": "tsx scripts/prove-context-guard.ts",
-    "test": "tsx --test server/context-guard.test.ts server/context-mri-service.test.ts server/experiment-engine.test.ts server/site-worker.test.ts plugins/context-mri/mcp/server.test.ts",
+    "robustness:prove": "tsx scripts/prove-context-robustness.ts",
+    "test": "tsx --test server/context-guard.test.ts server/context-mri-service.test.ts server/experiment-engine.test.ts server/fresh-task-proof.test.ts server/site-worker.test.ts plugins/context-mri/mcp/server.test.ts",
     "test:plugin": "tsx --test server/context-mri-service.test.ts plugins/context-mri/mcp/server.test.ts",
     "start": "tsx server/index.ts",
     "preview": "vite preview"

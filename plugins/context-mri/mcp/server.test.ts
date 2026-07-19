@@ -47,10 +47,11 @@ test('completes the native diagnose and verify workflow through MCP', async t =>
   assert.equal(structured.headline.harmfulItem, 'emergency-release-runbook.md');
   assert.equal(structured.headline.scoreDelta, 47);
   assert.equal(structured.privacy.networkUsed, false);
+  assert.equal(structured.guardRef, structured.guard.guardFingerprint);
 
   const verification = await client.callTool({
     name: 'verify_context_pack',
-    arguments: { guard: structured.guard, bundledPack: 'recommended' },
+    arguments: { guardRef: structured.guardRef, bundledPack: 'recommended' },
   });
   assert.equal(verification.isError, undefined);
   assert.equal((verification.structuredContent as Record<string, any>).status, 'pass');
@@ -68,4 +69,10 @@ test('returns an MCP tool error for unsupported input instead of mutating anythi
     arguments: { projectId: 'not-real' },
   });
   assert.equal(result.isError, true);
+
+  const missingGuard = await client.callTool({
+    name: 'verify_context_pack',
+    arguments: { guardRef: '0'.repeat(64), bundledPack: 'recommended' },
+  });
+  assert.equal(missingGuard.isError, true);
 });

@@ -374,7 +374,7 @@ function buildReport(
     },
     diagnosis: {
       finding: harmfulDetected
-        ? `${harmful.name} is pulling the agent toward a conflicting or unsafe instruction.`
+        ? `${harmful.name} has the largest observed negative single-file ablation effect for this task under this evaluator.`
         : 'No harmful context remains in this bundle.',
       explanation: harmfulDetected
         ? `Removing it improved ${harmful.pairedWins}/${REPEATS} paired runs; the recommended pack then scored ${packVerification.mean}/100.`

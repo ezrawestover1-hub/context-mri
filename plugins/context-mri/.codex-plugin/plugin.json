@@ -1,6 +1,6 @@
 {
   "name": "context-mri",
-  "version": "0.1.0+codex.20260719050640",
+  "version": "0.1.0+codex.20260719055454",
   "description": "Diagnose which context file changed an agent result, repair it with Codex, and verify the fix.",
   "author": {
     "name": "Ezra Westover",

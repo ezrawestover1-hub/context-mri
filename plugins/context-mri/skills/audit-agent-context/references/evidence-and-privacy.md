@@ -11,8 +11,8 @@
 ## Context classifications
 
 - **Required:** Removing the file materially lowers the measured result.
-- **Useful:** Removing the file causes a smaller but consistent loss.
-- **Redundant:** Removing the file causes no meaningful measured change.
+- **Useful:** Removing the file produces a smaller but consistent observed loss.
+- **Redundant:** Removing the file produces no meaningful measured change.
 - **Harmful:** Removing the file materially improves the measured result.
 
 Always scope classifications to the task and evaluator.
@@ -21,7 +21,7 @@ Always scope classifications to the task and evaluator.
 
 Use:
 
-> For this task under this evaluator, removing `FILE` changed the score from `A` to `B` across the measured repeats.
+> For this task under this evaluator, `FILE` had the largest observed negative single-file ablation effect: removing it changed the score from `A` to `B` across the measured repeats.
 
 Avoid:
 
@@ -39,11 +39,12 @@ For fixture mode, add:
 - The plugin receives only tool arguments selected by Codex from user-approved content.
 - Raw context content is not echoed in diagnostic output.
 - The plugin has no write tool; any repair is a separate Codex action governed by normal permissions.
+- These statements describe the plugin boundary only. They do not claim that the wider Codex application or model execution is entirely local.
 
 ## Unsupported requests
 
-If no bundled evaluator matches, say that Context MRI cannot causally score that arbitrary task in free deterministic mode. Offer to:
+If no bundled evaluator matches, say that Context MRI cannot assign controlled ablation scores to that arbitrary task in free deterministic mode. Offer to:
 
 1. Reframe the request to a supported evaluator.
-2. Inspect likely conflicts qualitatively without presenting a causal score.
+2. Inspect likely conflicts qualitatively without presenting a measured ablation score.
 3. Use a future custom/live evaluator when available.

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Check, Copy, ExternalLink, ScanSearch, ShieldCheck, Terminal, Wrench } from 'lucide-react';
 
-const starterPrompt = 'Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, and verify the recommended pack.';
+const starterPrompt = 'Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, verify that the original pack remains blocked, and verify that the recommended pack passes.';
 
 const workflow = [
   {
     icon: ScanSearch,
     number: '01',
     title: 'Diagnose in the conversation',
-    body: 'Codex sends only the task and context you choose. Context MRI measures each file and returns the finding, evidence, confidence, and limits.',
+    body: 'Codex sends only the task and context you choose. Context MRI measures each file and returns the finding, evidence, scope, and limits.',
   },
   {
     icon: Wrench,
@@ -69,7 +69,7 @@ export function CodexPluginProof() {
         <div className="plugin-terminal-body">
           <p><b>YOU</b><span>Why did my release agent choose an unsafe credential procedure?</span></p>
           <p><b>CODEX</b><span>Running Context MRI on the Security Release example…</span></p>
-          <div className="plugin-call"><small>CONTEXT MRI · DIAGNOSIS</small><strong><em>emergency-release-runbook.md</em> is harmful for this task.</strong><span>Baseline <b>53</b> <i>→</i> recommended pack <b>100</b> · 3 representative traces</span></div>
+          <div className="plugin-call"><small>CONTEXT MRI · DIAGNOSIS</small><strong><em>emergency-release-runbook.md</em> has the largest observed negative single-file effect for this task.</strong><span>Baseline <b>53</b> <i>→</i> recommended pack <b>100</b> · 3 representative traces</span></div>
           <p><b>CODEX</b><span>I can remove or rewrite that instruction after your approval.</span></p>
           <div className="plugin-verification"><span><Check size={14} /> REPAIRED PACK PASSED · 100/100</span><span>ORIGINAL BLOCKED · 53/100</span></div>
         </div>
@@ -87,7 +87,7 @@ export function CodexPluginProof() {
         <button type="button" onClick={() => void copyPrompt()} aria-live="polite">{copied ? <Check size={15} /> : <Copy size={15} />}{copied ? 'Prompt copied' : 'Copy judge prompt'}</button>
         <a href="https://github.com/ezrawestover1-hub/context-mri/tree/main/plugins/context-mri" target="_blank" rel="noreferrer">Inspect plugin source <ExternalLink size={14} /></a>
       </div>
-      <p className="plugin-privacy-note"><ShieldCheck size={14} /> Local stdio process · no account, API key, billing, repository crawl, or chat-history access. Only explicitly supplied context is analyzed. The bundled result is deterministic fixture evidence, not a universal claim.</p>
+      <p className="plugin-privacy-note"><ShieldCheck size={14} /> Local stdio process · no account, API key, billing, repository crawl, or chat-history access. Only explicitly supplied context is analyzed. These are plugin boundaries; Codex follows its own configured service settings. The bundled result is controlled, task-specific ablation evidence, not a universal claim.</p>
     </div>
   </section>;
 }

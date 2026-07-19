@@ -37,11 +37,11 @@ try {
   }
   const original = await client.callTool({
     name: 'verify_context_pack',
-    arguments: { guard: result.guard, bundledPack: 'original' },
+    arguments: { guardRef: result.guardRef, bundledPack: 'original' },
   });
   const repaired = await client.callTool({
     name: 'verify_context_pack',
-    arguments: { guard: result.guard, bundledPack: 'recommended' },
+    arguments: { guardRef: result.guardRef, bundledPack: 'recommended' },
   });
   if (original.isError || original.structuredContent?.status !== 'blocked') {
     throw new Error('Installed package did not block the original bundled pack.');
