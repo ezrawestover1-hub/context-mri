@@ -34,6 +34,20 @@ test('public deployment adapter makes live-run availability and non-fallback beh
     reason: 'This public no-login demo intentionally has no stored API key. Run a funded live audit from a self-hosted copy, then publish its raw artifact separately.',
   });
 
+  const missingEvidence = await worker.fetch(new Request('https://context-mri.test/api/live-evidence'), noAssets);
+  assert.equal(missingEvidence.status, 200);
+  assert.equal(await missingEvidence.json(), null);
+
+  const publishedEvidence = {
+    generatedAt: '2026-07-18T20:00:00.000Z',
+    report: { mode: 'live', model: 'gpt-5.6-sol', totalRuns: 24, baselineScore: 43, optimizedScore: 92 },
+    reportFingerprint: 'fixture-independent-live-proof',
+  };
+  const availableEvidence = await worker.fetch(new Request('https://context-mri.test/api/live-evidence'), {
+    ASSETS: { fetch: async () => Response.json(publishedEvidence) },
+  });
+  assert.deepEqual(await availableEvidence.json(), publishedEvidence);
+
   const live = await worker.fetch(new Request('https://context-mri.test/api/live/experiments', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

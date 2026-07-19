@@ -72,7 +72,7 @@ export default function App() {
   useEffect(() => {
     let active = true;
     void Promise.all([
-      fetchJsonOrNull<LiveEvidenceSummary>('/evidence/live-gpt-5.6.json'),
+      fetchJsonOrNull<LiveEvidenceSummary>('/api/live-evidence'),
       fetchJsonOrNull<LiveRunnerStatus>('/api/live-status'),
     ])
       .then(([artifact, status]) => {

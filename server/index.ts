@@ -2,6 +2,8 @@ import 'dotenv/config';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import type { ContextItem } from '../src/types.js';
 import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
 import { checkContextGuard, isContextGuard } from './context-guard.js';
@@ -40,6 +42,16 @@ app.get('/api/health', (_req, res) => res.json({
   keyConfigured: Boolean(process.env.OPENAI_API_KEY),
   experimentEngine: 'v3',
 }));
+
+app.get('/api/live-evidence', async (_req, res) => {
+  try {
+    const artifact = JSON.parse(await readFile(resolve('public/evidence/live-gpt-5.6.json'), 'utf8')) as unknown;
+    res.json(artifact);
+  } catch (error) {
+    if ((error as { code?: string }).code === 'ENOENT') return res.json(null);
+    res.status(500).json({ error: 'Published live evidence is not valid JSON.' });
+  }
+});
 
 app.get('/api/live-status', (_req, res) => res.json({
   available: Boolean(process.env.OPENAI_API_KEY),

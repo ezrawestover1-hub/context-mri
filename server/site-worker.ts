@@ -67,6 +67,18 @@ const worker = {
       });
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/live-evidence') {
+      const artifactUrl = new URL('/evidence/live-gpt-5.6.json', request.url);
+      const artifact = await env.ASSETS.fetch(new Request(artifactUrl, request));
+      if (artifact.status === 404) return json(null);
+      if (!artifact.ok) return json({ error: 'Published live evidence could not be read.' }, artifact.status);
+      try {
+        return json(await artifact.json());
+      } catch {
+        return json({ error: 'Published live evidence is not valid JSON.' }, 500);
+      }
+    }
+
     if (request.method === 'GET' && url.pathname === '/api/live-status') {
       return json({
         available: false,
