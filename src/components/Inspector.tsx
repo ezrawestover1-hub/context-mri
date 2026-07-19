@@ -41,7 +41,7 @@ export function Inspector({ item, evidence, report, recommendationApplied, onApp
           <div className="conflict current"><small>current source says</small><code>{report.diagnosis.currentInstruction}</code></div>
         </div>
 
-        <p className="plain-explanation">The archived guide competes with the current machine-readable schema. The agent becomes reliable when that guide is absent.</p>
+        <p className="plain-explanation">The {report.evaluationContract.legacySourceLabel} conflicts with the {report.evaluationContract.currentSourceLabel}. The agent becomes reliable when that source is absent.</p>
       </> : <>
         <h2>{evidence.status === 'required' ? 'The task falls apart without this file.' : evidence.status === 'useful' ? 'This file measurably improves reliability.' : 'This file adds tokens without measurable lift.'}</h2>
         <div className="context-effect"><strong>{evidence.contribution > 0 ? '+' : ''}{evidence.contribution} pp</strong><span>contribution to baseline score</span></div>

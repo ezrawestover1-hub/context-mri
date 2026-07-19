@@ -121,7 +121,7 @@ export function JudgeProof() {
         <ExternalLink size={15} />
       </a>
     </div>
-    <p className="engineering-proof">Independent evaluator · 5/5 fresh Codex tasks · lexical boundary tested · SHA-256 provenance · 35 automated tests · zero-secret CI</p>
+    <p className="engineering-proof">Independent evaluator · 5/5 fresh Codex tasks · lexical boundary tested · SHA-256 provenance · 36 automated tests · zero-secret CI</p>
   </section>;
 }
 

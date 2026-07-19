@@ -45,23 +45,25 @@ function hashPrompt(value: string) {
   return `${(primary >>> 0).toString(16).padStart(8, '0')}${(secondary >>> 0).toString(16).padStart(8, '0')}`.slice(0, 12);
 }
 
-function titleFromContext(item: ContextItem) {
+function titleFromContext(item: ContextItem, contract: EvaluationContract) {
   const known: Record<string, string> = {
     system: 'System',
     schema: 'Schema',
-    legacy: 'Legacy API',
     rules: 'Rules',
     examples: 'Examples',
   };
+  if (item.id === 'legacy') {
+    return contract.legacySourceLabel.replace(/\b\w/g, character => character.toUpperCase());
+  }
   if (known[item.id]) return known[item.id];
   const base = item.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
   return base.length > 16 ? `${base.slice(0, 15)}…` : base.replace(/\b\w/g, character => character.toUpperCase());
 }
 
-function variantsFor(contexts: ContextItem[]): Variant[] {
+function variantsFor(contexts: ContextItem[], contract: EvaluationContract): Variant[] {
   return [
     { id: 'baseline', label: 'Baseline', omittedContextId: null },
-    ...contexts.map(item => ({ id: `omit-${item.id}`, label: `−${titleFromContext(item)}`, omittedContextId: item.id })),
+    ...contexts.map(item => ({ id: `omit-${item.id}`, label: `−${titleFromContext(item, contract)}`, omittedContextId: item.id })),
   ];
 }
 
@@ -406,7 +408,7 @@ function contractFor(id: DiagnosticProjectId = DEFAULT_CONTRACT.id) {
 export function fixtureReport(contexts: ContextItem[], contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id) {
   const contract = contractFor(contractId);
   if (contract.fixtureProfile === 'judge-lab') throw new Error('Judge Lab contracts can only run as fresh live evaluations.');
-  const variants = variantsFor(contexts).map(variant => fixtureVariant(contexts, variant, contract));
+  const variants = variantsFor(contexts, contract).map(variant => fixtureVariant(contexts, variant, contract));
   const evidence = deriveContextEvidence(contexts, variants);
   const recommendedContextIds = recommendedIdsFor(evidence);
   const packVariant: Variant = {
@@ -498,7 +500,7 @@ function groupRuns(variants: Variant[], runs: ExperimentRun[]): VariantResult[] 
 async function liveReport(contexts: ContextItem[], apiKey: string, contract: EvaluationContract) {
   const { default: OpenAI } = await import('openai');
   const client = new OpenAI({ apiKey });
-  const variants = variantsFor(contexts);
+  const variants = variantsFor(contexts, contract);
   const jobs = variants.flatMap(variant => Array.from({ length: REPEATS }, (_, index) => ({ variant, repeat: index + 1 })));
 
   // Use one request as a quota probe before starting the concurrent suite.
@@ -529,7 +531,7 @@ async function liveReport(contexts: ContextItem[], apiKey: string, contract: Eva
 }
 
 export function liveSuiteRunCount(contexts: ContextItem[], contract: EvaluationContract = DEFAULT_CONTRACT) {
-  return (variantsFor(contexts).length + 1 + (interactionVariantFor(contexts, contract) ? 1 : 0)) * REPEATS;
+  return (variantsFor(contexts, contract).length + 1 + (interactionVariantFor(contexts, contract) ? 1 : 0)) * REPEATS;
 }
 
 export async function runLiveExperimentSuite(contexts: ContextItem[], apiKey: string, contractId: DiagnosticProjectId = DEFAULT_CONTRACT.id): Promise<ExperimentReport> {

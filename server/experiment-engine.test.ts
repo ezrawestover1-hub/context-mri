@@ -197,3 +197,12 @@ test('evaluates a materially different security-release contract with a policy-a
     'Structured response',
   ]);
 });
+
+test('uses the selected contract language for the Security omission label', () => {
+  const security = diagnosticProjects.find(project => project.id === 'security-release-safety')!;
+  const report = fixtureReport(security.contexts, security.id);
+  const legacyVariant = report.variants.find(variant => variant.omittedContextId === 'legacy')!;
+
+  assert.equal(legacyVariant.label, '−Emergency Release Runbook');
+  assert.notEqual(legacyVariant.label, '−Legacy API');
+});

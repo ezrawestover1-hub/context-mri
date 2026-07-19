@@ -95,7 +95,7 @@ The final cut must show real interactions, use Ezra's voice, contain no copyrigh
 - Show the sanitized five-run artifact: tool names, outcomes, timestamps, and hashes only.
 - Show the robustness proof with two explicit cards: `LEXICAL CHECK · PASSED` and `SEMANTIC PARAPHRASE · NEGATIVE CONTROL / LIMITATION`.
 - Show the deployed replay label, current green GitHub Actions run, self-audit, and public repository briefly.
-- On-screen: `5/5 FRESH CODEX TASKS · 35 TESTS · REAL MCP STDIO · PUBLIC PROOF`.
+- On-screen: `5/5 FRESH CODEX TASKS · 36 TESTS · REAL MCP STDIO · PUBLIC PROOF`.
 - Do not show a private prompt, source file, account identifier, usage record, or full Codex transcript.
 
 ### Scene 8 · 2:20–2:47 · Codex, GPT-5.6, and close

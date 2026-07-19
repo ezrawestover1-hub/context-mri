@@ -21979,22 +21979,24 @@ function hashPrompt(value) {
   }
   return `${(primary >>> 0).toString(16).padStart(8, "0")}${(secondary >>> 0).toString(16).padStart(8, "0")}`.slice(0, 12);
 }
-function titleFromContext(item) {
+function titleFromContext(item, contract) {
   const known = {
     system: "System",
     schema: "Schema",
-    legacy: "Legacy API",
     rules: "Rules",
     examples: "Examples"
   };
+  if (item.id === "legacy") {
+    return contract.legacySourceLabel.replace(/\b\w/g, (character) => character.toUpperCase());
+  }
   if (known[item.id]) return known[item.id];
   const base = item.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
   return base.length > 16 ? `${base.slice(0, 15)}\u2026` : base.replace(/\b\w/g, (character) => character.toUpperCase());
 }
-function variantsFor(contexts) {
+function variantsFor(contexts, contract) {
   return [
     { id: "baseline", label: "Baseline", omittedContextId: null },
-    ...contexts.map((item) => ({ id: `omit-${item.id}`, label: `\u2212${titleFromContext(item)}`, omittedContextId: item.id }))
+    ...contexts.map((item) => ({ id: `omit-${item.id}`, label: `\u2212${titleFromContext(item, contract)}`, omittedContextId: item.id }))
   ];
 }
 function activeContexts(contexts, variant) {
@@ -22257,7 +22259,7 @@ function contractFor(id = DEFAULT_CONTRACT.id) {
 function fixtureReport(contexts, contractId = DEFAULT_CONTRACT.id) {
   const contract = contractFor(contractId);
   if (contract.fixtureProfile === "judge-lab") throw new Error("Judge Lab contracts can only run as fresh live evaluations.");
-  const variants = variantsFor(contexts).map((variant) => fixtureVariant(contexts, variant, contract));
+  const variants = variantsFor(contexts, contract).map((variant) => fixtureVariant(contexts, variant, contract));
   const evidence = deriveContextEvidence(contexts, variants);
   const recommendedContextIds = recommendedIdsFor(evidence);
   const packVariant = {
