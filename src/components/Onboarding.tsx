@@ -1,15 +1,34 @@
 import { ArrowDown, ArrowRight, Check, ExternalLink, FileCheck2, FileJson, FileText, GitPullRequest, Play, RefreshCw, ShieldCheck, Sparkles, Upload } from 'lucide-react';
-import type { EvaluationContractSummary, ExperimentReport } from '../types';
+import type { ContextEvidence, ContextItem, EvaluationContractSummary, ExperimentReport } from '../types';
 
 type HeroIntroProps = {
   running: boolean;
   stage: string;
   onRun: () => void;
   onAddContext: () => void;
-  task: string;
+  contexts: ContextItem[];
+  report: ExperimentReport;
 };
 
-export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroIntroProps) {
+function contributionLabel(item: ContextEvidence) {
+  const sign = item.contribution > 0 ? '+' : item.contribution < 0 ? '−' : '';
+  return `${sign}${Math.abs(item.contribution)} pp`;
+}
+
+function ContextFileIcon({ name }: { name: string }) {
+  return name.endsWith('.json') ? <FileJson size={15} /> : <FileText size={15} />;
+}
+
+export function HeroIntro({ running, stage, onRun, onAddContext, contexts, report }: HeroIntroProps) {
+  const harmful = report.contextEvidence.find(item => item.status === 'harmful');
+  const strongestHelpful = [...report.contextEvidence]
+    .filter(item => item.contextId !== harmful?.contextId)
+    .sort((a, b) => b.contribution - a.contribution)
+    .slice(0, 2);
+  const inputPreviewIds = new Set([...strongestHelpful.map(item => item.contextId), harmful?.contextId].filter(Boolean));
+  const inputPreview = contexts.filter(item => inputPreviewIds.has(item.id));
+  const scoreLift = report.optimizedScore - report.baselineScore;
+
   return <section className="hero-intro" aria-labelledby="hero-title">
     <div className="hero-copy">
       <h1 id="hero-title">Find the one file making your agent worse.</h1>
@@ -25,7 +44,7 @@ export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroInt
       <div className="judge-path" aria-label="Thirty-second judge path">
         <strong>Try this in 30 seconds</strong>
         <ol>
-          <li><span>1</span><a href="#results">Run the free sample <small>See why removing one file reaches 92</small></a></li>
+          <li><span>1</span><a href="#results">Run the free sample <small>See why removing one file reaches {report.optimizedScore}</small></a></li>
           <li><span>2</span><a href="#next-steps">Apply and verify the smaller pack <small>Confirm the repair with a new run</small></a></li>
           <li><span>3</span><a href="#context-guard">Create the guard <small>Block the same regression in CI</small></a></li>
         </ol>
@@ -34,25 +53,22 @@ export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroInt
 
     <div className="workflow-preview" aria-label="Context MRI input, experiment, and output">
       <WorkflowPanel title="Task + context files">
-        <code className="workflow-task">{task}</code>
+        <code className="workflow-task">{report.evaluationContract.task}</code>
         <div className="workflow-files">
-          <span><FileText size={15} /> system-prompt.md</span>
-          <span><FileJson size={15} /> tool-schema.json</span>
-          <span className="harmful-file"><FileText size={15} /> legacy-api.md</span>
+          {inputPreview.map(item => <span className={item.id === harmful?.contextId ? 'harmful-file' : undefined} key={item.id}>
+            <ContextFileIcon name={item.name} /> {item.name}
+          </span>)}
         </div>
       </WorkflowPanel>
       <ArrowRight className="workflow-arrow" aria-hidden="true" />
       <WorkflowPanel title="Remove one at a time">
-        <code>system-prompt.md <b className="good">+35 pp</b></code>
-        <code>tool-schema.json <b className="good">+31 pp</b></code>
-        <code>legacy-api.md <b className="bad">−49 pp</b></code>
-        <code>examples.md <b>0 pp</b></code>
+        {report.contextEvidence.map(item => <code key={item.contextId}>{item.name} <b className={item.contribution > 0 ? 'good' : item.contribution < 0 ? 'bad' : undefined}>{contributionLabel(item)}</b></code>)}
       </WorkflowPanel>
       <ArrowRight className="workflow-arrow" aria-hidden="true" />
       <WorkflowPanel title="Repair + regression guard">
-        <strong>Remove <code>legacy-api.md</code></strong>
-        <small>The agent improves by 49 points without it.</small>
-        <div className="workflow-pack"><Check size={15} /> 92-point pack verified</div>
+        <strong>{harmful ? <>Remove <code>{harmful.name}</code></> : 'Keep the verified context pack'}</strong>
+        <small>{harmful ? `The agent improves by ${scoreLift} points without it.` : 'No harmful context was detected for this task.'}</small>
+        <div className="workflow-pack"><Check size={15} /> {report.optimizedScore}-point pack verified</div>
         <div className="workflow-guard"><ShieldCheck size={15} /> Original pack blocked in CI</div>
       </WorkflowPanel>
     </div>

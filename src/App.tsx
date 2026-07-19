@@ -417,7 +417,7 @@ export default function App() {
       </div>
     </header>
 
-    <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} task={report.evaluationContract.task} />
+    <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} contexts={contexts} report={report} />
     <JudgeProof />
     <EvidenceModes
       running={running}
