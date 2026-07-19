@@ -13,7 +13,7 @@ import { Inspector } from './components/Inspector';
 import { Inventory } from './components/Inventory';
 import { Matrix } from './components/Matrix';
 import { ContractModal, ProvenanceModal, RewriteModal, TraceModal } from './components/Modals';
-import { BeforeRun, HeroIntro, NextSteps, ResultGuide } from './components/Onboarding';
+import { BeforeRun, HeroIntro, JudgeProof, NextSteps, ResultGuide } from './components/Onboarding';
 import { createContextGuard } from './context-guard';
 
 type LiveEvidenceSummary = {
@@ -413,10 +413,12 @@ export default function App() {
       <div className="top-actions">
         <a className="how-link" href="#before-run">How it works</a>
         <button className="export-action" onClick={exportEvidence}><Download size={16} /> Export evidence</button>
-        <button className="run-action" onClick={() => runMRI(true)} disabled={running}>{running ? <Sparkles size={17} /> : <Play size={17} fill="currentColor" />}{running ? stage : 'Run guided demo'}</button>
+        <button className="run-action" onClick={() => runMRI(true)} disabled={running}>{running ? <Sparkles size={17} /> : <Play size={17} fill="currentColor" />}{running ? stage : 'Run free demo'}</button>
       </div>
     </header>
 
+    <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} task={report.evaluationContract.task} />
+    <JudgeProof />
     <EvidenceModes
       running={running}
       liveStatus={liveStatus}
@@ -426,7 +428,6 @@ export default function App() {
       onInspectContract={() => setContractOpen(true)}
       onOpenJudgeLab={() => setJudgeLabOpen(true)}
     />
-    <HeroIntro running={running} stage={stage} onRun={() => runMRI(true)} onAddContext={() => fileInput.current?.click()} task={report.evaluationContract.task} />
     <BeforeRun contract={report.evaluationContract} />
 
     <div className="results-anchor" id="results" ref={resultsRef}>

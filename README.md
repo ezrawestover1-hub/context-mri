@@ -1,5 +1,7 @@
 # Context MRI
 
+[![Context MRI Proof](https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml/badge.svg)](https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml)
+
 **Find the context that is quietly breaking your AI agent.**
 
 Context MRI is an evidence-first profiler for agent context. It runs a baseline, removes one context item at a time, repeats each condition, classifies every file from the measured score change, and verifies the recommended context pack with a final independent run.
@@ -13,6 +15,10 @@ Context MRI ships with three selectable, bundled diagnostic contracts: support A
 **Public judge demo:** [context-mri.ezra-westover1.chatgpt.site](https://context-mri.ezra-westover1.chatgpt.site)
 
 **Public source repository:** [github.com/ezrawestover1-hub/context-mri](https://github.com/ezrawestover1-hub/context-mri)
+
+**Public CI proof:** [original blocked, repaired pack passed](https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml)
+
+**Dogfooding audit:** [two real release-context inconsistencies found and repaired](./submission/SELF_AUDIT.md)
 
 The hosted demo opens without an account, API key, install, or build step. It intentionally uses the clearly labeled deterministic fixture replay so every judge gets the same complete, inspectable workflow. To generate fresh GPT-5.6 Sol traces instead, run the project locally with funded API quota as described below.
 
@@ -84,7 +90,9 @@ npm run guard:check -- \
 
 The command prints an inspectable JSON result and exits `1` if the bundle includes a blocked instruction, falls below the threshold, or fails an integrity fingerprint. Evidence exports preserve the active pack decision, so the runner checks the applied pack rather than an unstaged full library. When supplied an export, it also verifies that the original report and source library match the guard provenance. These fingerprints are tamper-evident integrity checks, not authorization signatures; production teams should also run representative live evaluations with human-calibrated success criteria.
 
-The repository includes a ready-to-run [GitHub Actions workflow](./.github/workflows/context-guard.yml). Copy the guard and evidence paths into your project, then keep the same command in CI so a changed context bundle fails before release.
+The repository includes a ready-to-run [GitHub Actions workflow](./.github/workflows/context-guard.yml). It runs the complete test suite and production build, audits Context MRI's own release context, proves that the committed original bundle is blocked at 43/100, proves that the repaired pack passes at 92/100, and uploads both JSON proof artifacts. No API key or paid service is involved. Copy the guard and evidence paths into your project, then keep the same command in CI so a changed context bundle fails before release.
+
+The [dogfooding audit](./submission/SELF_AUDIT.md) is intentionally narrower than a model evaluation. It caught an outdated video handoff and a one-sided CI claim in this repository, fixed both, and now fingerprints the release files and reruns the assertions on every relevant pull request.
 
 Optionally, with funded quota, generate a judge-shareable authentic trace artifact:
 
@@ -149,6 +157,8 @@ It is a bounded interaction measurement for that registered pair, not a claim th
 - `server/experiment-engine.ts` — contract-aware live runner, fixture replay, evaluator, classification, and pack verification
 - `server/context-guard.ts` — portable regression-guard validation and deterministic CI check
 - `scripts/check-context-guard.ts` — zero-service CI runner for a downloaded guard and evidence export
+- `scripts/prove-context-guard.ts` — dual-sided CI assertion for the measured original and repaired bundles
+- `scripts/audit-release-context.ts` — reproducible self-audit of submission and release-context consistency
 - `server/experiment-engine.test.ts` — evaluator, aggregation, classification, custom-context, and provenance invariants
 - `src/components/Matrix.tsx` — ablation matrix, contribution plot, and verification result
 - `src/components/Modals.tsx` — trace provenance, fixture explanation, and safe rewrite

@@ -10,6 +10,8 @@
 - [x] Render and verify the updated under-three-minute demo at 1080p with stereo audio (H.264, 1920×1080, 30 fps, stereo AAC, 2:17.17); the action scene now visibly shows Context Guard blocking 43 and passing 92 without changing narration or runtime
 - [ ] Upload public YouTube demo
 - [x] Public repository: https://github.com/ezrawestover1-hub/context-mri
+- [x] Public CI proof: https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml
+- [x] Reproducible dogfooding audit: https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/SELF_AUDIT.md
 - [x] README with setup, sample data, and judge test path
 - [x] Codex task/session ID captured: `019f71e4-f746-7083-a465-1c84948bbd8c`
 - [x] GPT-5.6 Terra Codex adversarial audit captured in `submission/GPT_5_6_TERRA_AUDIT.md`
@@ -35,7 +37,8 @@
 - Unit-tested evaluator, aggregate, classification, and provenance invariants
 - Applied-pack rerun submits the reduced bundle as a separate experiment and captures its report ID
 - Downloadable Context Guard blocks the original stale library, passes the repaired pack, fingerprints the task contract and recommended source files, and has a zero-service CI runner that exits nonzero on regression or provenance mismatch
-- Committed GitHub Actions workflow runs the Context Guard check on relevant pull requests and main-branch changes
+- Committed GitHub Actions workflow proves both sides of the claim: the original five-file bundle is blocked at 43 and the repaired three-file pack passes at 92, with integrity verified for both
+- Deterministic self-audit caught and repaired two real release-context inconsistencies, fingerprints its inputs, and reruns in CI without an API key
 
 ### Design
 
@@ -62,7 +65,7 @@
 
 ## Final manual actions
 
-1. Upload `submission/video/out/context-mri-demo.mp4` publicly or unlisted to YouTube and add the URL to Devpost.
+1. Upload `submission/video/out/context-mri-demo-winner-pass.mp4` publicly or unlisted to YouTube and add the URL to Devpost. Keep `context-mri-demo.mp4` as the preserved prior cut.
 2. Open the YouTube link in a private window to confirm it is viewable without your account.
 3. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
 4. Submit before **July 21, 2026 at 5:00 PM PDT**.

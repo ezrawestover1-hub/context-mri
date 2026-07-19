@@ -67,6 +67,9 @@ h2 em { color: #d58d72; font-weight: 500; }
 .proof-row { margin-top: 38px; display: flex; gap: 18px; }
 .proof-row span { min-width: 180px; padding: 18px; color: #c0d1ca; border: 1px solid #799286; border-radius: 7px; font-size: 18px; }
 .proof-row b { display: block; margin-bottom: 4px; color: var(--paper); font: 500 36px Georgia, serif; }
+.scenario-strip { margin-top: 34px; padding-top: 22px; display: flex; align-items: center; gap: 22px; border-top: 1px solid #6f897d; color: #c1d1ca; font-size: 20px; }
+.scenario-strip b { margin-right: 8px; color: #e0ebe4; font-size: 17px; letter-spacing: .1em; }
+.scenario-strip span { padding-left: 22px; border-left: 1px solid #6f897d; }
 
 .scene-header { min-height: 150px; display: flex; align-items: end; justify-content: space-between; gap: 60px; }
 .scene-header h2 { margin-top: 18px; font-size: 68px; }
@@ -93,10 +96,10 @@ h2 em { color: #d58d72; font-weight: 500; }
 
 .mode-scene { padding-top: 92px; }
 .mode-scene > h2 { max-width: 1380px; margin-top: 30px; font-size: 90px; }
-.mode-grid { margin-top: 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 34px; }
+.mode-grid { margin-top: 64px; display: grid; grid-template-columns: 1.3fr .7fr; gap: 34px; }
 .mode-card { min-height: 470px; padding: 46px; border-radius: 8px; }
 .mode-card.replay { color: var(--ink); background: var(--paper); }
-.mode-card.live { color: var(--paper); background: var(--pine-800); border: 1px solid #739184; }
+.mode-card.live { color: var(--paper); background: #173b30; border: 1px solid #647f72; }
 .mode-card > span { color: var(--rust); font-size: 19px; font-weight: 800; letter-spacing: .16em; }
 .mode-card.live > span { color: #bad1c6; }
 .mode-card h3 { margin-top: 28px; font: 500 54px Georgia, serif; }
@@ -123,6 +126,7 @@ h2 em { color: #d58d72; font-weight: 500; }
 .codex-steps strong { font-size: 29px; letter-spacing: .08em; }
 .codex-steps small { color: #c7d5cf; font: 27px/1.42 Georgia, serif; }
 .codex-close { margin-top: 38px; color: var(--pine-800); font: italic 34px/1.25 Georgia, serif; text-align: center; }
+.codex-close strong { color: var(--pine-950); font-weight: 700; }
 
 .caption-safe { position: absolute; left: 0; right: 0; bottom: 34px; height: 94px; display: grid; place-items: center; z-index: 50; pointer-events: none; }
 .caption { max-width: 1580px; padding: 16px 30px 18px; color: var(--paper); background: #09271ff2; border: 1px solid #789186; border-radius: 8px; box-shadow: 0 10px 36px #0000002b; text-align: center; font: 34px/1.25 Georgia, serif; }

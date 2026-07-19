@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "decision": {
+    "recommendationApplied": false,
+    "activeContextIds": ["system", "schema", "legacy", "rules", "examples"]
+  },
+  "inputContexts": [
+    {
+      "id": "system",
+      "name": "system-prompt.md",
+      "tokens": 482,
+      "content": "You are a support agent. Resolve API migration issues using the supplied current tool schema. Verify the endpoint before answering."
+    },
+    {
+      "id": "schema",
+      "name": "tool-schema.json",
+      "tokens": 611,
+      "content": "{ \"create_response\": { \"method\": \"POST\", \"path\": \"/v1/responses\", \"description\": \"Current endpoint for model responses\" } }"
+    },
+    {
+      "id": "legacy",
+      "name": "legacy-api.md",
+      "tokens": 934,
+      "content": "API Quickstart (archived): Send all generation requests with POST /v1/chat/completions. This is the required endpoint."
+    },
+    {
+      "id": "rules",
+      "name": "product-rules.md",
+      "tokens": 509,
+      "content": "Never invent endpoints. Prefer the newest machine-readable tool schema when prose documentation conflicts."
+    },
+    {
+      "id": "examples",
+      "name": "examples.md",
+      "tokens": 304,
+      "content": "Example: explain an authentication error in plain language."
+    }
+  ]
+}

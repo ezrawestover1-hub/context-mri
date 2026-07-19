@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowRight, Check, FileJson, FileText, Play, RefreshCw, Sparkles, Upload } from 'lucide-react';
+import { ArrowDown, ArrowRight, Check, ExternalLink, FileCheck2, FileJson, FileText, GitPullRequest, Play, RefreshCw, ShieldCheck, Sparkles, Upload } from 'lucide-react';
 import type { EvaluationContractSummary, ExperimentReport } from '../types';
 
 type HeroIntroProps = {
@@ -13,19 +13,19 @@ export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroInt
   return <section className="hero-intro" aria-labelledby="hero-title">
     <div className="hero-copy">
       <h1 id="hero-title">Find the one file making your agent worse.</h1>
-      <p>Context MRI runs a task-specific ablation: it tests each context file, shows what helps or hurts under one stated evaluator, and builds a smaller pack you can verify.</p>
+      <p>Most evals tell you an agent failed. Context MRI shows which context file changes the result for a stated task, verifies the repaired pack, and creates a CI guard so the regression cannot return.</p>
       <div className="hero-actions">
         <button className="hero-primary" onClick={onRun} disabled={running}>
           {running ? <Sparkles size={18} /> : <Play size={18} fill="currentColor" />}
-          {running ? stage : 'Run the included example'}
+          {running ? stage : 'Run the free 30-second demo'}
         </button>
         <button className="hero-secondary" onClick={onAddContext}><Upload size={17} /> Add my context files</button>
       </div>
-      <p className="hero-note">No account, API key, or setup required to inspect the included replay.</p>
+      <p className="hero-note">Complete judge path · no account, API key, payment, or setup required.</p>
       <div className="judge-path" aria-label="Thirty-second judge path">
         <strong>Try this in 30 seconds</strong>
         <ol>
-          <li><span>1</span><a href="#results">Run the sample <small>See why removing one file reaches 92</small></a></li>
+          <li><span>1</span><a href="#results">Run the free sample <small>See why removing one file reaches 92</small></a></li>
           <li><span>2</span><a href="#next-steps">Apply and verify the smaller pack <small>Confirm the repair with a new run</small></a></li>
           <li><span>3</span><a href="#context-guard">Create the guard <small>Block the same regression in CI</small></a></li>
         </ol>
@@ -49,19 +49,54 @@ export function HeroIntro({ running, stage, onRun, onAddContext, task }: HeroInt
         <code>examples.md <b>0 pp</b></code>
       </WorkflowPanel>
       <ArrowRight className="workflow-arrow" aria-hidden="true" />
-      <WorkflowPanel title="Evidence-backed plan">
+      <WorkflowPanel title="Repair + regression guard">
         <strong>Remove <code>legacy-api.md</code></strong>
         <small>The agent improves by 49 points without it.</small>
-        <div className="workflow-pack"><Check size={15} /> Smaller verified pack</div>
+        <div className="workflow-pack"><Check size={15} /> 92-point pack verified</div>
+        <div className="workflow-guard"><ShieldCheck size={15} /> Original pack blocked in CI</div>
       </WorkflowPanel>
     </div>
 
-    <a className="continue-cue" href="#before-run"><span>See what goes in</span><ArrowDown size={17} /></a>
+    <a className="continue-cue" href="#judge-proof"><span>See the technical proof</span><ArrowDown size={17} /></a>
   </section>;
 }
 
 function WorkflowPanel({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="workflow-panel"><h2>{title}</h2><div>{children}</div></div>;
+}
+
+const proofPoints = [
+  { value: '21', label: 'inspectable trace records per free scenario' },
+  { value: '3', label: 'separate task and rubric contracts' },
+  { value: '44%', label: 'less context in the included Support repair' },
+  { value: 'CI', label: 'original blocked; repaired pack passed' },
+];
+
+export function JudgeProof() {
+  return <section className="judge-proof" id="judge-proof" aria-labelledby="judge-proof-title">
+    <div className="judge-proof-copy">
+      <span>WHY THIS IS DIFFERENT</span>
+      <h2 id="judge-proof-title">A complete context-debugging loop—not another pass/fail score.</h2>
+      <p>Diagnose the harmful file, inspect the evidence, verify the smaller pack, and export a guard that prevents the same failure from returning.</p>
+    </div>
+    <dl>{proofPoints.map(point => <div key={point.value}>
+      <dt>{point.value}</dt>
+      <dd>{point.label}</dd>
+    </div>)}</dl>
+    <div className="proof-links" aria-label="Independent repository proof">
+      <a href="https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml" target="_blank" rel="noreferrer">
+        <GitPullRequest size={18} />
+        <span><strong>Watch the public CI proof</strong><small>Original bundle blocked at 43 · repaired pack passed at 92</small></span>
+        <ExternalLink size={15} />
+      </a>
+      <a href="https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/SELF_AUDIT.md" target="_blank" rel="noreferrer">
+        <FileCheck2 size={18} />
+        <span><strong>Read the dogfooding audit</strong><small>Two real release-context inconsistencies found and repaired</small></span>
+        <ExternalLink size={15} />
+      </a>
+    </div>
+    <p className="engineering-proof">Independent evaluator · run IDs + prompt hashes · SHA-256 pack provenance · 26 automated tests · zero-secret CI</p>
+  </section>;
 }
 
 export function BeforeRun({ contract }: { contract: EvaluationContractSummary }) {

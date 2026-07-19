@@ -74,7 +74,7 @@ const TitleScene = () => {
     <div className="title-content" style={{ opacity: interpolate(frame, [10, 34], [0, 1], clamp), translate: `0 ${interpolate(frame, [10, 34], [32, 0], clamp)}px` }}>
       <Brand light />
       <h1>One stale file can break an entire agent.</h1>
-      <p>Find the context that hurts performance.<br />Prove it with controlled experiments.</p>
+      <p>Most evals stop at a score.<br />Context MRI finds the file, verifies the repair, and guards it in CI.</p>
       <div className="title-proof"><span>BASELINE</span><b>43</b><i>→</i><span>VERIFIED PACK</span><b>92</b></div>
     </div>
     <div className="botanical-arc one" /><div className="botanical-arc two" />
@@ -86,12 +86,12 @@ const MethodScene = () => {
   return <AbsoluteFill className="scene cream-scene split-scene">
     <div className="copy-column" style={{ opacity: interpolate(frame, [6, 26], [0, 1], clamp), translate: `${interpolate(frame, [6, 26], [-40, 0], clamp)}px 0` }}>
       <Kicker>01 · THE METHOD</Kicker>
-      <h2>Input. Test. Action.</h2>
+      <h2>Diagnose. Repair. Prevent.</h2>
       <p className="lead">A controlled experiment for the context your agent reads.</p>
       <div className="method-list">
-        <div><b>1</b><span><strong>Define the task</strong><small>What must the agent do?</small></span></div>
+        <div><b>1</b><span><strong>Measure the baseline</strong><small>Fix the task and success rubric.</small></span></div>
         <div><b>2</b><span><strong>Remove one file</strong><small>Hold everything else constant.</small></span></div>
-        <div><b>3</b><span><strong>Verify the pack</strong><small>Re-run before trusting the change.</small></span></div>
+        <div><b>3</b><span><strong>Verify + guard</strong><small>Re-run, then block the regression in CI.</small></span></div>
       </div>
     </div>
     <div className="visual-column"><Screenshot src="hero.png" position="61% top" /></div>
@@ -108,6 +108,7 @@ const RevealScene = () => {
         <div><small>BASELINE</small><b className="bad-score">43</b></div><span>→</span><div><small>WITHOUT LEGACY</small><b>92</b></div>
       </div>
       <div className="proof-row"><span><b>+49</b> points</span><span><b>3/3</b> repeats</span><span><b>−44%</b> tokens</span></div>
+      <div className="scenario-strip" style={{ opacity: interpolate(frame, [260, 292], [0, 1], clamp), translate: `${interpolate(frame, [260, 292], [-24, 0], clamp)}px 0` }}><b>ONE ENGINE · THREE CONTRACTS</b><span>Support API</span><span>Billing API</span><span>Release security</span></div>
     </div>
     <div className="visual-column"><Screenshot src="result.png" position="center 8%" /></div>
   </AbsoluteFill>;
@@ -147,13 +148,13 @@ const ModeScene = () => {
   const frame = useCurrentFrame();
   return <AbsoluteFill className="scene pine-scene mode-scene">
     <Kicker light>05 · HONEST PROVENANCE</Kicker>
-    <h2>Replay for judging.<br />GPT‑5.6 for fresh evidence.</h2>
+    <h2>Complete free judge path.<br />Optional fresh-model runner.</h2>
     <div className="mode-grid">
       <div className="mode-card replay" style={{ opacity: interpolate(frame, [10, 30], [0, 1], clamp), translate: `${interpolate(frame, [10, 30], [-40, 0], clamp)}px 0` }}>
-        <span>PUBLIC JUDGE DEMO</span><h3>Deterministic fixture replay</h3><p>Same complete workflow for every judge. Clearly labeled. Never presented as a fresh model call.</p><b>NO ACCOUNT · NO KEY · NO SETUP</b>
+        <span>RECOMMENDED PUBLIC DEMO</span><h3>Full deterministic product loop</h3><p>Diagnosis, 21 inspectable traces, repaired-pack verification, and Context Guard—clearly labeled as replay evidence.</p><b>NO ACCOUNT · NO KEY · NO PAYMENT · NO SETUP</b>
       </div>
       <div className="mode-card live" style={{ opacity: interpolate(frame, [20, 40], [0, 1], clamp), translate: `${interpolate(frame, [20, 40], [40, 0], clamp)}px 0` }}>
-        <span>LIVE RUNNER</span><h3>GPT‑5.6 Sol</h3><p>Responses API, medium reasoning, strict Structured Outputs, run IDs, prompt hashes, and measured token use.</p><b>FRESH CLAIMS REQUIRE LIVE TRACES</b>
+        <span>OPTIONAL LOCAL RUNNER</span><h3>Fresh GPT‑5.6 Sol</h3><p>Responses API, strict Structured Outputs, run IDs, prompt hashes, and measured token use.</p><b>NEVER SUBSTITUTES A FIXTURE</b>
       </div>
     </div>
   </AbsoluteFill>;
@@ -165,7 +166,7 @@ const FinalScene = () => {
     <div className="paper-grain" />
     <Brand light />
     <div className="final-grid">
-      <div><Kicker light>BUILT FOR OPENAI BUILD WEEK</Kicker><h2>Prompt debugging,<br /><em>with evidence.</em></h2><p>Context MRI finds the instruction that quietly breaks an agent—and verifies the repair.</p></div>
+      <div><Kicker light>BUILT FOR OPENAI BUILD WEEK</Kicker><h2>Find the bad file.<br /><em>Keep it from returning.</em></h2><p>One evidence-first loop from diagnosis to verified repair and CI prevention.</p></div>
       <div className="built-with" style={{ opacity: interpolate(frame, [14, 36], [0, 1], clamp), translate: `${interpolate(frame, [14, 36], [30, 0], clamp)}px 0` }}>
         <span>BUILT WITH</span><b>CODEX</b><i>+</i><b>GPT‑5.6</b>
         <ul><li>Experiment architecture</li><li>Evaluator + tests</li><li>Interface + browser QA</li><li>Mathematical consistency</li></ul>
@@ -196,7 +197,7 @@ const CodexScene = () => {
         <b>{number}</b><span><strong>{title}</strong><small>{copy}</small></span>
       </div>)}
     </div>
-    <p className="codex-close">Codex accelerated the work. GPT-5.6 Terra challenged its evidence.</p>
+    <p className="codex-close"><strong>26 automated tests</strong> · independent evaluator · SHA-256 provenance · Context Guard CI</p>
   </AbsoluteFill>;
 };
 

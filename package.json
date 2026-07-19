@@ -8,8 +8,10 @@
     "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\"",
     "build": "npm run clean && tsc -b && vite build && npm run build:worker",
     "build:worker": "esbuild server/site-worker.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/server/index.js",
+    "audit:self": "tsx scripts/audit-release-context.ts",
     "evidence:live": "tsx scripts/generate-live-evidence.ts",
     "guard:check": "tsx scripts/check-context-guard.ts",
+    "guard:prove": "tsx scripts/prove-context-guard.ts",
     "test": "tsx --test server/**/*.test.ts",
     "start": "tsx server/index.ts",
     "preview": "vite preview"
