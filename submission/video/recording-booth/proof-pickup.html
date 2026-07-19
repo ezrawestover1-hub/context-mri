@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Context MRI Winner Proof Pickup</title>
+    <style>
+      :root {
+        --pine-950: #09271f;
+        --pine-900: #10372b;
+        --pine-700: #2f5d4d;
+        --cream: #f4eddf;
+        --paper: #fbf7ed;
+        --sage: #dce5d8;
+        --ink: #173128;
+        --muted: #65766d;
+        --rust: #b34b32;
+        --line: #c7bfad;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background: var(--cream);
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      button, select, a { font: inherit; }
+      button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid #d58d72; outline-offset: 3px; }
+      header {
+        padding: 22px clamp(22px, 5vw, 72px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        color: var(--paper);
+        background: var(--pine-950);
+      }
+      .brand { display: flex; align-items: center; gap: 15px; }
+      .mark { width: 46px; height: 46px; display: grid; place-items: center; border: 1.5px solid currentColor; border-radius: 50%; font-size: 22px; }
+      .brand strong { display: block; font: 700 22px/1 Georgia, serif; letter-spacing: .08em; }
+      .brand small { display: block; margin-top: 5px; color: #b9cbc3; font-size: 10px; font-weight: 800; letter-spacing: .15em; }
+      header > p { max-width: 570px; margin: 0; color: #c5d6ce; font-size: 14px; line-height: 1.5; text-align: right; }
+
+      main {
+        width: min(1420px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: clamp(28px, 5vw, 62px) 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(340px, .75fr);
+        gap: clamp(24px, 4vw, 52px);
+        align-items: start;
+      }
+      .eyebrow { margin: 0 0 14px; color: var(--rust); font-size: 13px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+      h1 { margin: 0; font: 500 clamp(44px, 5vw, 76px)/.98 Georgia, serif; letter-spacing: -.035em; }
+      .intro { max-width: 850px; margin: 22px 0 0; color: #486157; font: 22px/1.45 Georgia, serif; }
+      .script-card {
+        margin-top: 30px;
+        padding: clamp(28px, 4vw, 56px);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--pine-700);
+        border-radius: 10px;
+        box-shadow: 0 24px 70px #09271f12;
+      }
+      .script-card h2 { margin: 0 0 24px; color: var(--pine-700); font-size: 13px; letter-spacing: .15em; text-transform: uppercase; }
+      .script { margin: 0; font: 500 clamp(30px, 3vw, 43px)/1.42 Georgia, serif; letter-spacing: -.018em; }
+      .pronunciation { margin: 26px 0 0; padding-top: 20px; color: var(--muted); border-top: 1px solid #d9d1c0; font-size: 15px; line-height: 1.6; }
+      .pronunciation strong { color: var(--ink); }
+      .steps { margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; list-style: none; }
+      .steps li { padding: 14px; color: #40594f; background: #e7eadf; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+      .steps b { display: block; margin-bottom: 4px; color: var(--pine-900); }
+
+      aside {
+        position: sticky;
+        top: 22px;
+        padding: 28px;
+        color: var(--paper);
+        background: var(--pine-900);
+        border: 1px solid #6e8b7f;
+        border-radius: 11px;
+        box-shadow: 0 24px 60px #09271f22;
+      }
+      aside h2 { margin: 0; font: 500 34px/1.05 Georgia, serif; }
+      aside > p { margin: 12px 0 0; color: #bed0c8; font-size: 14px; line-height: 1.5; }
+      label { display: block; margin: 22px 0 8px; color: #c9d8d2; font-size: 12px; font-weight: 800; }
+      select { width: 100%; min-height: 46px; padding: 0 11px; color: var(--ink); background: var(--paper); border: 1px solid #859c92; border-radius: 6px; }
+      .meter { height: 12px; margin-top: 17px; overflow: hidden; background: #061c16; border: 1px solid #668378; border-radius: 999px; }
+      #meter-fill { width: 0%; height: 100%; background: #d5b36a; }
+      #level-hint { min-height: 18px; margin: 7px 0 0; color: #9eb5aa; font-size: 11px; }
+      .controls { margin-top: 20px; display: grid; gap: 10px; }
+      .controls button, .download {
+        width: 100%;
+        min-height: 50px;
+        display: grid;
+        place-items: center;
+        padding: 0 16px;
+        border-radius: 7px;
+        font-weight: 820;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      #enable { color: var(--pine-900); background: var(--paper); border: 0; }
+      #record { color: #fff; background: var(--rust); border: 0; }
+      #stop { color: var(--paper); background: transparent; border: 1px solid #adc1b8; }
+      button:disabled { opacity: .42; cursor: not-allowed; }
+      .status-line { margin-top: 18px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #061e17; border-radius: 6px; }
+      #status { color: #c8d8d1; font-size: 12px; }
+      #timer { font-variant-numeric: tabular-nums; font-weight: 850; letter-spacing: .06em; }
+      .dot { width: 8px; height: 8px; display: inline-block; margin-right: 7px; background: #799287; border-radius: 50%; }
+      .dot.live { background: #e07159; }
+      audio { width: 100%; margin-top: 16px; }
+      .download { margin-top: 10px; color: var(--pine-950); background: #c9dfd3; }
+      .download[hidden], audio[hidden] { display: none; }
+      .safety-note { margin-top: 18px; padding-top: 16px; color: #a9beb4; border-top: 1px solid #59776b; font-size: 12px; line-height: 1.5; }
+      .countdown { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; color: var(--paper); background: #09271fe8; font: 500 160px/1 Georgia, serif; backdrop-filter: blur(7px); }
+      .countdown[hidden] { display: none; }
+      .countdown small { display: block; margin-top: 16px; font: 800 14px/1.3 Inter, sans-serif; letter-spacing: .12em; text-align: center; text-transform: uppercase; }
+
+      @media (max-width: 900px) {
+        header { align-items: flex-start; }
+        header > p { display: none; }
+        main { grid-template-columns: 1fr; }
+        aside { position: static; order: -1; }
+      }
+      @media (max-width: 600px) {
+        main { width: min(100% - 24px, 1420px); }
+        .steps { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand"><div class="mark">✦</div><div><strong>CONTEXT MRI</strong><small>WINNER-PROOF PICKUP</small></div></div>
+      <p>One short new take. Your original eight recordings stay untouched, and you can redo this pickup as many times as you want.</p>
+    </header>
+
+    <main>
+      <section>
+        <p class="eyebrow">One final proof chapter · about 25 seconds</p>
+        <h1>Show the evidence judges asked for.</h1>
+        <p class="intro">Read this like you are explaining the final upgrade to one smart friend. Calm, clear, and proud—not rushed.</p>
+        <article class="script-card">
+          <h2>Your exact script</h2>
+          <p class="script">To test whether the method generalizes beyond the API example, I added a distinct security-release diagnostic. Its evaluator checks credential safety, source authority, unsafe-command refusal, risk explanation, and structured output. Judges can inspect that contract, verify the guard in the public GitHub C-I run—twenty-six tests with no stored API key—and read the self-audit documenting two inconsistencies I found and fixed.</p>
+          <p class="pronunciation"><strong>Say the letters separately:</strong> API = “A — P — I.” CI = “C — I.” Give a tiny pause after “diagnostic” and before “Judges can inspect.”</p>
+        </article>
+        <ol class="steps">
+          <li><b>1 · Enable</b>Choose your Mac microphone and check the level.</li>
+          <li><b>2 · Record</b>Read the script once. A three-second countdown starts first.</li>
+          <li><b>3 · Keep or redo</b>Listen. Redo only if needed, then download and attach it in Codex.</li>
+        </ol>
+      </section>
+
+      <aside>
+        <h2>Record the pickup</h2>
+        <p>Your best take replaces only this proof chapter. Nothing from the current video is deleted.</p>
+        <label for="device">Microphone</label>
+        <select id="device" disabled><option value="">Enable microphone access first</option></select>
+        <div class="meter" aria-label="Microphone input level"><div id="meter-fill"></div></div>
+        <p id="level-hint">Aim for green while speaking normally.</p>
+        <div class="controls">
+          <button id="enable" type="button">Enable microphone</button>
+          <button id="record" type="button" disabled>Record pickup</button>
+          <button id="stop" type="button" disabled>Stop &amp; save</button>
+        </div>
+        <div class="status-line"><div id="status"><span class="dot"></span>Microphone not enabled</div><div id="timer">00:00</div></div>
+        <audio id="playback" controls hidden></audio>
+        <a id="download" class="download" href="#" hidden>Download this pickup</a>
+        <p class="safety-note">Do not refresh until you download the take. If macOS blocks the mic, open System Settings → Privacy &amp; Security → Microphone and allow your browser.</p>
+      </aside>
+    </main>
+
+    <div class="countdown" id="countdown" hidden><div><span id="countdown-number">3</span><small>Recording starts</small></div></div>
+
+    <script>
+      const device = document.querySelector("#device");
+      const enable = document.querySelector("#enable");
+      const record = document.querySelector("#record");
+      const stop = document.querySelector("#stop");
+      const meterFill = document.querySelector("#meter-fill");
+      const levelHint = document.querySelector("#level-hint");
+      const status = document.querySelector("#status");
+      const timer = document.querySelector("#timer");
+      const playback = document.querySelector("#playback");
+      const download = document.querySelector("#download");
+      const countdown = document.querySelector("#countdown");
+      const countdownNumber = document.querySelector("#countdown-number");
+
+      let stream = null;
+      let mediaRecorder = null;
+      let chunks = [];
+      let audioContext = null;
+      let analyser = null;
+      let meterFrame = null;
+      let timerInterval = null;
+      let startedAt = 0;
+      let savedUrl = null;
+
+      const setStatus = (message, live = false) => {
+        status.innerHTML = `<span class="dot ${live ? "live" : ""}"></span>${message}`;
+      };
+      const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+      const chooseMime = () => ["audio/webm;codecs=opus", "audio/mp4;codecs=mp4a.40.2", "audio/mp4", "audio/webm"].find(type => MediaRecorder.isTypeSupported(type)) || "";
+
+      const refreshDevices = async () => {
+        const inputs = (await navigator.mediaDevices.enumerateDevices()).filter(item => item.kind === "audioinput");
+        const previous = device.value;
+        device.innerHTML = "";
+        inputs.forEach((input, index) => {
+          const option = document.createElement("option");
+          option.value = input.deviceId;
+          option.textContent = input.label || `Microphone ${index + 1}`;
+          device.append(option);
+        });
+        const preferred = inputs.find(input => /macbook.*microphone/i.test(input.label));
+        if (inputs.some(input => input.deviceId === previous)) device.value = previous;
+        else if (preferred) device.value = preferred.deviceId;
+        device.disabled = inputs.length === 0;
+      };
+
+      const startMeter = () => {
+        if (audioContext) audioContext.close();
+        audioContext = new AudioContext();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        audioContext.createMediaStreamSource(stream).connect(analyser);
+        const samples = new Uint8Array(analyser.fftSize);
+        const draw = () => {
+          analyser.getByteTimeDomainData(samples);
+          const rms = Math.sqrt(samples.reduce((sum, value) => sum + ((value - 128) / 128) ** 2, 0) / samples.length);
+          const percent = Math.min(100, Math.max(2, rms * 360));
+          meterFill.style.width = `${percent}%`;
+          meterFill.style.background = percent > 88 ? "#d96a52" : percent > 22 ? "#86c39e" : "#d5b36a";
+          levelHint.textContent = percent > 88 ? "Too loud—move a little farther away." : percent > 22 ? "Good level." : "A little quiet—move closer or speak slightly louder.";
+          meterFrame = requestAnimationFrame(draw);
+        };
+        draw();
+      };
+
+      const openMicrophone = async () => {
+        try {
+          stream?.getTracks().forEach(track => track.stop());
+          if (meterFrame) cancelAnimationFrame(meterFrame);
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              deviceId: device.value ? { exact: device.value } : undefined,
+              channelCount: 1,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+            },
+          });
+          await refreshDevices();
+          startMeter();
+          enable.textContent = "Microphone enabled";
+          record.disabled = false;
+          setStatus(`Ready · ${device.options[device.selectedIndex]?.textContent || "microphone connected"}`);
+        } catch (error) {
+          const message = error?.name === "NotAllowedError" ? "Microphone permission is blocked." : error?.name === "NotReadableError" ? "The microphone is busy in another app." : "Could not open the microphone.";
+          setStatus(message);
+        }
+      };
+
+      const showCountdown = async () => {
+        countdown.hidden = false;
+        for (const number of ["3", "2", "1"]) {
+          countdownNumber.textContent = number;
+          await new Promise(resolve => setTimeout(resolve, 850));
+        }
+        countdown.hidden = true;
+      };
+
+      const startRecording = async () => {
+        if (!stream || mediaRecorder?.state === "recording") return;
+        record.disabled = true;
+        enable.disabled = true;
+        await showCountdown();
+        chunks = [];
+        const mimeType = chooseMime();
+        mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType, audioBitsPerSecond: 192000 } : undefined);
+        mediaRecorder.addEventListener("dataavailable", event => { if (event.data.size) chunks.push(event.data); });
+        mediaRecorder.addEventListener("stop", () => {
+          clearInterval(timerInterval);
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || "audio/webm" });
+          if (savedUrl) URL.revokeObjectURL(savedUrl);
+          savedUrl = URL.createObjectURL(blob);
+          const extension = blob.type.includes("mp4") ? "m4a" : "webm";
+          const stamp = new Date().toISOString().replaceAll(":", "-").replaceAll(".", "-");
+          playback.src = savedUrl;
+          playback.hidden = false;
+          download.href = savedUrl;
+          download.download = `context-mri-winner-proof-pickup-${stamp}.${extension}`;
+          download.hidden = false;
+          record.textContent = "Redo this pickup";
+          record.disabled = false;
+          enable.disabled = false;
+          stop.disabled = true;
+          setStatus("Take saved · Listen once, then download or redo");
+        }, { once: true });
+        mediaRecorder.start(250);
+        startedAt = Date.now();
+        timer.textContent = "00:00";
+        timerInterval = setInterval(() => { timer.textContent = formatTime(Math.floor((Date.now() - startedAt) / 1000)); }, 250);
+        stop.disabled = false;
+        setStatus("Recording pickup", true);
+      };
+
+      enable.addEventListener("click", openMicrophone);
+      device.addEventListener("change", openMicrophone);
+      record.addEventListener("click", startRecording);
+      stop.addEventListener("click", () => { if (mediaRecorder?.state === "recording") mediaRecorder.stop(); });
+    </script>
+  </body>
+</html>

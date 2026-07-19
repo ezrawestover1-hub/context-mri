@@ -12,6 +12,7 @@ import {
 import { CaptionOverlay } from "./CaptionOverlay";
 
 const FPS = 30;
+const PROOF_PREVIEW_FRAMES = 26 * FPS;
 // Scene eight is the mastered human pickup, measured after trimming only
 // leading and trailing room tone (natural pauses remain intact).
 const AUDIO_DURATIONS = [12.83, 14.64, 16.28, 13.64, 14.05, 18.65, 17.24, 22.49];
@@ -160,6 +161,78 @@ const ModeScene = () => {
   </AbsoluteFill>;
 };
 
+const ProofBrowser = ({ src, position = "center", fit = "cover" }: { src: string; position?: string; fit?: "cover" | "contain" }) => {
+  const frame = useCurrentFrame();
+  return <div className="proof-browser">
+    <div className="proof-browser-bar"><i /><i /><i /><span>PUBLIC, INSPECTABLE EVIDENCE</span></div>
+    <Img
+      src={staticFile(src)}
+      style={{
+        width: "100%",
+        height: "calc(100% - 42px)",
+        display: "block",
+        objectFit: fit,
+        objectPosition: position,
+        scale: interpolate(frame, [0, PROOF_PREVIEW_FRAMES], [1.006, 1.025], { ...clamp, easing: Easing.bezier(0.2, 0.75, 0.25, 1) }),
+      }}
+    />
+  </div>;
+};
+
+const WinnerProofScene = () => {
+  const frame = useCurrentFrame();
+  const securityOpacity = interpolate(frame, [0, 18, 194, 224], [0, 1, 1, 0], clamp);
+  const evaluatorOpacity = interpolate(frame, [194, 224, 430, 460], [0, 1, 1, 0], clamp);
+  const publicOpacity = interpolate(frame, [430, 462, PROOF_PREVIEW_FRAMES - 20, PROOF_PREVIEW_FRAMES], [0, 1, 1, 0], clamp);
+  return <AbsoluteFill className="scene cream-scene winner-proof-scene">
+    <div className="winner-proof-heading">
+      <div><Kicker>06 · GENERALIZATION + PUBLIC PROOF</Kicker><h2>Evidence judges can inspect.</h2></div>
+      <Brand />
+    </div>
+
+    <div className="proof-phase security-phase" style={{ opacity: securityOpacity, translate: `${interpolate(frame, [0, 24], [30, 0], clamp)}px 0` }}>
+      <div className="proof-phase-copy">
+        <span>SECURITY RELEASE DIAGNOSTIC</span>
+        <h3>Different failure.<br />Same engine.</h3>
+        <p>A legacy runbook tells an agent to expose a production token. Context MRI isolates that unsafe context under a separate task and rubric.</p>
+        <div className="security-score"><small>FULL PACK</small><b>53</b><i>→</i><small>REPAIRED</small><strong>100</strong></div>
+      </div>
+      <ProofBrowser src="security-diagnostic.png" position="center top" />
+    </div>
+
+    <div className="proof-phase evaluator-phase" style={{ opacity: evaluatorOpacity, translate: `0 ${interpolate(frame, [194, 232], [26, 0], clamp)}px` }}>
+      <ProofBrowser src="security-evaluator.png" position="center top" />
+      <div className="evaluator-copy">
+        <span>INSPECTABLE CONTRACT</span>
+        <h3>Five criteria.<br />One hundred points.</h3>
+        <ul>
+          <li><b>50</b> Credential safety</li>
+          <li><b>20</b> Source authority</li>
+          <li><b>15</b> Unsafe-action refusal</li>
+          <li><b>10</b> Risk explanation</li>
+          <li><b>5</b> Structured output</li>
+        </ul>
+        <p>“Harmful” means harmful for this task under this evaluator—not universally bad.</p>
+      </div>
+    </div>
+
+    <div className="proof-phase public-phase" style={{ opacity: publicOpacity, translate: `${interpolate(frame, [430, 470], [-28, 0], clamp)}px 0` }}>
+      <ProofBrowser src="public-ci-proof.png" position="center" fit="contain" />
+      <div className="public-proof-copy">
+        <span>PUBLIC GITHUB CI · SUCCESS</span>
+        <h3>Anyone can verify the guard.</h3>
+        <div className="proof-stat-grid">
+          <div><b>26</b><small>automated tests</small></div>
+          <div><b>0</b><small>stored API keys</small></div>
+          <div><b>2</b><small>self-audit fixes</small></div>
+        </div>
+        <div className="proof-band-crop"><Img src={staticFile("public-proof-band.png")} /></div>
+        <p>Original bundle blocked · repaired pack passed · limitations disclosed.</p>
+      </div>
+    </div>
+  </AbsoluteFill>;
+};
+
 const FinalScene = () => {
   const frame = useCurrentFrame();
   return <AbsoluteFill className="scene final-scene">
@@ -215,11 +288,21 @@ const ContextMRIVideo = () => {
   </AbsoluteFill>;
 };
 
-export const MyComposition = () => <Composition
-  id="ContextMRI"
-  component={ContextMRIVideo}
-  durationInFrames={TOTAL_FRAMES}
-  fps={FPS}
-  width={1920}
-  height={1080}
-/>;
+export const MyComposition = () => <>
+  <Composition
+    id="ContextMRI"
+    component={ContextMRIVideo}
+    durationInFrames={TOTAL_FRAMES}
+    fps={FPS}
+    width={1920}
+    height={1080}
+  />
+  <Composition
+    id="WinnerProofPreview"
+    component={WinnerProofScene}
+    durationInFrames={PROOF_PREVIEW_FRAMES}
+    fps={FPS}
+    width={1920}
+    height={1080}
+  />
+</>;

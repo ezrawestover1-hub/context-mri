@@ -106,6 +106,44 @@ h2 em { color: #d58d72; font-weight: 500; }
 .mode-card p { margin-top: 25px; font: 29px/1.42 Georgia, serif; }
 .mode-card > b { display: block; margin-top: 36px; font-size: 17px; letter-spacing: .12em; }
 
+.winner-proof-scene { padding: 68px 92px 142px; }
+.winner-proof-heading { min-height: 144px; position: relative; z-index: 3; display: flex; align-items: start; justify-content: space-between; gap: 80px; }
+.winner-proof-heading h2 { margin-top: 18px; font-size: 72px; }
+.proof-phase { position: absolute; left: 92px; right: 92px; top: 228px; bottom: 150px; z-index: 1; }
+.security-phase { display: grid; grid-template-columns: .72fr 1.28fr; gap: 42px; align-items: stretch; }
+.proof-phase-copy, .evaluator-copy, .public-proof-copy { min-width: 0; }
+.proof-phase-copy { padding: 38px 12px 24px 8px; }
+.proof-phase-copy > span, .evaluator-copy > span, .public-proof-copy > span { color: var(--rust); font-size: 18px; font-weight: 850; letter-spacing: .15em; }
+.proof-phase-copy h3, .evaluator-copy h3, .public-proof-copy h3 { margin-top: 24px; font: 500 63px/1.04 Georgia, serif; letter-spacing: -1.5px; }
+.proof-phase-copy p { margin-top: 28px; color: #4b6359; font: 28px/1.42 Georgia, serif; }
+.security-score { margin-top: 36px; padding-top: 25px; display: grid; grid-template-columns: auto auto 34px auto auto; align-items: baseline; gap: 13px; border-top: 1px solid var(--line); }
+.security-score small { color: var(--pine-700); font-size: 13px; font-weight: 850; letter-spacing: .12em; }
+.security-score b, .security-score strong { font: 500 62px/1 Georgia, serif; }
+.security-score b { color: var(--rust); }.security-score strong { color: var(--pine-800); }.security-score i { color: var(--pine-600); font: 34px Georgia, serif; }
+.proof-browser { min-width: 0; height: 100%; overflow: hidden; background: var(--paper); border: 1px solid #71877d; border-radius: 10px; box-shadow: 0 26px 70px #09271f22; }
+.proof-browser-bar { height: 42px; padding: 0 16px; display: flex; align-items: center; gap: 8px; color: #b8cbc2; background: var(--pine-950); }
+.proof-browser-bar i { width: 9px; height: 9px; background: #779387; border-radius: 50%; }
+.proof-browser-bar i:nth-child(2) { background: #d39576; }.proof-browser-bar i:nth-child(3) { background: #b5cdbf; }
+.proof-browser-bar span { margin-left: auto; font-size: 10px; font-weight: 850; letter-spacing: .16em; }
+.evaluator-phase { top: 228px; bottom: 150px; display: grid; grid-template-columns: 1.18fr .82fr; gap: 44px; }
+.evaluator-copy { padding: 18px 6px 8px; }
+.evaluator-copy h3 { font-size: 58px; }
+.evaluator-copy ul { margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; list-style: none; }
+.evaluator-copy li { min-height: 64px; padding: 13px; display: flex; align-items: center; gap: 12px; color: var(--pine-900); background: var(--sage); border-radius: 5px; font-size: 18px; font-weight: 760; }
+.evaluator-copy li b { width: 38px; height: 38px; display: grid; place-items: center; flex: 0 0 auto; color: var(--paper); background: var(--pine-800); border-radius: 4px; font-size: 16px; }
+.evaluator-copy li:last-child { grid-column: 1 / -1; }
+.evaluator-copy p { margin-top: 22px; padding-top: 18px; color: #546a60; border-top: 1px solid var(--line); font: italic 22px/1.4 Georgia, serif; }
+.public-phase { display: grid; grid-template-columns: 1.05fr .75fr; gap: 42px; }
+.public-proof-copy { padding: 15px 4px 4px; }
+.public-proof-copy > span { color: #2f7352; }
+.public-proof-copy h3 { margin-top: 22px; font-size: 58px; }
+.proof-stat-grid { margin-top: 25px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.proof-stat-grid > div { min-height: 105px; padding: 14px; display: flex; flex-direction: column; justify-content: center; color: var(--paper); background: var(--pine-900); border-top: 4px solid #8fc2a5; border-radius: 5px; }
+.proof-stat-grid b { font: 500 46px/1 Georgia, serif; }.proof-stat-grid small { margin-top: 5px; color: #c6d6cf; font-size: 14px; font-weight: 760; }
+.proof-band-crop { height: 145px; margin-top: 18px; overflow: hidden; background: var(--pine-950); border: 1px solid #6e8a7e; border-radius: 5px; }
+.proof-band-crop img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; }
+.public-proof-copy > p { margin-top: 16px; color: #4b6359; font: italic 22px/1.35 Georgia, serif; }
+
 .final-scene { padding: 86px 120px 142px; }
 .final-scene > .brand-lockup { margin-left: 76px; }
 .final-grid { width: 1610px; margin: 104px auto 0; display: grid; grid-template-columns: 1.35fr .65fr; gap: 100px; align-items: center; position: relative; z-index: 2; }
