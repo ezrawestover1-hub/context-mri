@@ -40,7 +40,7 @@ The final eight-scene render uses the real deployed interface, burned-in caption
 
 ## Final scene — Codex and close
 
-**Screen:** Final Context MRI card, public URL, Codex + GPT-5.6 build summary, 26 automated tests, independent evaluator, SHA-256 provenance, and Context Guard CI.
+**Screen:** Final Context MRI card, public URL, Codex + GPT-5.6 build summary, 34 automated tests, independent evaluator, SHA-256 provenance, and Context Guard CI.
 
 “Why does this matter? Teams can spend hours blaming the prompt or buying a stronger model when one bad file is the real problem. Context MRI replaces that guesswork with evidence, helping agents become more accurate, less expensive, and easier to trust. Codex helped me choose the idea, research the official requirements, design the experiment, build and test the engine, refine the interface, and catch mathematical inconsistencies. Then I used GPT‑5.6 Terra in Codex for an adversarial audit of the evaluator, the fixture claims, and the final judge flow. It made the submission more honest and more defensible.”
 

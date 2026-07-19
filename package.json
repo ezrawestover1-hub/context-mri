@@ -6,17 +6,22 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"tsx watch server/index.ts\"",
     "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\"",
-    "build": "npm run clean && tsc -b && vite build && npm run build:worker",
+    "build": "npm run clean && tsc -b && vite build && npm run build:worker && npm run build:plugin",
     "build:worker": "esbuild server/site-worker.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/server/index.js",
+    "build:plugin": "esbuild plugins/context-mri/mcp/server.ts --bundle --format=esm --platform=node --target=node20 --outfile=plugins/context-mri/mcp/server.mjs",
+    "check:plugin": "node scripts/check-plugin.mjs",
+    "smoke:plugin": "node scripts/smoke-plugin.mjs",
     "audit:self": "tsx scripts/audit-release-context.ts",
     "evidence:live": "tsx scripts/generate-live-evidence.ts",
     "guard:check": "tsx scripts/check-context-guard.ts",
     "guard:prove": "tsx scripts/prove-context-guard.ts",
-    "test": "tsx --test server/context-guard.test.ts server/experiment-engine.test.ts server/site-worker.test.ts",
+    "test": "tsx --test server/context-guard.test.ts server/context-mri-service.test.ts server/experiment-engine.test.ts server/site-worker.test.ts plugins/context-mri/mcp/server.test.ts",
+    "test:plugin": "tsx --test server/context-mri-service.test.ts plugins/context-mri/mcp/server.test.ts",
     "start": "tsx server/index.ts",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@vitejs/plugin-react": "6.0.3",
     "cors": "2.8.6",
     "dotenv": "17.4.2",
@@ -25,7 +30,8 @@
     "openai": "6.48.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "vite": "8.1.5"
+    "vite": "8.1.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",

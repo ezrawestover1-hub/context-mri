@@ -15,6 +15,9 @@ flowchart LR
   I --> J[Exportable evidence report]
   J --> K[Portable Context Guard]
   K --> L[Deterministic CI check]
+  F --> M[Local Context MRI MCP]
+  M --> N[Codex audit skill]
+  N --> O[Diagnose, approve repair, verify]
 ```
 
 The server is the source of truth for scores, contributions, classifications, token reduction, recommended context IDs, pack verification, and provenance. The React client renders the returned `ExperimentReport`; input labels cannot declare themselves required or harmful.
@@ -93,6 +96,18 @@ A completed report can create a `ContextGuard` JSON artifact. It records the sel
 
 The guard is deliberately narrow: it protects against the stale instruction and threshold discovered by this diagnostic contract. It is not represented as a universal production guarantee. Teams should run a representative live evaluation suite alongside the deterministic check before relying on it as a release gate.
 
+## Codex plugin boundary
+
+`plugins/context-mri/` packages the diagnostic workflow for native use inside Codex. The plugin starts a local stdio MCP process and bundles an audit skill that routes a conversation through three read-only tools:
+
+1. `describe_evaluators` exposes supported task contracts, rubrics, input limits, privacy boundaries, and evidence limitations.
+2. `diagnose_context_pack` runs one task-specific ablation and returns compact findings, three representative traces, the full trace index, provenance, and a reusable Context Guard.
+3. `verify_context_pack` checks an explicitly supplied pack or the bundled original/recommended pack against that guard.
+
+The MCP adapter is intentionally thin. `server/context-mri-service.ts` owns validation and domain behavior, so the browser/API and plugin do not maintain two conflicting diagnostic engines. The tools cannot write files, edit a repository, access chat history, or call the network. Codex may propose a repair, but any edit still uses Codex's normal permission model; Context MRI only diagnoses and verifies. The bundled skill instructs Codex to diagnose once per unchanged pack and reuse the returned guard for before/after verification.
+
+The repository marketplace entry lives at `.agents/plugins/marketplace.json`. `npm run check:plugin` validates package invariants, and `npm run smoke:plugin` launches the bundled server over the real MCP stdio transport, confirms all three tools, diagnoses the Security Release example, proves the original is blocked, and proves the recommended pack passes.
+
 ## Trace and export contract
 
 Every run records:
@@ -114,4 +129,9 @@ Every run records:
 - Input is limited to 12 items, 20,000 characters per item, unique IDs, and bounded names.
 - No client bundle contains the secret.
 - The demo does not persist uploaded context or model outputs.
+- The local Codex plugin makes no network requests and retains no supplied context after the tool call.
+- Plugin tools receive only explicitly supplied content; they do not crawl a repository or read chat history.
+- Context file names reject control characters, and the MCP instructions explicitly treat every supplied name and body as untrusted data rather than commands.
+- The optional live Express runner binds to loopback by default and allows browser requests only from loopback or `CONTEXT_MRI_ALLOWED_ORIGINS`.
+- The public worker adds a same-origin script CSP, clickjacking protection, `nosniff`, a restrictive permissions policy, and no-store API responses.
 - Production use should add authentication, encrypted persistence, tenant isolation, rate limits, and explicit retention controls.

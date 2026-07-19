@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "context-mri": {
+      "title": "Context MRI",
+      "description": "Local read-only diagnostics for agent context failures.",
+      "cwd": ".",
+      "command": "node",
+      "args": [
+        "./mcp/server.mjs"
+      ]
+    }
+  }
+}

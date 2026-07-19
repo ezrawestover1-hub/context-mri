@@ -4,6 +4,7 @@ import { contexts as initialContexts, seedReport } from './data';
 import { defaultDiagnosticProject, diagnosticProjects, findDiagnosticProject } from './projects';
 import type { ContextGuard as ContextGuardType, ContextGuardCheck, ContextItem, ExperimentReport, ExperimentRun, JudgeLabInput } from './types';
 import { BrandMark } from './components/BrandMark';
+import { CodexPluginProof } from './components/CodexPluginProof';
 import { ContextGuard } from './components/ContextGuard';
 import { JudgeLabModal } from './components/JudgeLabModal';
 import { ContextPack } from './components/ContextPack';
@@ -411,6 +412,7 @@ export default function App() {
         {diagnosticProjects.map(project => <option key={project.id} value={project.id}>{project.label}</option>)}
       </select></label>
       <div className="top-actions">
+        <a className="how-link" href="#codex-plugin">Codex plugin</a>
         <a className="how-link" href="#before-run">How it works</a>
         <button className="export-action" onClick={exportEvidence}><Download size={16} /> Export evidence</button>
         <button className="run-action" onClick={() => runMRI(true)} disabled={running}>{running ? <Sparkles size={17} /> : <Play size={17} fill="currentColor" />}{running ? stage : 'Run free demo'}</button>
@@ -474,6 +476,8 @@ export default function App() {
       onDownload={downloadGuard}
       liveEvidence={liveEvidence}
     />}
+
+    <CodexPluginProof />
 
     <footer className="provenance-bar">
       <div><BrandMark /><span>{report.mode === 'live' ? 'Fresh GPT-5.6 run' : 'Fixture replay'} · inspectable evidence</span><Info size={14} /></div>

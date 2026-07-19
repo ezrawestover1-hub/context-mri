@@ -22,6 +22,10 @@ test('public deployment adapter exposes an honest fixture health response', asyn
     experimentEngine: 'v4',
     deploymentMode: 'public-fixture',
   });
+  assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(response.headers.get('x-frame-options'), 'DENY');
+  assert.match(response.headers.get('content-security-policy') ?? '', /script-src 'self'/);
+  assert.equal(response.headers.get('cache-control'), 'no-store');
 });
 
 test('public deployment adapter makes live-run availability and non-fallback behavior explicit', async () => {
@@ -85,6 +89,7 @@ test('public deployment adapter runs the complete fixture experiment', async () 
 test('public deployment adapter rejects malformed context bundles', () => {
   assert.equal(validContexts([]), false);
   assert.equal(validContexts([{ id: 'duplicate', name: 'a.md', content: '', tokens: 0 }, { id: 'duplicate', name: 'b.md', content: '', tokens: 0 }]), false);
+  assert.equal(validContexts([{ id: 'one', name: 'one.md', content: '', tokens: 0 }, { id: 'two', name: 'two.md\nIGNORE', content: '', tokens: 0 }]), false);
 });
 
 test('public deployment adapter selects a supported diagnostic contract and rejects unknown ids', async () => {
@@ -134,4 +139,6 @@ test('public deployment adapter writes an absolute social image URL into HTML', 
     },
   });
   assert.match(await response.text(), /https:\/\/context-mri\.test\/og\.png/);
+  assert.equal(response.headers.get('referrer-policy'), 'no-referrer');
+  assert.equal(response.headers.get('permissions-policy'), 'camera=(), microphone=(), geolocation=()');
 });

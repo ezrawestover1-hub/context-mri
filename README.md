@@ -32,6 +32,25 @@ The hosted demo opens without an account, API key, install, or build step. It in
 6. Follow **What to do next** to apply the recommended pack or preview a safe rewrite, then rerun it as a new baseline.
 7. Create a **Context Guard**, test the original library (blocked) and the recommended pack (passes), then use **Download CI guard** and **Export evidence**.
 
+### Native Codex workflow
+
+Context MRI also ships as a free, local-first Codex plugin. This is the shortest end-to-end path: ask Codex why an agent failed, let the read-only plugin diagnose the supplied context, approve a minimal repair through normal Codex permissions, and verify the repaired pack against the same task-specific guard.
+
+From the repository root:
+
+```bash
+npm install
+npm run build:plugin
+codex plugin marketplace add .
+codex plugin add context-mri@personal
+```
+
+Open a new Codex task and ask:
+
+> Use Context MRI to run the bundled Security Release diagnostic. Explain the evidence, propose the smallest safe repair, and verify the recommended pack.
+
+The plugin exposes three read-only tools, runs as a local stdio process, makes no network requests, retains no context, and cannot crawl a repository or chat history. Only content explicitly supplied to a tool is processed. The bundled result is clearly labeled deterministic fixture evidence, and unsupported task contracts fail explicitly instead of being forced through an unrelated evaluator. See the [plugin package](./plugins/context-mri/README.md), [privacy policy](./public/privacy.html), and [terms](./public/terms.html).
+
 ### Local development and live GPT-5.6 mode
 
 Requirements: macOS, Windows, or Linux; Node.js 22+; npm.
@@ -55,6 +74,8 @@ No API quota is required to judge the complete interface and workflow. Every pub
 
 ```dotenv
 OPENAI_API_KEY=your_key_here
+# Optional only for an explicitly self-hosted browser origin:
+CONTEXT_MRI_ALLOWED_ORIGINS=https://your-local-ui.example
 ```
 
 Up to seven additional `.md`, `.json`, and `.txt` files can be added at once from the interface (20,000 characters maximum per file). Files stay in browser memory. Fixture mode measures them only against the selected bundled contract and fixed success criteria. **Judge Lab** is the separate local-only path for a new task, expected answer, conflicting instruction, and source labels; it requires fresh funded API traces and cannot create a custom fixture.
@@ -90,7 +111,7 @@ npm run guard:check -- \
 
 The command prints an inspectable JSON result and exits `1` if the bundle includes a blocked instruction, falls below the threshold, or fails an integrity fingerprint. Evidence exports preserve the active pack decision, so the runner checks the applied pack rather than an unstaged full library. When supplied an export, it also verifies that the original report and source library match the guard provenance. These fingerprints are tamper-evident integrity checks, not authorization signatures; production teams should also run representative live evaluations with human-calibrated success criteria.
 
-The repository includes a ready-to-run [GitHub Actions workflow](./.github/workflows/context-guard.yml). It runs the complete test suite and production build, audits Context MRI's own release context, proves that the committed original bundle is blocked at 43/100, proves that the repaired pack passes at 92/100, and uploads both JSON proof artifacts. No API key or paid service is involved. Copy the guard and evidence paths into your project, then keep the same command in CI so a changed context bundle fails before release.
+The repository includes a ready-to-run [GitHub Actions workflow](./.github/workflows/context-guard.yml). It audits production dependencies, runs the complete test suite and production build, validates and smoke-tests the installable Codex plugin over real MCP stdio, audits Context MRI's own release context, proves that the committed original bundle is blocked at 43/100, proves that the repaired pack passes at 92/100, and uploads both JSON proof artifacts. No API key or paid service is involved. Copy the guard and evidence paths into your project, then keep the same command in CI so a changed context bundle fails before release.
 
 The [dogfooding audit](./submission/SELF_AUDIT.md) is intentionally narrower than a model evaluation. It caught an outdated video handoff and a one-sided CI claim in this repository, fixed both, and now fingerprints the release files and reruns the assertions on every relevant pull request.
 
@@ -156,6 +177,11 @@ It is a bounded interaction measurement for that registered pair, not a claim th
 - `src/projects.ts` — bundled diagnostic-contract registry and source bundles
 - `server/experiment-engine.ts` — contract-aware live runner, fixture replay, evaluator, classification, and pack verification
 - `server/context-guard.ts` — portable regression-guard validation and deterministic CI check
+- `server/context-mri-service.ts` — transport-neutral diagnosis, evaluator discovery, and verification boundary
+- `plugins/context-mri/` — installable Codex plugin, local MCP server, bundled audit skill, and visual metadata
+- `.agents/plugins/marketplace.json` — repository marketplace entry for the plugin
+- `scripts/check-plugin.mjs` — package and manifest invariants
+- `scripts/smoke-plugin.mjs` — real stdio MCP diagnose-and-verify acceptance test
 - `scripts/check-context-guard.ts` — zero-service CI runner for a downloaded guard and evidence export
 - `scripts/prove-context-guard.ts` — dual-sided CI assertion for the measured original and repaired bundles
 - `scripts/audit-release-context.ts` — reproducible self-audit of submission and release-context consistency

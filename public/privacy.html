@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Context MRI privacy policy for the free local Codex plugin and public demonstration." />
+  <title>Privacy · Context MRI</title>
+  <style>
+    :root { color-scheme: light; --pine: #12382e; --cream: #f7f1e5; --sage: #dfe8d9; --line: #b9b7aa; --soft: #52675d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--pine); background: var(--cream); font: 16px/1.65 Inter, ui-sans-serif, system-ui, sans-serif; }
+    header { min-height: 72px; padding: 0 clamp(22px, 5vw, 70px); display: flex; align-items: center; justify-content: space-between; color: #fffaf0; background: #0c2e25; }
+    header strong { font: 600 22px Georgia, serif; letter-spacing: .08em; }
+    header a { color: #dce8df; font-size: 13px; }
+    main { width: min(820px, calc(100% - 40px)); margin: 70px auto 90px; }
+    .kicker { color: #416856; font-size: 12px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { max-width: 720px; margin: 12px 0 20px; font: 500 clamp(44px, 7vw, 68px)/1 Georgia, serif; letter-spacing: -.03em; }
+    .summary { margin: 0 0 38px; padding: 20px 22px; color: #294b3e; background: var(--sage); border-left: 4px solid #2e5d4d; font: 19px/1.5 Georgia, serif; }
+    section { padding: 28px 0; border-top: 1px solid var(--line); }
+    h2 { margin: 0 0 10px; font: 600 27px Georgia, serif; }
+    p, li { color: var(--soft); }
+    ul { padding-left: 21px; }
+    code { color: #8e412d; }
+    footer { margin-top: 38px; color: #667970; font-size: 13px; }
+    a { color: #1e5745; }
+  </style>
+</head>
+<body>
+  <header><strong>CONTEXT MRI</strong><a href="/">Return to the diagnostic</a></header>
+  <main>
+    <span class="kicker">Privacy policy · Free beta</span>
+    <h1>Your context should stay under your control.</h1>
+    <p class="summary">The installable Context MRI Codex plugin runs locally, makes no network requests, and retains no supplied context. The public demonstration keeps uploaded files in browser memory for the current session.</p>
+
+    <section><h2>What the local plugin processes</h2><p>The plugin processes only the task, evaluator selection, and context content explicitly supplied to one of its tools. It does not automatically read your repository, Codex history, account, environment variables, or other files.</p></section>
+    <section><h2>Storage and transmission</h2><ul><li>The local stdio plugin does not send context to Context MRI or a third-party server.</li><li>It does not create an account, require an API key, use analytics, or retain tool inputs after the process ends.</li><li>Diagnostic output omits raw context content and returns findings, hashes, scores, traces, and guard metadata.</li></ul></section>
+    <section><h2>Public web demonstration</h2><p>The hosted demonstration uses deterministic bundled fixture evidence. Files added through the interface are held in browser memory for the current session and are not persisted by the public demo. Do not submit secrets or regulated data to any beta software.</p></section>
+    <section><h2>Future hosted service</h2><p>No paid or hosted context-analysis service is enabled in this competition build. If one is introduced later, this policy will be updated before launch with clear retention, deletion, tenant-isolation, and security terms.</p></section>
+    <section><h2>Questions and changes</h2><p>Questions or vulnerability reports can be opened through the <a href="https://github.com/ezrawestover1-hub/context-mri/issues">public GitHub repository</a>. Material policy changes will be dated on this page.</p></section>
+    <footer>Effective July 18, 2026 · Context MRI is an open-source competition beta by Ezra Westover.</footer>
+  </main>
+</body>
+</html>

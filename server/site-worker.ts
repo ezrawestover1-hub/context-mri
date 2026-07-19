@@ -1,6 +1,7 @@
 import type { ContextItem } from '../src/types.js';
 import { defaultDiagnosticProject, findDiagnosticProject, type DiagnosticProjectId } from '../src/projects.js';
 import { checkContextGuard, isContextGuard } from './context-guard.js';
+import { validateContextItems } from './context-mri-service.js';
 import { fixtureReport, liveSuiteRunCount } from './experiment-engine.js';
 
 type AssetsBinding = {
@@ -11,8 +12,18 @@ type SiteEnvironment = {
   ASSETS: AssetsBinding;
 };
 
+const PUBLIC_SECURITY_HEADERS = {
+  'content-security-policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+  'referrer-policy': 'no-referrer',
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+};
+
 const JSON_HEADERS = {
+  ...PUBLIC_SECURITY_HEADERS,
   'content-type': 'application/json; charset=utf-8',
+  'cache-control': 'no-store',
   'access-control-allow-origin': '*',
   'access-control-allow-headers': 'content-type',
   'access-control-allow-methods': 'GET, POST, OPTIONS',
@@ -29,28 +40,21 @@ async function withRequestMetadata(response: Response, request: Request) {
   return new Response(html, { status: response.status, statusText: response.statusText, headers: response.headers });
 }
 
+function withPublicSecurityHeaders(response: Response) {
+  const headers = new Headers(response.headers);
+  for (const [name, value] of Object.entries(PUBLIC_SECURITY_HEADERS)) headers.set(name, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 export function validContexts(value: unknown): value is ContextItem[] {
-  if (!Array.isArray(value) || value.length < 2 || value.length > 12) return false;
-  const ids = new Set<string>();
-  return value.every(item => {
-    if (!item || typeof item !== 'object') return false;
-    const candidate = item as Partial<ContextItem>;
-    const valid = typeof candidate.id === 'string' && candidate.id.length > 0 && candidate.id.length <= 64 &&
-      typeof candidate.name === 'string' && candidate.name.length > 0 && candidate.name.length <= 160 &&
-      typeof candidate.content === 'string' && candidate.content.length <= 20_000 &&
-      typeof candidate.tokens === 'number' && Number.isFinite(candidate.tokens) && candidate.tokens >= 0;
-    if (!valid || ids.has(candidate.id!)) return false;
-    ids.add(candidate.id!);
-    return true;
-  });
+  return validateContextItems(value);
 }
 
 function validProjectId(value: unknown): value is DiagnosticProjectId {
   return Boolean(findDiagnosticProject(value));
 }
 
-const worker = {
-  async fetch(request: Request, env: SiteEnvironment): Promise<Response> {
+async function handleRequest(request: Request, env: SiteEnvironment): Promise<Response> {
     const url = new URL(request.url);
 
     if (request.method === 'OPTIONS' && url.pathname.startsWith('/api/')) {
@@ -138,6 +142,11 @@ const worker = {
     const fallbackUrl = new URL('/index.html', request.url);
     const fallback = await env.ASSETS.fetch(new Request(fallbackUrl, request));
     return withRequestMetadata(fallback, request);
+}
+
+const worker = {
+  async fetch(request: Request, env: SiteEnvironment): Promise<Response> {
+    return withPublicSecurityHeaders(await handleRequest(request, env));
   },
 };
 

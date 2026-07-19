@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Terms for the free Context MRI competition beta." />
+  <title>Terms · Context MRI</title>
+  <style>
+    :root { color-scheme: light; --pine: #12382e; --cream: #f7f1e5; --sage: #dfe8d9; --line: #b9b7aa; --soft: #52675d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--pine); background: var(--cream); font: 16px/1.65 Inter, ui-sans-serif, system-ui, sans-serif; }
+    header { min-height: 72px; padding: 0 clamp(22px, 5vw, 70px); display: flex; align-items: center; justify-content: space-between; color: #fffaf0; background: #0c2e25; }
+    header strong { font: 600 22px Georgia, serif; letter-spacing: .08em; }
+    header a { color: #dce8df; font-size: 13px; }
+    main { width: min(820px, calc(100% - 40px)); margin: 70px auto 90px; }
+    .kicker { color: #416856; font-size: 12px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { max-width: 720px; margin: 12px 0 20px; font: 500 clamp(44px, 7vw, 68px)/1 Georgia, serif; letter-spacing: -.03em; }
+    .summary { margin: 0 0 38px; padding: 20px 22px; color: #294b3e; background: var(--sage); border-left: 4px solid #2e5d4d; font: 19px/1.5 Georgia, serif; }
+    section { padding: 28px 0; border-top: 1px solid var(--line); }
+    h2 { margin: 0 0 10px; font: 600 27px Georgia, serif; }
+    p, li { color: var(--soft); }
+    ul { padding-left: 21px; }
+    footer { margin-top: 38px; color: #667970; font-size: 13px; }
+    a { color: #1e5745; }
+  </style>
+</head>
+<body>
+  <header><strong>CONTEXT MRI</strong><a href="/">Return to the diagnostic</a></header>
+  <main>
+    <span class="kicker">Terms · Free competition beta</span>
+    <h1>Use the evidence as a tool—not as a guarantee.</h1>
+    <p class="summary">Context MRI is free, open-source beta software for task-specific context diagnosis. It can reveal useful evidence, but it does not replace human review, security testing, or production evaluation.</p>
+
+    <section><h2>Permission to use</h2><p>You may use and modify the project under its MIT license. The public demo and local plugin are offered without billing for this competition beta.</p></section>
+    <section><h2>Appropriate use</h2><ul><li>Use Context MRI only with content you are authorized to process.</li><li>Do not rely on a fixture or one task-specific evaluator as proof of broad model safety or performance.</li><li>Review suggested repairs before applying them and run representative production tests afterward.</li></ul></section>
+    <section><h2>Evidence limits</h2><p>Bundled examples are deterministic fixture replays. File labels mean “harmful, useful, or required for this task under this evaluator,” not universally. Single-file ablation can miss interactions, and fingerprint checks are tamper-evident controls rather than authorization signatures.</p></section>
+    <section><h2>No warranty</h2><p>The software is provided “as is,” without warranties or guarantees of availability, correctness, fitness, security, or non-infringement, to the extent permitted by law. You remain responsible for decisions, deployments, and data handled with the software.</p></section>
+    <section><h2>Changes and contact</h2><p>The beta may change or be discontinued. Questions can be opened through the <a href="https://github.com/ezrawestover1-hub/context-mri/issues">public GitHub repository</a>.</p></section>
+    <footer>Effective July 18, 2026 · Context MRI is an open-source competition beta by Ezra Westover.</footer>
+  </main>
+</body>
+</html>

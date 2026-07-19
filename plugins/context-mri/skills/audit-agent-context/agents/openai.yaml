@@ -1,0 +1,13 @@
+interface:
+  display_name: "Audit Agent Context"
+  short_description: "Diagnose agent context failures with evidence"
+  brand_color: "#173F35"
+  default_prompt: "Use $audit-agent-context to find which supplied context file caused this agent failure and verify the repair."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "context-mri"
+      description: "Local read-only Context MRI diagnostic tools"
+      transport: "stdio"
+policy:
+  allow_implicit_invocation: true

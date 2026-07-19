@@ -1,0 +1,49 @@
+{
+  "name": "context-mri",
+  "version": "0.1.0+codex.20260719050640",
+  "description": "Diagnose which context file changed an agent result, repair it with Codex, and verify the fix.",
+  "author": {
+    "name": "Ezra Westover",
+    "url": "https://github.com/ezrawestover1-hub"
+  },
+  "homepage": "https://context-mri.ezra-westover1.chatgpt.site",
+  "repository": "https://github.com/ezrawestover1-hub/context-mri",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "developer-tools",
+    "agent-evals",
+    "context-debugging",
+    "mcp",
+    "regression-guard"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Context MRI",
+    "shortDescription": "Find the context file that changed an agent result",
+    "longDescription": "Context MRI brings a local diagnose, repair, and verify loop into Codex. It measures one-file-at-a-time context effects, exposes inspectable evidence, creates a fingerprinted Context Guard, and verifies the repaired pack without uploading source code or requiring billing.",
+    "developerName": "Ezra Westover",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://context-mri.ezra-westover1.chatgpt.site",
+    "privacyPolicyURL": "https://context-mri.ezra-westover1.chatgpt.site/privacy.html",
+    "termsOfServiceURL": "https://context-mri.ezra-westover1.chatgpt.site/terms.html",
+    "defaultPrompt": [
+      "Audit these agent context files and identify the failure source.",
+      "Explain the strongest Context MRI finding and its evidence.",
+      "Verify this repaired context pack against its regression guard."
+    ],
+    "brandColor": "#173F35",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/logo.png",
+    "screenshots": [
+      "./assets/codex-workflow.png",
+      "./assets/security-diagnostic.png",
+      "./assets/public-ci-proof.png"
+    ]
+  }
+}
