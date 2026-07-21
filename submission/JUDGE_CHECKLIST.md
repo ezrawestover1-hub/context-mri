@@ -8,7 +8,7 @@
 - [x] Devpost project draft created: https://devpost.com/software/context-mri
 - [x] Record the short scene-eight human-voice pickup that explicitly explains Codex usage
 - [x] Render and verify the updated under-three-minute demo at 1080p with stereo audio (H.264, 1920×1080, 30 fps, stereo AAC, 2:17.17); the action scene now visibly shows Context Guard blocking 43 and passing 92 without changing narration or runtime
-- [ ] Upload public YouTube demo
+- [x] Public YouTube demo: https://youtu.be/KoPrdv2dRTI
 - [x] Public repository: https://github.com/ezrawestover1-hub/context-mri
 - [x] Public CI proof: https://github.com/ezrawestover1-hub/context-mri/actions/workflows/context-guard.yml
 - [x] Reproducible dogfooding audit: https://github.com/ezrawestover1-hub/context-mri/blob/main/submission/SELF_AUDIT.md
@@ -68,13 +68,16 @@
 - Finds harmful context, not merely long context
 - Combines debugging, evaluation, optimization, and regression evidence
 
-## Final manual actions
+## Final submission verification
 
-1. Record and render the V2 native Codex cut from `submission/DEMO_VIDEO_V2_PLAN.md`. Keep `submission/video/out/context-mri-demo-winner-pass.mp4` as the proven fallback until V2 has been watched end to end.
-2. Upload the best verified cut publicly or unlisted to YouTube and add the URL to Devpost.
-3. Open the YouTube link in a private window to confirm it is viewable without your account.
-4. Confirm the Devpost form accepts the captured Codex session ID; if it specifically requires an ID emitted by `/feedback`, run `/feedback` in this task and use the displayed ID.
-5. Submit before **July 21, 2026 at 5:00 PM PDT**.
+- [x] Verified local source render: `submission/video/out/context-mri-demo-winner-pass.mp4`
+- [x] Final 2:17 demo uploaded publicly to YouTube
+- [x] YouTube URL attached to the Devpost submission
+- [x] Public no-login demo verified
+- [x] Public repository and installation path verified
+- [x] Context Guard CI green on submission commit `93adeb0`
+- [x] Codex session ID `019f71e4-f746-7083-a465-1c84948bbd8c` accepted
+- [x] Submission published to OpenAI Build Week
 
 ## Verified public judge path
 
